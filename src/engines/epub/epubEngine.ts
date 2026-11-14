@@ -136,6 +136,7 @@ export class EpubViewerEngine {
   private activeHighlights: string[] = []
   private cfiHelper = new EpubCFI()
   private tapHandler: ((clientX: number, clientY: number) => void) | null = null
+  private keyHandler: ((event: KeyboardEvent) => void) | null = null
   private container: HTMLElement | null = null
   private onRelocated: ((loc: EpubLocationChange) => void) | null = null
   // View mode the current rendition was created with (the view manager differs per mode).
@@ -153,6 +154,15 @@ export class EpubViewerEngine {
    */
   setTapHandler(handler: ((clientX: number, clientY: number) => void) | null): void {
     this.tapHandler = handler
+  }
+
+  /**
+   * Registers a callback for key presses while focus is inside the EPUB iframe (e.g. after
+   * clicking the text on desktop), where they never reach the parent window's keydown listener.
+   * The listener is not passive, so the handler may preventDefault().
+   */
+  setKeyHandler(handler: ((event: KeyboardEvent) => void) | null): void {
+    this.keyHandler = handler
   }
 
   /**
@@ -332,6 +342,13 @@ export class EpubViewerEngine {
     rendition.on('click', (event: MouseEvent, contents: any) =>
       this.handleContentClick(event, contents)
     )
+    // epub.js forwards keydown only through passive listeners (preventDefault is ignored), so
+    // attach our own listener to each section document.
+    ;(rendition as any).hooks.content.register((contents: any) => {
+      contents?.document?.addEventListener('keydown', (event: KeyboardEvent) =>
+        this.keyHandler?.(event)
+      )
+    })
 
     let isFirstRelocation = Boolean(initialLocator)
 
@@ -660,6 +677,16 @@ export class EpubViewerEngine {
 
   async next(): Promise<void> {
     await this.rendition?.next()
+  }
+
+  /**
+   * Scroll mode: smoothly scrolls by most of a screen (direction 1 = down, -1 = up), keeping a
+   * little overlap for context. Used instead of next()/prev(), which jump a full screen at once.
+   */
+  scrollByScreen(direction: 1 | -1): void {
+    const el: HTMLElement | undefined = (this.rendition as any)?.manager?.container
+    if (!el) return
+    el.scrollBy({ top: direction * el.clientHeight * 0.85, behavior: 'smooth' })
   }
 
   async prev(): Promise<void> {

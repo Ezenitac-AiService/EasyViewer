@@ -364,6 +364,7 @@ async function loadDocument() {
     if (!epubContainerRef.value) return
     epubEngine = new EpubViewerEngine()
     epubEngine.setTapHandler(handleReaderTap)
+    epubEngine.setKeyHandler(handleKeydown)
     try {
       const info = await epubEngine.loadBook(
         buffer,
@@ -585,7 +586,8 @@ function handleTxtScroll() {
 
 async function prevPage() {
   if (currentBook.value?.format === 'epub') {
-    await epubEngine?.prev()
+    if (settingsStore.settings.viewMode === 'paginated') await epubEngine?.prev()
+    else epubEngine?.scrollByScreen(-1)
     return
   }
 
@@ -601,7 +603,8 @@ async function prevPage() {
 
 async function nextPage() {
   if (currentBook.value?.format === 'epub') {
-    await epubEngine?.next()
+    if (settingsStore.settings.viewMode === 'paginated') await epubEngine?.next()
+    else epubEngine?.scrollByScreen(1)
     return
   }
 
@@ -818,11 +821,17 @@ function handleKeydown(e: KeyboardEvent) {
     return
   }
   if (drawerOpen.value || settingsOpen.value) return
+  if (e.altKey || e.ctrlKey || e.metaKey) return
 
-  if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+  // Arrow keys follow the reading direction: up/down in vertical scroll mode, left/right in
+  // paginated mode. The other axis is ignored so it can't jump the view sideways/unexpectedly.
+  const isScrollMode = settingsStore.settings.viewMode !== 'paginated'
+  const backKey = isScrollMode ? 'ArrowUp' : 'ArrowLeft'
+  const forwardKey = isScrollMode ? 'ArrowDown' : 'ArrowRight'
+  if (e.key === backKey || e.key === 'PageUp') {
     e.preventDefault()
     prevPage()
-  } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+  } else if (e.key === forwardKey || e.key === 'PageDown' || e.key === ' ') {
     e.preventDefault()
     nextPage()
   }

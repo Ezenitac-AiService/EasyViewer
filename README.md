@@ -159,6 +159,16 @@ where.exe cargo
 
 # 빌드 명령어
 
+## 버젼 올리기
+
+./package.json
+
+./src-tauri/Cargo.toml
+
+./src-tauri/tauri.conf.json
+
+에서 버젼을 수정.
+
 ## windows
 
 설치 마법사 없이 단독 .exe 실행 파일만 빠르게 빌드:
