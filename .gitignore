@@ -28,3 +28,8 @@ src-tauri/target
 src-tauri/gen/schemas
 
 *.epub
+
+# Build outputs (exclude all except DMG as requested)
+build/*
+!build/*.dmg
+
