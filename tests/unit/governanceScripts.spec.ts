@@ -31,6 +31,46 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     const mismatch = checkVersionSync(tmpRoot)
     expect(mismatch.ok).toBe(false)
     expect(mismatch.error).toMatch(/불일치|mismatch/i)
+
+    // Pre-release SemVer (0.1.6-alpha) sync including package-lock.json and Cargo.lock
+    const alphaRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ev-version-alpha-'))
+    tempDirs.push(alphaRoot)
+    fs.mkdirSync(path.join(alphaRoot, 'src-tauri'), { recursive: true })
+    fs.writeFileSync(path.join(alphaRoot, 'package.json'), JSON.stringify({ version: '0.1.6-alpha' }))
+    fs.writeFileSync(
+      path.join(alphaRoot, 'package-lock.json'),
+      JSON.stringify({ version: '0.1.6-alpha', packages: { '': { version: '0.1.6-alpha' } } })
+    )
+    fs.writeFileSync(path.join(alphaRoot, 'src-tauri/Cargo.toml'), '[package]\nversion = "0.1.6-alpha"\n')
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/Cargo.lock'),
+      '[[package]]\nname = "easy-viewer"\nversion = "0.1.6-alpha"\n'
+    )
+    fs.writeFileSync(path.join(alphaRoot, 'src-tauri/tauri.conf.json'), JSON.stringify({ version: '0.1.6-alpha' }))
+
+    expect(checkVersionSync(alphaRoot).ok).toBe(true)
+
+    // Stale package-lock.json must fail checkVersionSync
+    fs.writeFileSync(
+      path.join(alphaRoot, 'package-lock.json'),
+      JSON.stringify({ version: '0.1.5', packages: { '': { version: '0.1.5' } } })
+    )
+    const lockMismatch = checkVersionSync(alphaRoot)
+    expect(lockMismatch.ok).toBe(false)
+    expect(lockMismatch.error).toMatch(/package-lock\.json/)
+
+    // Stale Cargo.lock must also fail checkVersionSync
+    fs.writeFileSync(
+      path.join(alphaRoot, 'package-lock.json'),
+      JSON.stringify({ version: '0.1.6-alpha', packages: { '': { version: '0.1.6-alpha' } } })
+    )
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/Cargo.lock'),
+      '[[package]]\nname = "easy-viewer"\nversion = "0.1.5"\n'
+    )
+    const cargoLockMismatch = checkVersionSync(alphaRoot)
+    expect(cargoLockMismatch.ok).toBe(false)
+    expect(cargoLockMismatch.error).toMatch(/Cargo\.lock/)
   })
 
   it('enforces Korean Conventional Commits header, blank line, >=20 char Korean body, and allows Merge/Revert exceptions', () => {

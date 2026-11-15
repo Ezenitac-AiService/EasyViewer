@@ -8,7 +8,7 @@
 
 ## Summary
 
-EasyViewer(`0.1.5`) 코드베이스를 프로젝트 헌법(`v3.2.0`)의 품질·보안·아키텍처·검증 원칙에 정렬하기 위한 리팩토링 구현 계획이다. 핵심 요구사항은 (1) 테스트 하네스 부재(`package.json` 내 `test` 스크립트 미정의)를 해소하고 Tier 1(`Vitest` + `@vue/test-utils` + `jsdom` + `@tauri-apps/api/mocks`) 및 Tier 2(`Playwright` 웹 DOM·레이아웃 범위) 자동화 검증·성능 기준선 체계를 구축하며(`FR-001`~`FR-003`, `FR-011`, `FR-012`), (2) 뷰(`LibraryView.vue`)와 스토어(`useBookStore.ts`)에 남아 있는 직접 `@tauri-apps/*` 호출을 `src/services/platform/` 추상화 계층(`PlatformDialogPort`, `PlatformPathPort`, `PlatformDragDropPort`, `PlatformCredentialPort`)으로 캡슐화해 플랫폼 일관성을 확보하고(`FR-004`~`FR-006`), (3) 앱 CSP(`src-tauri/tauri.conf.json`의 `csp: null` 제거 및 `index.html` 외부 Google Fonts 제거), `/__remote_proxy` Zero-Trust(Fail-Closed Origin/메서드/크기/타임아웃·DNS Pinning·세션 논스) 및 네이티브 Rust `safe_remote_fetch` 단일 신뢰 계층(와일드카드 `http:default` 제거), EPUB Zip Bomb 사전 차단·샌드박스·새니타이즈 일관성, WebDAV `href` 경로 탐색 차단 및 평문 자격증명 제거(`v1 -> v2` 마이그레이션)를 통해 종합 보안 방어선을 구축하는 것이다(`FR-007`~`FR-010`).
+EasyViewer(`0.1.5` 착수 → `0.1.6-alpha` 프리릴리즈 목표) 코드베이스를 프로젝트 헌법(`v3.2.0`)의 품질·보안·아키텍처·검증 원칙에 정렬하기 위한 리팩토링 구현 계획이다. 핵심 요구사항은 (1) 테스트 하네스 부재(`package.json` 내 `test` 스크립트 미정의)를 해소하고 Tier 1(`Vitest` + `@vue/test-utils` + `jsdom` + `@tauri-apps/api/mocks`) 및 Tier 2(`Playwright` 웹 DOM·레이아웃 범위) 자동화 검증·성능 기준선 체계를 구축하며(`FR-001`~`FR-003`, `FR-011`, `FR-012`), (2) 뷰(`LibraryView.vue`)와 스토어(`useBookStore.ts`)에 남아 있는 직접 `@tauri-apps/*` 호출을 `src/services/platform/` 추상화 계층(`PlatformDialogPort`, `PlatformPathPort`, `PlatformDragDropPort`, `PlatformCredentialPort`)으로 캡슐화해 플랫폼 일관성을 확보하고(`FR-004`~`FR-006`), (3) 앱 CSP(`src-tauri/tauri.conf.json`의 `csp: null` 제거 및 `index.html` 외부 Google Fonts 제거), `/__remote_proxy` Zero-Trust(Fail-Closed Origin/메서드/크기/타임아웃·DNS Pinning·세션 논스) 및 네이티브 Rust `safe_remote_fetch` 단일 신뢰 계층(와일드카드 `http:default` 제거), EPUB Zip Bomb 사전 차단·샌드박스·새니타이즈 일관성, WebDAV `href` 경로 탐색 차단 및 평문 자격증명 제거(`v1 -> v2` 마이그레이션)를 통해 종합 보안 방어선을 구축하는 것이다(`FR-007`~`FR-010`).
 
 기술적 접근 방식과 상세 계약은 [research.md](./research.md), [data-model.md](./data-model.md), [contracts/platform-boundary.md](./contracts/platform-boundary.md), [contracts/security-policy.md](./contracts/security-policy.md), [contracts/quality-gates.md](./contracts/quality-gates.md) 및 [quickstart.md](./quickstart.md)에 정의한다.
 
@@ -29,7 +29,7 @@ EasyViewer(`0.1.5`) 코드베이스를 프로젝트 헌법(`v3.2.0`)의 품질·
   - Tier 1 단위·계약 테스트 suites 전체 실행 <= 30s (`SC-001`) 및 `mockIPC` 기반 `initLibrary`/`prepareBookFiles` IPC 호출 횟수 상한 회귀 방지
   - Playwright 웹 DOM/레이아웃(Chromium) 범위에서 서재 초기화(`50`권 시드)·1MB+ TXT 열람·보기 모드/테마 전환 경로의 워밍업 제외 다회 실행 중앙값(p50) 기준선 측정 시 `deltaMs > 15ms && ratio > 0.10` 회귀 금지 (`FR-012`, `SC-006`) — 데스크톱 파일 I/O IPC 상한은 `mockIPC`로, 대용량 EPUB 스캔은 단위 경계로 별도 검증
 - **Constraints**:
-  - 버전 동기화: `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` 모두 `"0.1.5"` 일치 유지
+  - 버전 동기화: `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` (및 락파일 `package-lock.json`, `src-tauri/Cargo.lock`) 모두 `"0.1.6-alpha"` 프리릴리즈 버전 일치 유지
   - 보안: `index.html`의 Google Fonts `<link>` 제거 및 로컬/시스템 폰트 스택 전환으로 CSP 외부 폰트 호스트 예외 0건 유지; `src-tauri/tauri.conf.json` `csp: null` 제거 및 `connect-src: "'self' ipc: http://ipc.localhost blob: data:"` 제한, `CONTENT_CSP`·`jszip` Zip Bomb 사전 상한(`10,000` 엔트리/`256 MiB`)·`<base>` 정합성 강화; `/__remote_proxy`에서 Fail-Closed `Origin`/`Sec-Fetch-Site`·메서드 화이트리스트·요청/응답 상한·전체 요청 deadline(`timeoutMs`)·`X-EasyViewer-Proxy: 1` 식별 헤더·Node DNS Pinning(TOCTOU 방지)·세션 논스 게이트·WebDAV `href` 탐색 차단 적용; 네이티브는 `"http:default"` Capability 및 WebView 직접 `plugin-http` 호출을 제거하고 Rust `safe_remote_fetch`(`reqwest` `redirect::Policy::none()`, 연결 IP 고정, 바이트 상한, 명시 승인 시에만 TLS 예외) 단일 신뢰 경계로 통합; WebDAV 기억 비밀번호는 `tauri-plugin-keyring-store` + `tauri-plugin-keyring-store-api`로 OS 키체인에 분리 저장
   - 경계: `src/services/platform/`(시스템 대화상자·경로·드래그앤드롭·자격증명), `src/services/storage/`(파일·KV 영속화), `src/services/network/`(순수 SSRF 분류·원격 HTTP 경유)로 역할을 분리하고, 데스크톱 드래그앤드롭은 `tauri.conf.json` `"dragDropEnabled": true` + `isTauriEnv()` 전용 `onDragDropEvent` 단일 구독(Option A)으로 통합하며, `src/engines/{epub,txt}/`는 `@/types` 외 상위 레이어에 의존하지 않음 (`FR-006`)
   - 로컬·타겟 환경 제약: 로컬 호스트(`rustc 1.100.0`, `aarch64-apple-darwin`)에서는 `npm run verify`(빌드·Vitest·경계·버전·`cargo check && cargo test`)가 직접 실행 가능하나, 미설치 크로스 타겟(macOS universal/Android/iOS 빌드) 및 코드 서명/App Sandbox 공증·실앱 GUI/모바일 실기기 수동 검증(`T059`)은 대상 CI·실기기 환경에서 별도로 완료해야 함(또한 `cargo` 부재 호스트에서는 `verify.mjs`가 `BLOCKED` exit `2`로 정직하게 구분함)
@@ -48,7 +48,7 @@ EasyViewer(`0.1.5`) 코드베이스를 프로젝트 헌법(`v3.2.0`)의 품질·
 - **원칙 V (단순하고 일관된 아키텍처 & 플랫폼 추상화)**: PASS — `LibraryView.vue`, `useBookStore.ts`, `syncService.ts`의 직접 `@tauri-apps/*`/외부 `fetch` 의존성을 제거하고 `src/services/platform/`, `src/services/storage/`, `src/services/network/` 역할별 경계로 통합한다. `epubEngine.ts`와 `txtEngine.ts`의 `@/types` 전용 의존 규율은 유지한다.
 - **원칙 VI (지속적 회의주의와 검증 중심 원칙)**: PASS — 리팩토링 설계 및 구현 완료 시 항상 "의심 → 확인 → 검토 → 검증" 주기를 적용하며, `scripts/verify.mjs`는 `cargo` 부재 시 기본 종료 코드 `2`(`BLOCKED`)를 반환해 미검증 상태의 거짓 통과(`exit 0`)를 금지하고(`--frontend-only` 명시 시에만 프론트엔드 전용 게이트 통과 허용), Playwright(웹) + `mockIPC`(IPC 횟수 상한) + `cargo test`(Rust)로 검증 범위를 정직하게 분리 보고한다.
 - **원칙 VII (Zero Trust 보안 원칙)**: PASS — WebView/프론트엔드 JS 검사는 우회 가능하므로 신뢰하지 않는다. 네이티브 원격 HTTP는 WebView `"http:default"` Capability를 제거하고 Rust `safe_remote_fetch`에서 SSRF·DNS/IP·리다이렉트·응답 크기·TLS 예외를 원자 강제하며, `/__remote_proxy`는 Fail-Closed Origin·메서드·크기/타임아웃·세션 논스 게이트를 적용하고, EPUB/WebDAV 입력은 사전 크기·엔트리·경로 검증으로 차단한다.
-- **품질 게이트 & 기술 제약**: PASS — `vue-tsc -b && vite build`, `npm test`, 경계 위반 검사, 버전(`0.1.5`) 동기화 검사, CSP 설정 강화를 모두 계약([contracts/quality-gates.md](./contracts/quality-gates.md), [contracts/security-policy.md](./contracts/security-policy.md))으로 고정한다.
+- **품질 게이트 & 기술 제약**: PASS — `vue-tsc -b && vite build`, `npm test`, 경계 위반 검사, 버전(`0.1.6-alpha` 포함 매니페스트·락파일) 동기화 검사, CSP 설정 강화를 모두 계약([contracts/quality-gates.md](./contracts/quality-gates.md), [contracts/security-policy.md](./contracts/security-policy.md))으로 고정한다.
 
 ### 2. Post-Design Gate (Phase 1 설계 완료 후 재점검)
 
@@ -82,15 +82,20 @@ specs/001-constitution-compliance-refactoring/
 
 ```text
 .
+├── README.md                                   # v0.1.6-alpha 아키텍처·품질 게이트·크로스 플랫폼 빌드·macOS Ad-Hoc 안내
+├── LICENSE                                     # GNU General Public License v3.0 (원문 보존)
+├── THIRD_PARTY_LICENSES.md                     # 0.1.6-alpha npm/Cargo 직접 의존성 SPDX 라이선스 고지
+├── .github/workflows/build-apple.yml           # macOS Universal / iOS 빌드 워크플로우 (verify 게이트 + Node 24 LTS)
+├── build/                                      # 배포용 .dmg 산출물 보관 (.gitignore `!build/*.dmg`, 0.1.6-alpha 정합 유지)
 ├── index.html                                  # Google Fonts CDN 제거 대상
-├── package.json                                # version "0.1.5"; @tauri-apps/* ^2.12.x·plugin-opener ^2.x 및 test/verify/gate 스크립트 추가 대상
+├── package.json                                # version "0.1.6-alpha"; @tauri-apps/* ^2.12.x·plugin-opener ^2.x 및 test/verify/gate 스크립트 추가 대상
 ├── tsconfig.json                               # strict: true, @/* -> src/*
 ├── vite.config.ts                              # /__remote_proxy SSRF·Origin·TLS 방어 강화 대상
 ├── scripts/
 │   ├── android.mjs                             # 기존 Android 빌드 스크립트
 │   ├── remoteProxyGuard.mjs                    # (신규) Node 전용 DNS Pinning·SSRF 소켓 가드
 │   ├── check-boundaries.mjs                    # (신규) 직접 @tauri-apps/*·스토리지·비승인 fetch 및 엔진 역의존 검사
-│   ├── check-version-sync.mjs                  # (신규) package.json/Cargo.toml/tauri.conf.json 버전 일치 검사
+│   ├── check-version-sync.mjs                  # (신규) package.json/Cargo.toml/tauri.conf.json 및 락파일 버전 일치 검사
 │   ├── check-commit-msg.mjs                    # (신규) Conventional Commits + 한국어 본문 검사
 │   ├── verify.mjs                              # (신규) 통합 품질 게이트(Rust 부재 시 기본 exit 2 BLOCKED, --frontend-only 지원)
 ├── src/
@@ -139,8 +144,8 @@ specs/001-constitution-compliance-refactoring/
 │       ├── LibraryView.vue                     # 직접 dialog/webview/fs 호출 제거 -> platform/*
 │       └── ReaderView.vue
 ├── src-tauri/
-│   ├── Cargo.toml                              # version = "0.1.5", reqwest 0.13(rustls+rustls-platform-verifier), tauri-plugin-opener, tauri-plugin-keyring-store 0.3.2 (http:default 제거)
-│   ├── tauri.conf.json                         # version = "0.1.5", dragDropEnabled: true(데스크톱 sourcePath), 명시적 CSP(connect-src 와일드카드 http:/https: 제거)
+│   ├── Cargo.toml                              # version = "0.1.6-alpha", reqwest 0.13(rustls+rustls-platform-verifier), tauri-plugin-opener, tauri-plugin-keyring-store 0.3.2 (http:default 제거)
+│   ├── tauri.conf.json                         # version = "0.1.6-alpha", bundle.macOS.signingIdentity: "-", dragDropEnabled: true(데스크톱 sourcePath), 명시적 CSP(connect-src 와일드카드 http:/https: 제거)
 │   ├── capabilities/
 │   │   ├── default.json                        # 공통 최소 권한 + 모바일 $APPDATA/books/** 스코프(http:default·appdata-*-recursive 제거)
 │   │   └── desktop.json                        # (신규) platforms:["linux","macOS","windows"] 데스크톱 FS·드래그앤드롭·스코프 제한 opener:allow-open-path 권한

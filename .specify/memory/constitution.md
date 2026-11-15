@@ -1,14 +1,3 @@
-<!--
-Sync Impact Report (변경 영향 보고서 - 커밋 전 제거 권장)
-- Version change: 3.1.1 → 3.2.0 (MINOR: Zero Trust·macOS 최신성 감사에 따른 기술 스택 및 플랫폼 제약사항 정합화 — WebView `plugin-http` 제거, `tauri-plugin-opener`·`tauri-plugin-keyring-store`·`reqwest 0.13`·Tauri `^2.12.x` 반영)
-- Modified sections:
-  - 기술 스택 및 플랫폼 제약사항: WebView 직접 `plugin-http` 제거 및 Rust `safe_remote_fetch`(`reqwest 0.13` `rustls` + `rustls-platform-verifier`) 단일화, `tauri-plugin-opener` 및 `tauri-plugin-keyring-store` 추가, `@tauri-apps/{api,cli}` `^2.12.x` 및 공식 플러그인 최신 `2.x`(CI Rust `>= 1.90.0`) 반영
-- Added sections: 없음
-- Removed sections: 없음
-- Templates & runtime impact:
-  - specs/001-constitution-compliance-refactoring/{spec,plan,research,contracts,tasks}.md 정합 정렬 완료
-- Deferred TODOs: 없음
--->
 # EasyViewer Constitution
 
 ## Core Principles
@@ -142,7 +131,8 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   (`allow_storage_dir`), 프록시·네이티브 HTTP SSRF/TLS 검증 및 안전 자격증명 격리를 반드시 적용해야
   한다(MUST).
 - **버전 동기화**: 애플리케이션 버전 변경 시 `package.json`, `src-tauri/Cargo.toml`,
-  `src-tauri/tauri.conf.json` 세 파일의 버전을 반드시 동일하게 유지해야 한다(MUST).
+  `src-tauri/tauri.conf.json` 세 파일(및 존재하는 경우 `package-lock.json`, `src-tauri/Cargo.lock`
+  락파일의 루트 패키지 버전)을 반드시 동일하게 유지해야 한다(MUST).
 
 ## 개발 워크플로우 및 품질 게이트 (Development Workflow & Quality Gates)
 

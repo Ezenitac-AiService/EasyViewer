@@ -8,7 +8,7 @@
 | `npm run test:e2e` | 2계층 Playwright 실제 브라우저(렌더링·페이지네이션·CSP·탭) 테스트 실행 | `FR-001`, `FR-003`, `SC-001`, `SC-004` |
 | `npm run test:perf` | 2계층 런타임 성능 기준선 측정 및 비교 검증 | `FR-012`, `SC-006` |
 | `npm run check:boundaries` | `src/views/`, `src/stores/`, `src/components/`, `src/engines/`, `src/services/sync/` 내 직접 `@tauri-apps/*`, `localStorage`, `indexedDB`, 비승인 직접 네트워크 `fetch`/`XMLHttpRequest` 참조 탐지 | `FR-005`, `SC-002` (0건) |
-| `npm run check:version` | `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` 버전 일치 검증 | `FR-011`, `SC-005` |
+| `npm run check:version` | `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` (및 존재하는 경우 `package-lock.json`, `src-tauri/Cargo.lock`) 버전 일치 검증 | `FR-011`, `SC-005` |
 | `npm run check:commit-msg <file>` | Conventional Commits 접두사 + 한국어 요약 + 빈 줄 + 상세 본문 형식 검증 | `FR-011`, `SC-005` |
 | `npm run verify` | `build` + `test` + `check:boundaries` + `check:version` + Rust 백엔드 검증(`cargo check && cargo test`) 실행. `cargo` 미설치 시 기본 종료 코드는 **`2` (`BLOCKED`)** 로 실패·차단 처리하며, 프론트엔드 전용 로컬 확인 시 `--frontend-only` 플래그를 명시한 경우에만 `BLOCKED` 로그 출력 후 `0` 반환 | `FR-011`, `SC-005` |
 

@@ -20,7 +20,7 @@
 ## 3. 소스 무결성·버전 동기화·거버넌스 게이트 (`FR-011`, `FR-012`)
 
 - [x] 프로덕션 소스(`src/`, `src-tauri/src/`) 내 `TODO`/`FIXME`/테스트 전용 우회 분기 및 직접 `@tauri-apps/plugin-http` 잔존 `0건` 확인 (`grep` 점검)
-- [x] `scripts/check-version-sync.mjs`를 통한 `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` 버전 일치(`0.1.5`) 검증
+- [x] `scripts/check-version-sync.mjs`를 통한 `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` (및 락파일 `package-lock.json`, `src-tauri/Cargo.lock`) 버전 일치(`0.1.6-alpha`) 검증
 - [x] `scripts/check-commit-msg.mjs`를 통한 Conventional Commits + 한국어 요약 + 빈 줄 + 20자 이상 한국어 본문 검증 및 Merge/Revert 예외 검증
 - [x] `scripts/verify.mjs` `cargo` 미설치 시 Fail-Closed exit `2` (`BLOCKED`) 및 `--frontend-only` 명시 시 exit `0` 동작 검증
 
@@ -30,3 +30,11 @@
 - [x] `T069`: Rust `is_sensitive_path` macOS/Windows 대소문자 비구분 ASCII 소문자 정규화(`/system`, `.SSH` 등 차단) 및 `#[cfg(test)]` 부정 단위 테스트 통과 (`is_sensitive_path_blocks_case_variants_when_case_insensitive`)
 - [x] `T070`: Rust `safe_remote_fetch` 전체 요청·리다이렉트·스트림 수명 총합 데드라인(`compute_remaining_budget` / `TIMEOUT:`) 적용 및 `#[cfg(test)]` 단위 테스트 통과 (`compute_remaining_budget_enforces_total_deadline`)
 - [x] `T071`: `src/services/sync/syncService.ts` `POST`/`GET` HTTP `response.ok` 검사(`SyncHttpError` + `isFatalSyncError` + `5xx` `local-hub` 폴백 / `4xx`·동의 오류 전파) + `tests/unit/syncService.spec.ts` 단위 테스트 통과 (`7 passed`)
+
+## 5. Phase 10 (`0.1.6-alpha` 프리릴리즈 기준) 수렴 검증 항목 (`T072`~`T076`)
+
+- [x] `T072`: `plan.md`, `quickstart.md`, `governance.md` 내 `0.1.5` 잔존 표기 → `0.1.6-alpha` 및 `macOS.signingIdentity: "-"`·`README.md`·`THIRD_PARTY_LICENSES.md`·`build-apple.yml` 정합성 반영
+- [x] `T073`: `scripts/check-version-sync.mjs` 락파일(`package-lock.json`, `Cargo.lock`) 버전 일치 검증 확장 및 `tests/unit/governanceScripts.spec.ts` `0.1.6-alpha` 프리릴리즈/불일치 거부 단위 테스트 통과
+- [x] `T074`: `.specify/memory/constitution.md` 상단 임시 `Sync Impact Report` HTML 주석 제거 및 버전 동기화 규범 정합 확인
+- [x] `T075`: 루트 `build/` 구 `0.1.5` `.dmg` 제거 및 `0.1.6-alpha` Ad-Hoc 서명 `.dmg` 정합 반영 + `.github/workflows/build-apple.yml` Node `24` LTS 및 `npm run verify` 선행 게이트 추가
+- [x] `T076`: `README.md` macOS Ad-Hoc 서명(`signingIdentity: "-"`)·`xattr -cr` 안내 반영 및 `THIRD_PARTY_LICENSES.md`·`codesign --verify --deep --strict` 검증 완료

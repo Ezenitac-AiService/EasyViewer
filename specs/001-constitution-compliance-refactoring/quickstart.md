@@ -46,6 +46,6 @@
 3. (Rust 단독 점검 시) 백엔드 검증: `cd src-tauri && cargo check && cargo test` (크로스 타겟 macOS universal/iOS/Android 빌드는 대상 타겟·SDK 설치 환경에서 수행)
 4. 기대 결과:
    - `check:boundaries`: 상위 계층(`views`, `stores`, `components`, `engines`, `services/sync`) 직접 플랫폼/네트워크 API 호출 `0건`
-   - `check:version`: `package.json`, `Cargo.toml`, `tauri.conf.json` 버전 일치 (`0.1.5`)
+   - `check:version`: `package.json`, `Cargo.toml`, `tauri.conf.json` (및 락파일 `package-lock.json`, `Cargo.lock`) 버전 일치 (`0.1.6-alpha`)
    - 의도적으로 주입한 규범 위반 샘플에 대해 탐지 실패(exit 1) 100% 확인
    - `cargo` 미설치 상태에서 `npm run verify` 기본 실행 시 `BLOCKED`(exit `2`) 반환 확인

@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-15
 
-**Status**: Converged (Local Gates Passed; T059 Cross-Target & Device Manual Verification Open)
+**Status**: Converged (0.1.6-alpha Aligned; Local Gates Passed; T059 Cross-Target/Device Manual Verification Open)
 
 **Input**: User description: "헌법을 준수하면서 헌법의 내용을 반영한 리펙토링 작업을 위한 리서치를 진행하고 스펙 문서를 작성"
 
