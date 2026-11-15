@@ -21,13 +21,15 @@ describe('Multi-platform release GitHub Actions workflows', () => {
     expect(content).toContain('aarch64-apple-darwin,x86_64-apple-darwin')
     expect(content).toContain('npm run mac:build')
     expect(content).toContain('windows-latest')
+    expect(content).toContain('--bundles nsis')
     expect(content).toContain('ubuntu-22.04')
+    expect(content).toContain('--bundles deb,appimage')
     expect(content).toContain('libwebkit2gtk-4.1-dev')
     expect(content).toContain('APPIMAGE_EXTRACT_AND_RUN')
 
     // Android release APK build
     expect(content).toContain("java-version: '21'")
-    expect(content).toContain('android-actions/setup-android')
+    expect(content).toContain('android-actions/setup-android@v4')
     expect(content).toContain('aarch64-linux-android')
     expect(content).toContain('npm run android:init')
     expect(content).toContain('npm run android:release')

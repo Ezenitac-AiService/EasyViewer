@@ -58,17 +58,15 @@ jobs:
           - name: windows-x64
             os: windows-latest
             rust_targets: x86_64-pc-windows-msvc
-            build_cmd: npx tauri build
+            build_cmd: npx tauri build --bundles nsis
             bundle_path: |
               src-tauri/target/release/bundle/nsis/*.exe
-              src-tauri/target/release/bundle/msi/*.msi
           - name: linux-x64
             os: ubuntu-22.04
             rust_targets: x86_64-unknown-linux-gnu
-            build_cmd: npx tauri build
+            build_cmd: npx tauri build --bundles deb,appimage
             bundle_path: |
               src-tauri/target/release/bundle/deb/*.deb
-              src-tauri/target/release/bundle/rpm/*.rpm
               src-tauri/target/release/bundle/appimage/*.AppImage
     runs-on: ${{ matrix.os }}
     steps:
@@ -124,7 +122,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
       - name: Install Android SDK platform, build-tools, and NDK
         shell: bash
         run: |
