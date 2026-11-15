@@ -192,6 +192,11 @@ npm run android:release     # arm64 release APK
 npm run android:release:all # 전체 ABI release APK
 ```
 
+### GitHub Actions 멀티 플랫폼 자동 릴리즈
+
+- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)**, **Windows x64 (`-setup.exe`, `.msi`)**, **Linux x64 (`.deb`, `.rpm`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
+- [`.github/workflows/build-apple.yml`](.github/workflows/build-apple.yml): `main` PR 및 수동 실행용 macOS Universal + iOS 시뮬레이터(`--debug --target aarch64-sim`) 빌드 검증 워크플로우입니다.
+
 ---
 
 ## 라이선스 (License)
