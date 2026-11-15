@@ -1,5 +1,5 @@
 import type { BookFormat } from '@/types'
-import { isTauriEnv } from '@/services/storage/platformAdapter'
+import { MAX_REMOTE_RESPONSE_BYTES, remoteFetch } from '@/services/network/remoteFetch'
 
 export interface DownloadProgress {
   loaded: number
@@ -60,36 +60,10 @@ export async function downloadRemoteBook(
     throw new Error('유효한 HTTP/HTTPS URL을 입력해 주세요.')
   }
 
-  let response: Response | null = null
-  if (isTauriEnv()) {
-    try {
-      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http')
-      response = await tauriFetch(trimmedUrl, { method: 'GET' })
-    } catch {
-      response = null
-    }
-  }
-
-  if (!response) {
-    try {
-      const proxyRes = await fetch('/__remote_proxy', {
-        method: 'GET',
-        headers: {
-          'x-target-url': trimmedUrl,
-          'x-target-method': 'GET'
-        }
-      })
-      if (proxyRes.status !== 404) {
-        response = proxyRes
-      }
-    } catch {
-      // Fallback to direct fetch
-    }
-  }
-
-  if (!response) {
-    response = await fetch(trimmedUrl)
-  }
+  const response = await remoteFetch(trimmedUrl, {
+    method: 'GET',
+    maxResponseBytes: MAX_REMOTE_RESPONSE_BYTES
+  })
 
   if (!response.ok) {
     throw new Error(`파일 다운로드 실패 (HTTP ${response.status})`)
@@ -98,6 +72,9 @@ export async function downloadRemoteBook(
   const contentType = response.headers.get('content-type') || ''
   const contentLengthHeader = response.headers.get('content-length')
   const totalBytes = contentLengthHeader ? parseInt(contentLengthHeader, 10) : 0
+  if (totalBytes > MAX_REMOTE_RESPONSE_BYTES) {
+    throw new Error('원격 파일 크기가 허용 상한(256 MiB)을 초과했습니다.')
+  }
 
   if (response.body && typeof response.body.getReader === 'function') {
     const reader = response.body.getReader()
@@ -108,8 +85,12 @@ export async function downloadRemoteBook(
       const { done, value } = await reader.read()
       if (done) break
       if (value) {
-        chunks.push(value)
         loadedBytes += value.byteLength
+        if (loadedBytes > MAX_REMOTE_RESPONSE_BYTES) {
+          await reader.cancel().catch(() => {})
+          throw new Error('원격 파일 크기가 허용 상한(256 MiB)을 초과했습니다.')
+        }
+        chunks.push(value)
         const percent = totalBytes > 0 ? Math.min(99, Math.round((loadedBytes / totalBytes) * 100)) : 50
         onProgress?.({ loaded: loadedBytes, total: totalBytes, percent })
       }

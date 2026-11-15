@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-11-15T14:25:41.667Z",
+  "environment": "darwin-arm64-node24-chromium",
+  "seededBookCount": 50,
+  "warmupRuns": 2,
+  "measuredRuns": 7,
+  "metrics": [
+    {
+      "metric": "library_init_ms",
+      "samplesMs": [
+        61.21,
+        49.94,
+        67.87,
+        50.07,
+        46.24,
+        46.05,
+        48.7
+      ],
+      "medianMs": 49.94
+    },
+    {
+      "metric": "large_txt_open_ms",
+      "samplesMs": [
+        64.11,
+        62.7,
+        57.3,
+        59.84,
+        62.39,
+        61.45,
+        62.94
+      ],
+      "medianMs": 62.39
+    },
+    {
+      "metric": "view_mode_toggle_ms",
+      "samplesMs": [
+        121.8,
+        135.02,
+        117.99,
+        116.32,
+        125.14,
+        120.62,
+        153.95
+      ],
+      "medianMs": 121.8
+    },
+    {
+      "metric": "theme_switch_ms",
+      "samplesMs": [
+        93.94,
+        98.18,
+        99.13,
+        113.44,
+        107.81,
+        95.66,
+        94.78
+      ],
+      "medianMs": 98.18
+    }
+  ]
+}

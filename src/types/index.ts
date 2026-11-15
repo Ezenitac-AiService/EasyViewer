@@ -85,14 +85,54 @@ export interface SyncPayload {
   settings?: Partial<ViewerSettings>
 }
 
+export type CredentialScope = 'session' | 'native-secure' | 'web-acknowledged'
+
 export interface WebDavConnection {
   id: string
   alias: string
   url: string
   username: string
   password?: string
+  rememberPassword?: boolean
+  credentialScope?: CredentialScope
   initialPath: string
   lastConnectedAt: number
+}
+
+export interface TrustedRemoteHostConsent {
+  hostKey: string
+  allowPrivateNetwork: boolean
+  allowSelfSignedTls: boolean
+  consentedAt: number
+}
+
+export interface PlatformCapabilities {
+  canPickStorageDir: boolean
+  canOpenStorageDir: boolean
+  canDeleteLocalFile: boolean
+  supportsNativeDragDrop: boolean
+  hasSecureCredentialStore: boolean
+}
+
+export type PerformanceMetricName =
+  | 'library_init_ms'
+  | 'large_txt_open_ms'
+  | 'view_mode_toggle_ms'
+  | 'theme_switch_ms'
+
+export interface PerformanceMetricSample {
+  metric: PerformanceMetricName
+  samplesMs: number[]
+  medianMs: number
+}
+
+export interface PerformanceBaselineReport {
+  capturedAt: string
+  environment: string
+  seededBookCount: number
+  warmupRuns: number
+  measuredRuns: number
+  metrics: PerformanceMetricSample[]
 }
 
 export interface WebDavItem {

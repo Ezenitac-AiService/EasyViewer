@@ -154,11 +154,12 @@ export class PlatformStorageAdapter {
     await this.setItem(STORAGE_DIR_KEY, dir)
   }
 
-  /** Opens the storage folder in Explorer / Finder (creating it if needed). */
+  /** Opens the storage folder in Explorer / Finder (creating and validating it first). */
   async openStorageDir(): Promise<void> {
     const dir = await this.getStorageDir()
     await invokeCommand('allow_storage_dir', { path: dir })
-    await invokeCommand('open_folder', { path: dir })
+    const { openPath } = await import('@tauri-apps/plugin-opener')
+    await openPath(dir)
   }
 
   /**

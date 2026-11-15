@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { BookFormat, BookMeta, BookmarkItem, ReadingLocation, SyncPayload } from '@/types'
-import { isDesktopApp, platformStorage } from '@/services/storage/platformAdapter'
+import { isDesktopApp, platformPath, platformStorage } from '@/services/platform'
 import { extractEpubMetadata } from '@/engines/epub/epubEngine'
 import { createSampleEpubBook, createSampleTxtBook } from '@/services/sampleBooks'
 import { downloadRemoteBook, type DownloadProgress } from '@/services/network/downloadService'
@@ -98,12 +98,12 @@ export const useBookStore = defineStore('books', () => {
   async function prepareBookFiles() {
     // Desktop only: Android/iOS keep the internal `books/<id>.bin` files as they are.
     if (!(await isDesktopApp())) return
-    const { dirname } = await import('@tauri-apps/api/path')
     const dirs: string[] = [await platformStorage.getStorageDir()]
     for (const book of books.value) {
       if (book.storedPath) {
         try {
-          dirs.push(await dirname(book.storedPath))
+          const parent = await platformPath.dirname(book.storedPath)
+          if (parent) dirs.push(parent)
         } catch {
           // Ignore malformed paths
         }

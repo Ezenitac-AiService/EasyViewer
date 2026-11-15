@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useBookStore } from '@/stores/useBookStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
+import { grantHostConsent, RemoteFetchConsentError } from '@/services/network/remoteFetch'
 import { RefreshCw, Cloud, Copy, Upload, Check, X } from 'lucide-vue-next'
 
 defineProps<{
@@ -17,12 +18,46 @@ const settingsStore = useSettingsStore()
 
 const syncSnapshotJson = ref('')
 const feedbackMsg = ref('')
+const errorMsg = ref('')
 const copied = ref(false)
+const pendingConsentPrompt = ref<{
+  kind: 'private' | 'tls'
+  url: string
+  origin: string
+} | null>(null)
+
+async function approveSyncConsent() {
+  const prompt = pendingConsentPrompt.value
+  if (!prompt) return
+  pendingConsentPrompt.value = null
+  await grantHostConsent(prompt.url, {
+    allowPrivateNetwork: prompt.kind === 'private' ? true : undefined,
+    allowSelfSignedTls: prompt.kind === 'tls' ? true : undefined
+  })
+  await handleRunSync()
+}
 
 async function handleRunSync() {
   feedbackMsg.value = ''
-  const res = await bookStore.syncNow()
-  feedbackMsg.value = res.message
+  errorMsg.value = ''
+  pendingConsentPrompt.value = null
+  try {
+    const res = await bookStore.syncNow()
+    feedbackMsg.value = res.message
+  } catch (err: unknown) {
+    if (
+      err instanceof RemoteFetchConsentError &&
+      (err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ||
+        err.code === 'SELF_SIGNED_TLS_CONFIRM_REQUIRED')
+    ) {
+      pendingConsentPrompt.value = {
+        kind: err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ? 'private' : 'tls',
+        url: settingsStore.settings.syncEndpoint.trim(),
+        origin: err.origin
+      }
+    }
+    errorMsg.value = err instanceof Error ? err.message : '동기화 중 오류가 발생했습니다.'
+  }
 }
 
 async function handleExportJson() {
@@ -94,6 +129,7 @@ async function handleImportJson() {
             />
             <button
               type="button"
+              data-testid="run-sync-btn"
               :disabled="bookStore.isSyncing"
               class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shrink-0 transition-colors"
               @click="handleRunSync"
@@ -142,8 +178,47 @@ async function handleImportJson() {
         </div>
 
         <div
+          v-if="pendingConsentPrompt"
+          data-testid="sync-consent-banner"
+          class="flex flex-col gap-2 p-3 rounded-xl border text-xs"
+          :style="{
+            backgroundColor: 'var(--ev-surface)',
+            borderColor: 'var(--ev-border)',
+            color: 'var(--ev-text)'
+          }"
+        >
+          <span>
+            {{
+              pendingConsentPrompt.kind === 'private'
+                ? `사설 네트워크(${pendingConsentPrompt.origin}) 동기화 서버 연결을 신뢰하고 허용하시겠습니까?`
+                : `자체 서명 TLS 인증서(${pendingConsentPrompt.origin}) 예외를 허용하시겠습니까?`
+            }}
+          </span>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              data-testid="approve-sync-consent-btn"
+              class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold"
+              @click="approveSyncConsent"
+            >
+              신뢰하고 다시 시도
+            </button>
+          </div>
+        </div>
+
+        <div
+          v-if="errorMsg"
+          data-testid="sync-error-banner"
+          class="p-3 rounded-xl border border-rose-500/40 bg-rose-500/10 text-xs font-medium"
+          :style="{ color: 'var(--ev-text)' }"
+        >
+          {{ errorMsg }}
+        </div>
+
+        <div
           v-if="feedbackMsg"
-          class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-xs font-medium"
+          class="p-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-medium"
+          :style="{ color: 'var(--ev-text)' }"
         >
           {{ feedbackMsg }}
         </div>

@@ -10,6 +10,8 @@ import {
   removeWebDavConnection,
   saveWebDavConnection
 } from '@/services/network/webdavService'
+import { getPlatformCapabilities, platformCredential } from '@/services/platform'
+import { grantHostConsent, RemoteFetchConsentError } from '@/services/network/remoteFetch'
 import {
   ArrowLeft,
   Globe,
@@ -59,7 +61,16 @@ const webdavUrl = ref('')
 const webdavPath = ref('/')
 const webdavUsername = ref('')
 const webdavPassword = ref('')
+const rememberPassword = ref(false)
+const webStorageConsent = ref(false)
+const hasSecureCredentialStore = ref(false)
 const webdavHistory = ref<WebDavConnection[]>([])
+const pendingConsentPrompt = ref<{
+  kind: 'private' | 'tls'
+  url: string
+  origin: string
+  source: 'url' | 'webdav'
+} | null>(null)
 
 // 3. Full-Screen WebDAV Explorer State (shown as a new Full Screen upon connection success)
 const isWebDavConnecting = ref(false)
@@ -179,12 +190,30 @@ watch(
 )
 
 onMounted(async () => {
+  const caps = await getPlatformCapabilities()
+  hasSecureCredentialStore.value = caps.hasSecureCredentialStore
   webdavHistory.value = await loadWebDavHistory()
 })
+
+async function approvePendingConsent() {
+  const prompt = pendingConsentPrompt.value
+  if (!prompt) return
+  pendingConsentPrompt.value = null
+  await grantHostConsent(prompt.url, {
+    allowPrivateNetwork: prompt.kind === 'private' ? true : undefined,
+    allowSelfSignedTls: prompt.kind === 'tls' ? true : undefined
+  })
+  if (prompt.source === 'url') {
+    await handleUrlDownload()
+  } else {
+    await handleConnectWebDav()
+  }
+}
 
 async function handleUrlDownload() {
   if (!remoteUrl.value.trim() || isDownloading.value) return
   errorMessage.value = ''
+  pendingConsentPrompt.value = null
   isDownloading.value = true
   progressPercent.value = 5
 
@@ -196,6 +225,18 @@ async function handleUrlDownload() {
     emit('downloaded', book)
     emit('close')
   } catch (err: any) {
+    if (
+      err instanceof RemoteFetchConsentError &&
+      (err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ||
+        err.code === 'SELF_SIGNED_TLS_CONFIRM_REQUIRED')
+    ) {
+      pendingConsentPrompt.value = {
+        kind: err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ? 'private' : 'tls',
+        url: remoteUrl.value.trim(),
+        origin: err.origin,
+        source: 'url'
+      }
+    }
     errorMessage.value =
       err?.message || '원격 파일 다운로드 중 오류가 발생했습니다. CORS 정책 또는 URL을 확인해 주세요.'
   } finally {
@@ -209,13 +250,19 @@ async function handleSaveWebDavOnly() {
     webdavError.value = 'WebDAV 서버 URL을 입력해 주세요.'
     return
   }
+  if (rememberPassword.value && !hasSecureCredentialStore.value && !webStorageConsent.value) {
+    webdavError.value = '웹 환경에서 비밀번호를 저장하려면 브라우저 로컬 저장소 안내에 동의해 주세요.'
+    return
+  }
   webdavError.value = ''
   webdavHistory.value = await saveWebDavConnection({
     alias: '',
     url,
     username: webdavUsername.value.trim(),
     password: webdavPassword.value,
-    initialPath: webdavPath.value.trim() || '/'
+    initialPath: webdavPath.value.trim() || '/',
+    rememberPassword: rememberPassword.value,
+    webStorageConsent: webStorageConsent.value
   })
   webdavSuccessMsg.value = '최근 접속내역 목록에 연결 정보를 저장했습니다.'
 }
@@ -224,8 +271,14 @@ async function handleConnectWebDav() {
   const url = webdavUrl.value.trim()
   if (!url || isWebDavConnecting.value) return
 
+  if (rememberPassword.value && !hasSecureCredentialStore.value && !webStorageConsent.value) {
+    webdavError.value = '웹 환경에서 비밀번호를 저장하려면 브라우저 로컬 저장소 안내에 동의해 주세요.'
+    return
+  }
+
   webdavError.value = ''
   webdavSuccessMsg.value = ''
+  pendingConsentPrompt.value = null
   isWebDavConnecting.value = true
 
   const startPath = webdavPath.value.trim() || '/'
@@ -237,7 +290,9 @@ async function handleConnectWebDav() {
       url,
       username: webdavUsername.value.trim(),
       password: webdavPassword.value,
-      initialPath: startPath
+      initialPath: startPath,
+      rememberPassword: rememberPassword.value,
+      webStorageConsent: webStorageConsent.value
     })
 
     // Check if the user entered a direct .epub or .txt file URL on WebDAV
@@ -272,6 +327,18 @@ async function handleConnectWebDav() {
     // Open the dedicated Full Screen WebDAV Explorer view
     isWebDavExplorerOpen.value = true
   } catch (err: any) {
+    if (
+      err instanceof RemoteFetchConsentError &&
+      (err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ||
+        err.code === 'SELF_SIGNED_TLS_CONFIRM_REQUIRED')
+    ) {
+      pendingConsentPrompt.value = {
+        kind: err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ? 'private' : 'tls',
+        url,
+        origin: err.origin,
+        source: 'webdav'
+      }
+    }
     webdavError.value =
       err?.message || 'WebDAV 서버에 연결할 수 없습니다. 주소와 계정 정보를 확인해 주세요.'
   } finally {
@@ -283,7 +350,9 @@ async function selectRecentConnection(conn: WebDavConnection, autoConnect = true
   webdavUrl.value = conn.url
   webdavPath.value = conn.initialPath || '/'
   webdavUsername.value = conn.username
-  webdavPassword.value = conn.password || ''
+  rememberPassword.value = Boolean(conn.rememberPassword)
+  webStorageConsent.value = conn.credentialScope === 'web-acknowledged'
+  webdavPassword.value = await platformCredential.getPassword(conn.id)
   webdavError.value = ''
   webdavSuccessMsg.value = ''
 
@@ -774,6 +843,28 @@ function formatItemDate(rawDate?: string): string {
                 <span>{{ errorMessage }}</span>
               </div>
 
+              <div
+                v-if="pendingConsentPrompt && pendingConsentPrompt.source === 'url'"
+                class="flex flex-col gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-300 text-xs"
+              >
+                <span>
+                  {{
+                    pendingConsentPrompt.kind === 'private'
+                      ? `사설 네트워크(${pendingConsentPrompt.origin}) 연결을 신뢰하고 허용하시겠습니까?`
+                      : `자체 서명 TLS 인증서(${pendingConsentPrompt.origin}) 예외를 허용하시겠습니까?`
+                  }}
+                </span>
+                <div class="flex justify-end">
+                  <button
+                    type="button"
+                    class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold"
+                    @click="approvePendingConsent"
+                  >
+                    신뢰하고 다시 시도
+                  </button>
+                </div>
+              </div>
+
               <div class="flex items-center justify-end gap-2 pt-3 border-t" :style="{ borderColor: 'var(--ev-border)' }">
                 <button
                   type="submit"
@@ -855,6 +946,28 @@ function formatItemDate(rawDate?: string): string {
                   </div>
                 </div>
 
+                <!-- Credential Persistence Controls -->
+                <div class="space-y-1.5 pt-1 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input v-model="rememberPassword" type="checkbox" class="rounded border-gray-400" />
+                    <span>
+                      비밀번호 기억
+                      <span class="opacity-65">
+                        ({{ hasSecureCredentialStore ? 'OS 키체인 안전 저장' : '기본 세션 메모리 유지' }})
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    v-if="rememberPassword && !hasSecureCredentialStore"
+                    class="flex items-start gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/25 cursor-pointer select-none text-[11px]"
+                  >
+                    <input v-model="webStorageConsent" type="checkbox" class="mt-0.5 rounded border-gray-400" />
+                    <span>
+                      웹 브라우저 환경에서는 OS 키체인을 사용할 수 없어 로컬 저장소(IndexedDB)에 보관됩니다. 개인 기기에서만 사용함을 확인하고 동의합니다.
+                    </span>
+                  </label>
+                </div>
+
                 <!-- Alerts -->
                 <div
                   v-if="webdavError"
@@ -862,6 +975,28 @@ function formatItemDate(rawDate?: string): string {
                 >
                   <AlertCircle class="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{{ webdavError }}</span>
+                </div>
+
+                <div
+                  v-if="pendingConsentPrompt && pendingConsentPrompt.source === 'webdav'"
+                  class="flex flex-col gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-300 text-xs"
+                >
+                  <span>
+                    {{
+                      pendingConsentPrompt.kind === 'private'
+                        ? `사설 네트워크 NAS(${pendingConsentPrompt.origin}) 연결을 신뢰하고 허용하시겠습니까?`
+                        : `자체 서명 TLS 인증서(${pendingConsentPrompt.origin}) 예외를 허용하시겠습니까?`
+                    }}
+                  </span>
+                  <div class="flex justify-end">
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold"
+                      @click="approvePendingConsent"
+                    >
+                      신뢰하고 다시 연결
+                    </button>
+                  </div>
                 </div>
 
                 <div
