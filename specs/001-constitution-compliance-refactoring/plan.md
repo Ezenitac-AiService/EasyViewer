@@ -85,7 +85,9 @@ specs/001-constitution-compliance-refactoring/
 ├── README.md                                   # v0.1.6-alpha 아키텍처·품질 게이트·크로스 플랫폼 빌드·macOS Ad-Hoc 안내
 ├── LICENSE                                     # GNU General Public License v3.0 (원문 보존)
 ├── THIRD_PARTY_LICENSES.md                     # 0.1.6-alpha npm/Cargo 직접 의존성 SPDX 라이선스 고지
-├── .github/workflows/build-apple.yml           # macOS Universal / iOS 빌드 워크플로우 (verify 게이트 + Node 24 LTS)
+├── .github/workflows/
+│   ├── release.yml                             # v*/수동 멀티 플랫폼 자동 릴리즈 (verify + macOS Universal/Windows NSIS/Linux deb·AppImage/Android APK)
+│   └── build-apple.yml                         # PR/수동 전용 macOS Universal + iOS 시뮬레이터 검증 워크플로우 (verify 게이트 + Node 24 LTS)
 ├── build/                                      # 배포용 .dmg 산출물 보관 (.gitignore `!build/*.dmg`, 0.1.6-alpha 정합 유지)
 ├── index.html                                  # Google Fonts CDN 제거 대상
 ├── package.json                                # version "0.1.6-alpha"; @tauri-apps/* ^2.12.x·plugin-opener ^2.x 및 test/verify/gate 스크립트 추가 대상

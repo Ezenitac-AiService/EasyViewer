@@ -130,16 +130,16 @@ jobs:
         run: |
           set -euo pipefail
           yes | sdkmanager --licenses >/dev/null || true
-          SDK_LIST="$(sdkmanager --list)"
-          LATEST_NDK="$(printf '%s\n' "$SDK_LIST" | grep -oE 'ndk;28\.[0-9]+\.[0-9]+' | sort -V | tail -n 1 || true)"
+          PACKAGES="$(sdkmanager --list | awk '{print $1}')"
+          LATEST_NDK="$(printf '%s\n' "$PACKAGES" | grep -E '^ndk;28\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 || true)"
           if [ -z "$LATEST_NDK" ]; then
-            LATEST_NDK="$(printf '%s\n' "$SDK_LIST" | grep -oE 'ndk;27\.[0-9]+\.[0-9]+' | sort -V | tail -n 1)"
+            LATEST_NDK="$(printf '%s\n' "$PACKAGES" | grep -E '^ndk;27\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
           fi
-          LATEST_PLATFORM="$(printf '%s\n' "$SDK_LIST" | grep -oE 'platforms;android-37(\.0)?' | sort -V | head -n 1 || true)"
+          LATEST_PLATFORM="$(printf '%s\n' "$PACKAGES" | grep -E '^platforms;android-37(\.0)?$' | sort -V | tail -n 1 || true)"
           if [ -z "$LATEST_PLATFORM" ]; then
-            LATEST_PLATFORM="$(printf '%s\n' "$SDK_LIST" | grep -oE 'platforms;android-36(\.0)?' | sort -V | head -n 1)"
+            LATEST_PLATFORM="$(printf '%s\n' "$PACKAGES" | grep -E '^platforms;android-36(\.0)?$' | sort -V | tail -n 1)"
           fi
-          LATEST_BUILD_TOOLS="$(printf '%s\n' "$SDK_LIST" | grep -oE 'build-tools;3[67]\.[0-9]+\.[0-9]+' | sort -V | tail -n 1)"
+          LATEST_BUILD_TOOLS="$(printf '%s\n' "$PACKAGES" | grep -E '^build-tools;3[67]\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
           sdkmanager "platform-tools" "$LATEST_PLATFORM" "$LATEST_BUILD_TOOLS" "$LATEST_NDK"
           if [ -d "$ANDROID_HOME/platforms/android-37.0" ] && [ ! -e "$ANDROID_HOME/platforms/android-37" ]; then
             ln -sfn "$ANDROID_HOME/platforms/android-37.0" "$ANDROID_HOME/platforms/android-37"

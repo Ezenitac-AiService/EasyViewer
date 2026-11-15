@@ -92,7 +92,7 @@ npm test
 # 정적 아키텍처 경계 위반 검사 (views/stores/components/engines/sync 내 직접 Tauri/웹저장소/fetch 차단)
 npm run check:boundaries
 
-# package.json, Cargo.toml, tauri.conf.json 버전 일치 검증
+# package.json, Cargo.toml, tauri.conf.json 및 락파일(package-lock.json, Cargo.lock) 버전 일치 검증
 npm run check:version
 
 # 커밋 메시지 규범 검증 (Conventional Commits + 한국어 요약 및 20자 이상 본문)
@@ -142,14 +142,22 @@ npm run tauri build -- --no-bundle
 # NSIS 설치 프로그램 빌드
 npm run tauri build -- --bundles nsis
 
-# MSI 설치 패키지 빌드
+# MSI 설치 패키지 (정식 숫자 버전 전용; `-alpha` 등 비숫자 프리릴리즈는 NSIS 사용)
 npm run tauri build -- --bundles msi
 ```
 
 생성 경로 (`<version>` 예: `0.1.6-alpha`):
 - 포터블 실행 파일: `src-tauri/target/release/easy-viewer.exe`
 - NSIS 설치 프로그램: `src-tauri/target/release/bundle/nsis/EasyViewer_<version>_x64-setup.exe`
-- MSI 설치 패키지: `src-tauri/target/release/bundle/msi/EasyViewer_<version>_x64_en-US.msi`
+- MSI 설치 패키지 (정식 버전): `src-tauri/target/release/bundle/msi/EasyViewer_<version>_x64_en-US.msi`
+
+### Linux 빌드
+
+```bash
+# Ubuntu/Debian 계열 사전 의존성: libwebkit2gtk-4.1-dev, libappindicator3-dev, librsvg2-dev, patchelf
+# 프리릴리즈(`0.1.6-alpha` 등 하이픈 포함) 버전은 RPM spec 제약으로 deb,appimage 지정 빌드
+APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build -- --bundles deb,appimage
+```
 
 ### macOS · iOS 빌드
 

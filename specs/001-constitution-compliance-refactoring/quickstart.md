@@ -43,7 +43,7 @@
 ### 시나리오 D: 플랫폼 경계·버전·커밋 형식·빌드 통합 게이트 (`FR-005`, `FR-011`, `SC-002`, `SC-005`)
 1. 실행: `npm run verify` (`PATH="$HOME/.cargo/bin:$PATH"` 기준 `cargo check && cargo test` 포함 전체 통합 실행; Rust 미설치 환경에서 프론트엔드 게이트만 확인할 때는 `npm run verify -- --frontend-only` 사용, 미설치 상태 기본 `npm run verify`는 exit `2` `BLOCKED` 반환)
 2. 커밋 형식 부정/긍정 테스트: `npm run check:commit-msg -- <sample-commit-msg-file>`
-3. (Rust 단독 점검 시) 백엔드 검증: `cd src-tauri && cargo check && cargo test` (크로스 타겟 macOS universal/iOS/Android 빌드는 대상 타겟·SDK 설치 환경에서 수행)
+3. (Rust 단독 점검 및 크로스 플랫폼 빌드) 백엔드 검증: `cd src-tauri && cargo check && cargo test` (크로스 타겟 macOS universal/Windows/Linux/Android 릴리즈 빌드는 대상 환경 또는 `.github/workflows/release.yml` CI에서 수행)
 4. 기대 결과:
    - `check:boundaries`: 상위 계층(`views`, `stores`, `components`, `engines`, `services/sync`) 직접 플랫폼/네트워크 API 호출 `0건`
    - `check:version`: `package.json`, `Cargo.toml`, `tauri.conf.json` (및 락파일 `package-lock.json`, `Cargo.lock`) 버전 일치 (`0.1.6-alpha`)

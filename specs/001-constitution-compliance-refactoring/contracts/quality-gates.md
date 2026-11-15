@@ -40,3 +40,11 @@
 
 - 구현/리뷰 단계 산출물(`plan.md`, 리뷰 보고서 등)에는 외부 기술 결정의 공식 레퍼런스 출처와 내부 검증의 관찰된 파일·실행 결과를 기록한다.
 - 프로덕션 코드(`src/`, `src-tauri/src/`) 내 `TODO`/`FIXME` 미구현 스텁이나 테스트 전용 고정 반환 우회 분기가 존재하지 않음을 점검한다.
+
+---
+
+## 5. CI 멀티 플랫폼 릴리즈 게이트 (`.github/workflows/release.yml`)
+
+- **선행 검증**: 모든 플랫폼 번들 빌드 전에 `verify` 잡(`ubuntu-22.04`, Node `24` + WebKitGTK 4.1)이 `npm run verify`를 통과해야 한다.
+- **프리릴리즈 포맷 제약**: `0.1.6-alpha`처럼 비숫자 프리릴리즈 식별자(`-alpha`)가 포함된 경우 Windows는 `--bundles nsis`, Linux는 `--bundles deb,appimage`를 사용해 `.msi`/`.rpm` 버전 제약 충돌을 방지한다.
+- **아티팩트 검증 및 자동 첨부**: macOS Universal 빌드는 `codesign --verify --deep --strict` 및 `hdiutil verify`를 통과한 뒤, Android `.apk`와 함께 `gh release upload --clobber` 또는 `gh release create`로 GitHub Release에 첨부한다. (`tests/unit/releaseWorkflow.spec.ts`로 워크플로우 계약 검증)
