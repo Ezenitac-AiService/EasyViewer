@@ -1,8 +1,38 @@
 import type { BookmarkItem, ReadingLocation, SyncPayload, ViewerSettings } from '@/types'
 import { platformStorage } from '@/services/storage/platformAdapter'
+import { remoteFetch, RemoteFetchConsentError } from '@/services/network/remoteFetch'
 
 const SYNC_CACHE_KEY = 'cloud_sync_snapshot'
 const DEVICE_ID_KEY = 'device_id'
+
+/** Non-transient 4xx HTTP rejection from the remote sync endpoint that must surface to the caller. */
+class SyncHttpError extends Error {
+  readonly status: number
+
+  constructor(status: number) {
+    super(`SYNC_HTTP_ERROR (${status}): 원격 동기화 서버가 요청을 거부했습니다.`)
+    this.name = 'SyncHttpError'
+    this.status = status
+  }
+}
+
+function isFatalSyncError(err: unknown): boolean {
+  return (
+    err instanceof SyncHttpError ||
+    (err instanceof RemoteFetchConsentError &&
+      (err.code === 'BLOCKED_HIGH_RISK' ||
+        err.code === 'PRIVATE_NETWORK_CONFIRM_REQUIRED' ||
+        err.code === 'SELF_SIGNED_TLS_CONFIRM_REQUIRED'))
+  )
+}
+
+function checkSyncResponseOk(res: Response): boolean {
+  if (res.ok) return true
+  if (res.status >= 400 && res.status < 500) {
+    throw new SyncHttpError(res.status)
+  }
+  return false
+}
 
 export async function getOrCreateDeviceId(): Promise<string> {
   let id = await platformStorage.getItem<string>(DEVICE_ID_KEY, '')
@@ -84,16 +114,16 @@ export async function synchronizeReadingData(
   const cleanEndpoint = endpoint.trim()
   if (cleanEndpoint && (cleanEndpoint.startsWith('http://') || cleanEndpoint.startsWith('https://'))) {
     try {
-      const getRes = await fetch(cleanEndpoint, {
+      const getRes = await remoteFetch(cleanEndpoint, {
         method: 'GET',
         headers: { Accept: 'application/json' }
       })
-      if (getRes.ok) {
+      if (checkSyncResponseOk(getRes)) {
         remotePayload = (await getRes.json()) as SyncPayload
-        mode = 'remote'
       }
-    } catch {
-      // Fallback to local sync hub if remote GET fails
+    } catch (err) {
+      if (isFatalSyncError(err)) throw err
+      // Fallback to local sync hub only on transient offline or 5xx server errors
     }
   }
 
@@ -120,14 +150,17 @@ export async function synchronizeReadingData(
 
   if (cleanEndpoint && (cleanEndpoint.startsWith('http://') || cleanEndpoint.startsWith('https://'))) {
     try {
-      await fetch(cleanEndpoint, {
+      const postRes = await remoteFetch(cleanEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nextPayload)
       })
-      mode = 'remote'
-    } catch {
-      // Saved locally in sync hub
+      if (checkSyncResponseOk(postRes)) {
+        mode = 'remote'
+      }
+    } catch (err) {
+      if (isFatalSyncError(err)) throw err
+      // Saved locally in sync hub on transient offline or 5xx server errors
     }
   }
 

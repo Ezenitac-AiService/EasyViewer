@@ -1,5 +1,7 @@
 import type { BookFormat, WebDavConnection, WebDavItem } from '@/types'
 import { isTauriEnv, platformStorage } from '@/services/storage/platformAdapter'
+import { platformCredential } from '@/services/platform/credentialService'
+import { MAX_REMOTE_RESPONSE_BYTES, remoteFetch } from '@/services/network/remoteFetch'
 import {
   extractFilenameFromUrl,
   inferBookFormat,
@@ -8,6 +10,13 @@ import {
 } from '@/services/network/downloadService'
 
 const WEBDAV_HISTORY_KEY = 'webdav_history'
+
+function hasUnsafeControlOrTraversal(raw: string): boolean {
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f\\]/.test(raw)) return true
+  const segments = raw.split('/').filter(Boolean)
+  return segments.some((seg) => seg === '..' || seg === '.')
+}
 
 function encodeBasicAuth(username: string, password?: string): string {
   if (!username && !password) return ''
@@ -20,69 +29,6 @@ function encodeBasicAuth(username: string, password?: string): string {
   return `Basic ${btoa(binary)}`
 }
 
-async function universalFetch(
-  url: string,
-  options: {
-    method: string
-    headers?: Record<string, string>
-    body?: string
-  }
-): Promise<Response> {
-  if (isTauriEnv()) {
-    try {
-      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http')
-      return await tauriFetch(url, {
-        method: options.method,
-        headers: options.headers,
-        body: options.body
-      })
-    } catch {
-      // Fallback to local proxy below if Tauri HTTP plugin rejects custom port or self-signed cert
-    }
-  }
-
-  // Use same-origin Vite proxy (/ __remote_proxy) to bypass browser CORS preflight & self-signed NAS cert issues
-  try {
-    const proxyHeaders: Record<string, string> = {
-      'x-target-url': url,
-      'x-target-method': options.method
-    }
-    if (options.headers?.Authorization) {
-      proxyHeaders['x-target-auth'] = options.headers.Authorization
-    }
-    if (options.headers?.Depth) {
-      proxyHeaders['x-target-depth'] = options.headers.Depth
-    }
-    if (options.headers?.['Content-Type']) {
-      proxyHeaders['Content-Type'] = options.headers['Content-Type']
-    }
-
-    const proxyRes = await fetch('/__remote_proxy', {
-      method: options.body ? 'POST' : 'GET',
-      headers: proxyHeaders,
-      body: options.body
-    })
-
-    if (proxyRes.status !== 404) {
-      if (proxyRes.status === 502) {
-        const errText = await proxyRes.text()
-        throw new Error(errText || '원격 WebDAV 서버에 연결할 수 없습니다.')
-      }
-      return proxyRes
-    }
-  } catch (err: any) {
-    if (err?.message?.includes('원격')) {
-      throw err
-    }
-  }
-
-  return await fetch(url, {
-    method: options.method,
-    headers: options.headers,
-    body: options.body
-  })
-}
-
 export function buildWebDavTargetUrl(
   serverUrl: string,
   subPath: string,
@@ -93,13 +39,14 @@ export function buildWebDavTargetUrl(
 
   let fullUrl = base
   if (cleanSub) {
-    const encodedSegments = cleanSub
-      .split('/')
-      .filter(Boolean)
+    const segments = cleanSub.split('/').filter(Boolean)
+    if (segments.some((seg) => seg === '..' || seg === '.')) {
+      throw new Error('WebDAV 경로에 허용되지 않은 상위 이동(..) 세그먼트가 포함되어 있습니다.')
+    }
+    const encodedSegments = segments
       .map((seg) => encodeURIComponent(decodeURIComponent(seg)))
       .join('/')
 
-    // Avoid duplicating path if serverUrl already ends with the same path segment
     const lowerBase = base.toLowerCase()
     const lowerSub = `/${encodedSegments.toLowerCase()}`
     const lowerRawSub = `/${cleanSub.toLowerCase()}`
@@ -115,18 +62,29 @@ export function buildWebDavTargetUrl(
 }
 
 /**
- * Loads saved WebDAV connection profiles sorted by most recently connected
+ * Loads saved WebDAV connection profiles (migrating v1 plaintext passwords transparently to v2).
  */
 export async function loadWebDavHistory(): Promise<WebDavConnection[]> {
   const list = await platformStorage.getItem<WebDavConnection[]>(WEBDAV_HISTORY_KEY, [])
-  return list.sort((a, b) => b.lastConnectedAt - a.lastConnectedAt)
+  const { sanitized, migratedCount } = await platformCredential.migrateLegacyPlaintext(list)
+  if (migratedCount > 0) {
+    await platformStorage.setItem(WEBDAV_HISTORY_KEY, sanitized)
+  }
+  return sanitized.sort((a, b) => b.lastConnectedAt - a.lastConnectedAt)
+}
+
+export interface SaveWebDavConnectionInput
+  extends Omit<WebDavConnection, 'id' | 'lastConnectedAt' | 'password'> {
+  id?: string
+  password?: string
+  webStorageConsent?: boolean
 }
 
 /**
- * Adds or updates a WebDAV connection profile in the recent connections list
+ * Adds or updates a WebDAV connection profile without storing plaintext passwords in connection metadata.
  */
 export async function saveWebDavConnection(
-  input: Omit<WebDavConnection, 'id' | 'lastConnectedAt'> & { id?: string }
+  input: SaveWebDavConnectionInput
 ): Promise<WebDavConnection[]> {
   const history = await loadWebDavHistory()
   const cleanUrl = input.url.trim().replace(/\/+$/, '')
@@ -149,14 +107,32 @@ export async function saveWebDavConnection(
       (item.url.replace(/\/+$/, '') === cleanUrl && item.username === cleanUser)
   )
 
+  const id = existingIdx >= 0 ? history[existingIdx].id : input.id || `webdav-${Date.now()}`
+  const rememberPassword = Boolean(input.rememberPassword)
+  const credentialScope = rememberPassword
+    ? isTauriEnv()
+      ? 'native-secure'
+      : 'web-acknowledged'
+    : 'session'
+
+  if (typeof input.password === 'string' && input.password.length > 0) {
+    await platformCredential.setPassword(id, input.password, {
+      remember: rememberPassword,
+      webStorageConsent: input.webStorageConsent
+    })
+  } else if (!rememberPassword) {
+    await platformCredential.removePassword(id)
+  }
+
   const record: WebDavConnection = {
-    id: existingIdx >= 0 ? history[existingIdx].id : input.id || `webdav-${Date.now()}`,
+    id,
     alias: defaultAlias,
     url: cleanUrl,
     username: cleanUser,
-    password: input.password ?? (existingIdx >= 0 ? history[existingIdx].password : ''),
     initialPath: cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`,
-    lastConnectedAt: Date.now()
+    lastConnectedAt: Date.now(),
+    rememberPassword,
+    credentialScope
   }
 
   if (existingIdx >= 0) {
@@ -170,13 +146,123 @@ export async function saveWebDavConnection(
 }
 
 /**
- * Removes a WebDAV connection profile from recent history
+ * Removes a WebDAV connection profile and its stored credential from recent history.
  */
 export async function removeWebDavConnection(id: string): Promise<WebDavConnection[]> {
   const history = await loadWebDavHistory()
   const filtered = history.filter((item) => item.id !== id)
+  await platformCredential.removePassword(id)
   await platformStorage.setItem(WEBDAV_HISTORY_KEY, filtered)
   return filtered
+}
+
+/**
+ * Parses WebDAV PROPFIND XML safely, rejecting path traversal (`..`), control chars, and origin escapes.
+ */
+export function parseWebDavPropfindXml(
+  xmlText: string,
+  serverUrl: string,
+  targetUrl: string
+): WebDavItem[] {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(xmlText, 'application/xml')
+
+  const baseParsed = new URL(serverUrl.trim())
+  const basePathPrefix = decodeURIComponent(baseParsed.pathname).replace(/\/+$/, '')
+  const targetParsed = new URL(targetUrl)
+  const currentFullDecodedPath =
+    '/' + decodeURIComponent(targetParsed.pathname).replace(/^\/+|\/+$/g, '')
+
+  const responses = Array.from(doc.getElementsByTagNameNS('*', 'response'))
+  const items: WebDavItem[] = []
+
+  for (const respNode of responses) {
+    const hrefNode = respNode.getElementsByTagNameNS('*', 'href')[0]
+    if (!hrefNode || !hrefNode.textContent) continue
+
+    const rawHref = hrefNode.textContent.trim()
+    if (hasUnsafeControlOrTraversal(rawHref)) continue
+
+    let decodedPathname = rawHref
+    try {
+      if (rawHref.startsWith('http://') || rawHref.startsWith('https://')) {
+        const hrefParsed = new URL(rawHref)
+        if (hrefParsed.origin !== targetParsed.origin) continue
+        decodedPathname = decodeURIComponent(hrefParsed.pathname)
+      } else {
+        decodedPathname = decodeURIComponent(rawHref)
+      }
+    } catch {
+      continue
+    }
+
+    if (hasUnsafeControlOrTraversal(decodedPathname)) continue
+
+    const normalizedItemFull = '/' + decodedPathname.replace(/^\/+|\/+$/g, '')
+    if (
+      basePathPrefix &&
+      normalizedItemFull !== basePathPrefix &&
+      !normalizedItemFull.toLowerCase().startsWith(`${basePathPrefix.toLowerCase()}/`)
+    ) {
+      continue
+    }
+
+    // Skip the current directory entry itself
+    if (normalizedItemFull.toLowerCase() === currentFullDecodedPath.toLowerCase()) {
+      continue
+    }
+
+    let relativePath = decodedPathname
+    if (basePathPrefix && relativePath.toLowerCase().startsWith(basePathPrefix.toLowerCase())) {
+      relativePath = relativePath.slice(basePathPrefix.length)
+    }
+    const cleanRel = '/' + relativePath.replace(/^\/+|\/+$/g, '')
+
+    const resourceTypeNode = respNode.getElementsByTagNameNS('*', 'resourcetype')[0]
+    const isDirectory = Boolean(
+      resourceTypeNode && resourceTypeNode.getElementsByTagNameNS('*', 'collection').length > 0
+    )
+
+    const displayNameNode = respNode.getElementsByTagNameNS('*', 'displayname')[0]
+    const rawDisplayName = displayNameNode?.textContent?.trim() || ''
+    if (rawDisplayName && (hasUnsafeControlOrTraversal(rawDisplayName) || rawDisplayName.includes('/'))) {
+      continue
+    }
+
+    const segments = cleanRel.split('/').filter(Boolean)
+    const fallbackName = segments[segments.length - 1] || cleanRel
+    const name = rawDisplayName || fallbackName
+    if (!name || hasUnsafeControlOrTraversal(name)) continue
+
+    const lengthNode = respNode.getElementsByTagNameNS('*', 'getcontentlength')[0]
+    const size = lengthNode?.textContent ? parseInt(lengthNode.textContent.trim(), 10) || 0 : 0
+
+    const modifiedNode = respNode.getElementsByTagNameNS('*', 'getlastmodified')[0]
+    const lastModified = modifiedNode?.textContent?.trim()
+
+    const lowerName = name.toLowerCase()
+    let format: BookFormat | undefined
+    if (!isDirectory) {
+      if (lowerName.endsWith('.epub')) format = 'epub'
+      else if (lowerName.endsWith('.txt')) format = 'txt'
+      else continue
+    }
+
+    items.push({
+      name,
+      path: cleanRel,
+      href: rawHref,
+      isDirectory,
+      size,
+      lastModified,
+      format
+    })
+  }
+
+  return items.sort((a, b) => {
+    if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1
+    return a.name.localeCompare(b.name, 'ko')
+  })
 }
 
 /**
@@ -208,7 +294,7 @@ export async function listWebDavDirectory(
   </D:prop>
 </D:propfind>`
 
-  const response = await universalFetch(targetUrl, {
+  const response = await remoteFetch(targetUrl, {
     method: 'PROPFIND',
     headers,
     body: propfindBody
@@ -222,89 +308,7 @@ export async function listWebDavDirectory(
   }
 
   const xmlText = await response.text()
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(xmlText, 'application/xml')
-
-  const baseParsed = new URL(serverUrl.trim())
-  const basePathPrefix = decodeURIComponent(baseParsed.pathname).replace(/\/+$/, '')
-  const targetParsed = new URL(targetUrl)
-  const currentFullDecodedPath =
-    '/' + decodeURIComponent(targetParsed.pathname).replace(/^\/+|\/+$/g, '')
-
-  const responses = Array.from(doc.getElementsByTagNameNS('*', 'response'))
-  const items: WebDavItem[] = []
-
-  for (const respNode of responses) {
-    const hrefNode = respNode.getElementsByTagNameNS('*', 'href')[0]
-    if (!hrefNode || !hrefNode.textContent) continue
-
-    const rawHref = hrefNode.textContent.trim()
-    let decodedPathname = rawHref
-    try {
-      if (rawHref.startsWith('http://') || rawHref.startsWith('https://')) {
-        decodedPathname = decodeURIComponent(new URL(rawHref).pathname)
-      } else {
-        decodedPathname = decodeURIComponent(rawHref)
-      }
-    } catch {
-      // Keep rawHref if decoding fails
-    }
-
-    const normalizedItemFull = '/' + decodedPathname.replace(/^\/+|\/+$/g, '')
-
-    // Skip the current directory entry itself
-    if (normalizedItemFull.toLowerCase() === currentFullDecodedPath.toLowerCase()) {
-      continue
-    }
-
-    let relativePath = decodedPathname
-    if (
-      basePathPrefix &&
-      relativePath.toLowerCase().startsWith(basePathPrefix.toLowerCase())
-    ) {
-      relativePath = relativePath.slice(basePathPrefix.length)
-    }
-    const cleanRel = '/' + relativePath.replace(/^\/+|\/+$/g, '')
-
-    const resourceTypeNode = respNode.getElementsByTagNameNS('*', 'resourcetype')[0]
-    const isDirectory = Boolean(
-      resourceTypeNode && resourceTypeNode.getElementsByTagNameNS('*', 'collection').length > 0
-    )
-
-    const displayNameNode = respNode.getElementsByTagNameNS('*', 'displayname')[0]
-    const segments = cleanRel.split('/').filter(Boolean)
-    const fallbackName = segments[segments.length - 1] || cleanRel
-    const name = displayNameNode?.textContent?.trim() || fallbackName
-
-    const lengthNode = respNode.getElementsByTagNameNS('*', 'getcontentlength')[0]
-    const size = lengthNode?.textContent ? parseInt(lengthNode.textContent.trim(), 10) || 0 : 0
-
-    const modifiedNode = respNode.getElementsByTagNameNS('*', 'getlastmodified')[0]
-    const lastModified = modifiedNode?.textContent?.trim()
-
-    const lowerName = name.toLowerCase()
-    let format: BookFormat | undefined
-    if (!isDirectory) {
-      if (lowerName.endsWith('.epub')) format = 'epub'
-      else if (lowerName.endsWith('.txt')) format = 'txt'
-      else continue // Only show directories and supported book files (.epub, .txt)
-    }
-
-    items.push({
-      name,
-      path: cleanRel,
-      href: rawHref,
-      isDirectory,
-      size,
-      lastModified,
-      format
-    })
-  }
-
-  return items.sort((a, b) => {
-    if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1
-    return a.name.localeCompare(b.name, 'ko')
-  })
+  return parseWebDavPropfindXml(xmlText, serverUrl, targetUrl)
 }
 
 /**
@@ -324,9 +328,10 @@ export async function downloadWebDavFile(
     headers.Authorization = auth
   }
 
-  const response = await universalFetch(targetUrl, {
+  const response = await remoteFetch(targetUrl, {
     method: 'GET',
-    headers
+    headers,
+    maxResponseBytes: MAX_REMOTE_RESPONSE_BYTES
   })
 
   if (!response.ok) {
@@ -336,8 +341,15 @@ export async function downloadWebDavFile(
   const contentType = response.headers.get('content-type') || ''
   const contentLengthHeader = response.headers.get('content-length')
   const totalBytes = contentLengthHeader ? parseInt(contentLengthHeader, 10) : 0
+  if (totalBytes > MAX_REMOTE_RESPONSE_BYTES) {
+    throw new Error('원격 파일 크기가 허용 상한(256 MiB)을 초과했습니다.')
+  }
 
   const buffer = await response.arrayBuffer()
+  if (buffer.byteLength > MAX_REMOTE_RESPONSE_BYTES) {
+    throw new Error('원격 파일 크기가 허용 상한(256 MiB)을 초과했습니다.')
+  }
+
   onProgress?.({
     loaded: buffer.byteLength,
     total: totalBytes || buffer.byteLength,

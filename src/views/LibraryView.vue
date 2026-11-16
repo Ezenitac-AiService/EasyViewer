@@ -3,7 +3,15 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBookStore } from '@/stores/useBookStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
-import { isDesktopApp, isTauriEnv, platformStorage } from '@/services/storage/platformAdapter'
+import {
+  getPlatformCapabilities,
+  isSupportedBookFileName,
+  MAX_LOCAL_BOOK_BYTES,
+  platformDialog,
+  platformDragDrop,
+  platformStorage,
+  type DroppedBookInput
+} from '@/services/platform'
 import type { BookFormat, BookMeta } from '@/types'
 import NetworkDownloadModal from '@/components/library/NetworkDownloadModal.vue'
 import SyncModal from '@/components/library/SyncModal.vue'
@@ -31,8 +39,7 @@ const settingsStore = useSettingsStore()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
-let dragDepth = 0
-let unlistenTauriDragDrop: (() => void) | null = null
+let unlistenDragDrop: (() => void) | null = null
 const filterFormat = ref<'all' | BookFormat>('all')
 const searchQuery = ref('')
 const showDownloadModal = ref(false)
@@ -64,14 +71,8 @@ async function openStorageFolder() {
 
 async function changeStorageFolder() {
   try {
-    const { open } = await import('@tauri-apps/plugin-dialog')
-    const picked = await open({
-      directory: true,
-      multiple: false,
-      defaultPath: storageDir.value || undefined,
-      title: '소설 저장 폴더 선택'
-    })
-    if (!picked || Array.isArray(picked)) return
+    const picked = await platformDialog.pickStorageDirectory(storageDir.value || undefined)
+    if (!picked) return
     await platformStorage.setStorageDir(picked)
     await refreshStorageDir()
     showToast('저장 폴더를 변경했습니다. 이제부터 추가하는 책이 이 폴더에 저장됩니다.')
@@ -96,11 +97,13 @@ async function handleRemoveBook(book: BookMeta) {
   if (isDesktop.value && deleteFile) {
     // The file is permanently deleted from a user-visible folder: confirm first.
     try {
-      const { ask } = await import('@tauri-apps/plugin-dialog')
-      const ok = await ask(
-        `'${book.title}'을(를) 서재에서 삭제하고 저장 폴더의 파일도 삭제합니다.\n삭제한 파일은 되돌릴 수 없습니다.`,
-        { title: '책 삭제', kind: 'warning', okLabel: '삭제', cancelLabel: '취소' }
-      )
+      const ok = await platformDialog.confirmAction({
+        title: '책 삭제',
+        message: `'${book.title}'을(를) 서재에서 삭제하고 저장 폴더의 파일도 삭제합니다.\n삭제한 파일은 되돌릴 수 없습니다.`,
+        kind: 'warning',
+        confirmLabel: '삭제',
+        cancelLabel: '취소'
+      })
       if (!ok) return
     } catch {
       return
@@ -120,44 +123,25 @@ onMounted(async () => {
   await settingsStore.initSettings()
   await bookStore.initLibrary()
 
-  isDesktop.value = await isDesktopApp()
+  const caps = await getPlatformCapabilities()
+  isDesktop.value = caps.canPickStorageDir
   if (isDesktop.value) await refreshStorageDir()
 
-  window.addEventListener('dragenter', handleWindowDragEnter)
-  window.addEventListener('dragover', handleWindowDragOver)
-  window.addEventListener('dragleave', handleWindowDragLeave)
-  window.addEventListener('drop', handleWindowDrop)
-
-  if (isTauriEnv()) {
-    try {
-      const { getCurrentWebview } = await import('@tauri-apps/api/webview')
-      unlistenTauriDragDrop = await getCurrentWebview().onDragDropEvent(async (event) => {
-        const payload = event.payload
-        if (payload.type === 'enter' || payload.type === 'over') {
-          isDragging.value = true
-        } else if (payload.type === 'leave') {
-          isDragging.value = false
-          dragDepth = 0
-        } else if (payload.type === 'drop') {
-          isDragging.value = false
-          dragDepth = 0
-          if (payload.paths && payload.paths.length > 0) {
-            await processDroppedPaths(payload.paths)
-          }
-        }
-      })
-    } catch {
-      // HTML5 drag and drop handles it when dragDropEnabled is false
+  unlistenDragDrop = await platformDragDrop.subscribe({
+    onDragStateChange: (dragging) => {
+      isDragging.value = dragging
+    },
+    onFilesDropped: async (items) => {
+      await processDroppedItems(items)
+    },
+    onError: (err) => {
+      showToast(errorText(err))
     }
-  }
+  })
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('dragenter', handleWindowDragEnter)
-  window.removeEventListener('dragover', handleWindowDragOver)
-  window.removeEventListener('dragleave', handleWindowDragLeave)
-  window.removeEventListener('drop', handleWindowDrop)
-  unlistenTauriDragDrop?.()
+  unlistenDragDrop?.()
 })
 
 const filteredBooks = computed(() => {
@@ -196,93 +180,48 @@ async function handleFileSelect(e: Event) {
   input.value = ''
 }
 
-function hasFileTransfer(e: DragEvent): boolean {
-  const types = e.dataTransfer?.types
-  if (!types) return true
-  return Array.from(types).includes('Files')
-}
-
-function handleWindowDragEnter(e: DragEvent) {
-  if (!hasFileTransfer(e)) return
-  e.preventDefault()
-  dragDepth++
-  isDragging.value = true
-}
-
-function handleWindowDragOver(e: DragEvent) {
-  if (!hasFileTransfer(e)) return
-  e.preventDefault()
-  if (e.dataTransfer) {
-    e.dataTransfer.dropEffect = 'copy'
-  }
-  isDragging.value = true
-}
-
-function handleWindowDragLeave(e: DragEvent) {
-  if (!hasFileTransfer(e)) return
-  e.preventDefault()
-  dragDepth = Math.max(0, dragDepth - 1)
-  if (dragDepth === 0 || !e.relatedTarget) {
-    isDragging.value = false
-    dragDepth = 0
-  }
-}
-
-async function handleWindowDrop(e: DragEvent) {
-  e.preventDefault()
-  dragDepth = 0
-  isDragging.value = false
-  if (e.dataTransfer?.files?.length) {
-    await processFiles(Array.from(e.dataTransfer.files))
-  }
-}
-
-async function handleDrop(e: DragEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-  dragDepth = 0
-  isDragging.value = false
-  if (!e.dataTransfer?.files?.length) return
-  await processFiles(Array.from(e.dataTransfer.files))
-}
-
-async function processDroppedPaths(paths: string[]) {
+async function processDroppedItems(items: DroppedBookInput[]) {
   let added = 0
-  try {
-    const { readFile } = await import('@tauri-apps/plugin-fs')
-    for (const fullPath of paths) {
-      const normalized = fullPath.replace(/\\/g, '/')
-      const fileName = normalized.split('/').pop() || fullPath
-      const lower = fileName.toLowerCase()
-      if (!lower.endsWith('.txt') && !lower.endsWith('.epub')) continue
-      const bytes = await readFile(fullPath)
-      const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
-      // Passing the path lets a file that already is in the storage folder be used in place.
-      await bookStore.addBookFromBuffer(buffer, fileName, undefined, undefined, fullPath)
+  let failedCount = 0
+  for (const item of items) {
+    try {
+      await bookStore.addBookFromBuffer(item.buffer, item.fileName, undefined, undefined, item.sourcePath)
       added++
+    } catch (err) {
+      failedCount++
+      showToast(`도서 추가 실패: ${errorText(err)}`)
     }
-  } catch (err) {
-    console.warn('[LibraryView] Tauri path drop read failed:', err)
   }
-
   if (added > 0) {
     showToast(`${added}권의 문서를 오프라인 서재에 추가했습니다.`)
-  } else {
+  } else if (failedCount === 0) {
     showToast('지원하는 파일 형식(.txt, .epub)을 선택해 주세요.')
   }
 }
 
 async function processFiles(files: File[]) {
   let added = 0
+  let rejectedReason = ''
   for (const file of files) {
-    const lower = file.name.toLowerCase()
-    if (!lower.endsWith('.txt') && !lower.endsWith('.epub')) continue
-    const buffer = await file.arrayBuffer()
-    await bookStore.addBookFromBuffer(buffer, file.name)
-    added++
+    if (!isSupportedBookFileName(file.name)) {
+      continue
+    }
+    if (file.size > MAX_LOCAL_BOOK_BYTES) {
+      rejectedReason = `허용된 최대 도서 파일 크기(256 MB)를 초과했습니다: ${file.name}`
+      continue
+    }
+    try {
+      const buffer = await file.arrayBuffer()
+      await bookStore.addBookFromBuffer(buffer, file.name)
+      added++
+    } catch (err) {
+      rejectedReason = `도서 추가 실패: ${errorText(err)}`
+    }
   }
   if (added > 0) {
     showToast(`${added}권의 문서를 오프라인 서재에 추가했습니다.`)
+  } else if (rejectedReason) {
+    showToast(rejectedReason)
   } else {
     showToast('지원하는 파일 형식(.txt, .epub)을 선택해 주세요.')
   }
@@ -303,11 +242,7 @@ function formatFileSize(bytes: number): string {
 </script>
 
 <template>
-  <div
-    class="h-full w-full flex flex-col overflow-hidden select-none"
-    @dragover.prevent="handleWindowDragOver"
-    @drop.prevent="handleDrop"
-  >
+  <div class="h-full w-full flex flex-col overflow-hidden select-none">
     <!-- Header -->
     <header
       class="px-4 sm:px-8 pb-4 border-b flex flex-wrap items-center justify-between gap-3 shrink-0"

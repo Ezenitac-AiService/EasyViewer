@@ -1,4 +1,5 @@
 import ePub, { EpubCFI, type Book, type NavItem, type Rendition } from 'epubjs'
+import JSZip from 'jszip'
 import type { SearchResultItem, TocItem, ViewerSettings } from '@/types'
 import { getStableScrollManager } from './stableScrollManager'
 
@@ -73,38 +74,127 @@ function collapseCfiString(cfiStr: string, toStart = true): string {
  *    refreshes are removed as a second line of defense.
  * Listeners added by this app are parent-page functions, which CSP does not block.
  */
-const CONTENT_CSP =
-  "script-src 'none'; object-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; form-action 'none'"
+export const CONTENT_CSP =
+  "default-src 'none'; script-src 'none'; object-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'; connect-src 'none'; style-src 'self' 'unsafe-inline' blob: data:; img-src 'self' blob: data:; font-src 'self' blob: data:"
+
+const MAX_EPUB_ZIP_ENTRIES = 10_000
+const MAX_EPUB_UNCOMPRESSED_BYTES = 256 * 1024 * 1024
+const MAX_EPUB_SINGLE_ENTRY_BYTES = 128 * 1024 * 1024
+
 const XHTML_NS = 'http://www.w3.org/1999/xhtml'
-const ACTIVE_ELEMENTS = ['script', 'iframe', 'frame', 'frameset', 'object', 'embed', 'applet', 'portal']
+const ACTIVE_ELEMENTS = new Set([
+  'script',
+  'iframe',
+  'frame',
+  'frameset',
+  'object',
+  'embed',
+  'applet',
+  'portal',
+  'base',
+  'foreignobject',
+  'use',
+  'animate',
+  'set'
+])
 const URL_ATTRIBUTES = new Set(['href', 'src', 'action', 'formaction', 'data', 'xlink:href', 'srcdoc'])
 
-function isScriptUrl(value: string): boolean {
+function isDangerousUrl(value: string): boolean {
   const normalized = value.replace(/[\s\u0000-\u001f]/g, '').toLowerCase()
   return (
     normalized.startsWith('javascript:') ||
     normalized.startsWith('vbscript:') ||
-    normalized.startsWith('data:text/html')
+    normalized.startsWith('data:text/html') ||
+    normalized.startsWith('data:image/svg+xml')
   )
 }
 
-function sanitizeSectionDocument(doc: Document): void {
+function sanitizeStyleText(css: string): string {
+  const neutralizeUrl = (rawUrl: string, original: string): string => {
+    const cleaned = rawUrl.trim()
+    if (isDangerousUrl(cleaned) || /^https?:/i.test(cleaned)) {
+      return 'none'
+    }
+    return original
+  }
+
+  return css
+    .replace(/@import\b[^;]*(;|$)/gim, '')
+    .replace(/expression\s*\([^)]*(?:\([^)]*\)[^)]*)*\)/gi, 'none')
+    .replace(/expression\s*\(/gi, 'invalid(')
+    .replace(/url\(\s*"([^"]*)"\s*\)/gi, (match, inner: string) => neutralizeUrl(inner, match))
+    .replace(/url\(\s*'([^']*)'\s*\)/gi, (match, inner: string) => neutralizeUrl(inner, match))
+    .replace(/url\(\s*([^)'"]*(?:\([^)]*\)[^)'"]*)*)\s*\)/gi, (match, inner: string) =>
+      neutralizeUrl(inner, match)
+    )
+    .replace(/(?:javascript|vbscript):/gi, 'blocked:')
+}
+
+/**
+ * Inspects EPUB ZIP central directory bounds before passing the buffer to epub.js to block Zip Bombs.
+ */
+export async function validateEpubArchiveBounds(buffer: ArrayBuffer): Promise<void> {
+  const zip = await JSZip.loadAsync(buffer)
+  const entries = Object.values(zip.files)
+  if (entries.length > MAX_EPUB_ZIP_ENTRIES) {
+    throw new Error(
+      `EPUB 아카이브 엔트리 수(${entries.length})가 허용 상한(${MAX_EPUB_ZIP_ENTRIES}개)을 초과했습니다.`
+    )
+  }
+
+  let totalUncompressed = 0
+  for (const entry of entries) {
+    if (entry.dir) continue
+    const dataMeta = (entry as unknown as {
+      _data?: { uncompressedSize?: number; compressedSize?: number }
+    })._data
+    const uncompressed = Number(dataMeta?.uncompressedSize ?? 0)
+    const compressed = Number(dataMeta?.compressedSize ?? 0)
+    if (uncompressed > MAX_EPUB_SINGLE_ENTRY_BYTES) {
+      throw new Error(
+        `EPUB 아카이브 단일 파일 크기가 허용 상한(128 MiB)을 초과했습니다: ${entry.name}`
+      )
+    }
+    if (compressed > 0 && uncompressed > 32 * 1024 * 1024 && uncompressed / compressed > 300) {
+      throw new Error(`EPUB 아카이브 압축률이 비정상적으로 높습니다: ${entry.name}`)
+    }
+    totalUncompressed += uncompressed
+    if (totalUncompressed > MAX_EPUB_UNCOMPRESSED_BYTES) {
+      throw new Error('EPUB 아카이브 비압축 총 용량이 허용 상한(256 MiB)을 초과했습니다.')
+    }
+  }
+}
+
+export function sanitizeSectionDocument(doc: Document): void {
   const root = doc?.documentElement
   if (!root) return
 
-  for (const name of ACTIVE_ELEMENTS) {
-    for (const el of Array.from(doc.getElementsByTagNameNS('*', name))) el.remove()
-  }
-
-  for (const el of Array.from(doc.getElementsByTagNameNS('*', '*'))) {
-    if (el.localName === 'meta' && /refresh/i.test(el.getAttribute('http-equiv') || '')) {
+  const allElements = Array.from(doc.getElementsByTagNameNS('*', '*'))
+  for (const el of allElements) {
+    const localName = (el.localName || el.tagName || '').toLowerCase()
+    if (ACTIVE_ELEMENTS.has(localName)) {
       el.remove()
       continue
     }
+    if (localName === 'meta' && /refresh/i.test(el.getAttribute('http-equiv') || '')) {
+      el.remove()
+      continue
+    }
+    if (localName === 'style' && el.textContent) {
+      el.textContent = sanitizeStyleText(el.textContent)
+    }
     for (const attr of Array.from(el.attributes)) {
       const name = attr.name.toLowerCase()
-      if (name.startsWith('on') || (URL_ATTRIBUTES.has(name) && isScriptUrl(attr.value))) {
+      const localAttr = (attr.localName || attr.name).toLowerCase()
+      if (
+        name.startsWith('on') ||
+        ((URL_ATTRIBUTES.has(name) || URL_ATTRIBUTES.has(localAttr)) && isDangerousUrl(attr.value))
+      ) {
         el.removeAttributeNode(attr)
+        continue
+      }
+      if (name === 'style') {
+        el.setAttribute('style', sanitizeStyleText(attr.value))
       }
     }
   }
@@ -115,6 +205,11 @@ function sanitizeSectionDocument(doc: Document): void {
     head = doc.createElementNS(ns, 'head')
     root.insertBefore(head, root.firstChild)
   }
+  const existingCsp = Array.from(head.getElementsByTagNameNS('*', 'meta')).find(
+    (meta) => meta.getAttribute('http-equiv')?.toLowerCase() === 'content-security-policy'
+  )
+  if (existingCsp) existingCsp.remove()
+
   const csp = doc.createElementNS(ns, 'meta')
   csp.setAttribute('http-equiv', 'Content-Security-Policy')
   csp.setAttribute('content', CONTENT_CSP)
@@ -252,6 +347,7 @@ export class EpubViewerEngine {
     toc: TocItem[]
   }> {
     this.destroy()
+    await validateEpubArchiveBounds(buffer)
 
     const book = ePub(buffer.slice(0))
     this.book = book
@@ -882,6 +978,7 @@ export async function extractEpubMetadata(buffer: ArrayBuffer): Promise<{
   author: string
   coverUrl?: string
 }> {
+  await validateEpubArchiveBounds(buffer)
   const book = ePub(buffer.slice(0))
   try {
     await book.ready
