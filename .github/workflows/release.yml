@@ -99,7 +99,9 @@ jobs:
       - name: Build Tauri bundle (${{ matrix.name }})
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
-        run: ${{ matrix.build_cmd }}
+          MATRIX_NAME: ${{ matrix.name }}
+          MATRIX_BUILD_CMD: ${{ matrix.build_cmd }}
+        run: node scripts/ci-build-desktop.mjs
       - name: Package Windows portable ZIP
         if: matrix.name == 'windows-x64'
         shell: pwsh
