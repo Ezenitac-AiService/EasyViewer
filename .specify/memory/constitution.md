@@ -1,12 +1,3 @@
-<!--
-Sync Impact Report (v3.2.0 -> v3.3.0)
-- Version change: 3.2.0 -> 3.3.0 (MINOR: 450-line module ceiling gate, AST CSS/SVG sanitization, multi-platform app ID sync, and WAI-ARIA dialog gates expanded)
-- Modified principles: None (Principles I–VII preserved unchanged)
-- Modified sections:
-  - 기술 스택 및 플랫폼 제약사항: css-tree ^3.2.1, dunce/sha2/zip 9.x, IndexedDB v2 분리 저장소, DocumentReaderPort, 전 플랫폼 식별자(com.edith.easyviewer) 동기화 명시
-  - 개발 워크플로우 및 품질 게이트: check:boundaries 450줄 규모 상한 게이트, 초기 진입 번들 예산(<= 480 kB), AST 기반 정화 및 WAI-ARIA 대화상자(포커스 트랩·Escape·초점 복귀·3테마) 검증 기준 추가
-- Follow-up TODOs: None
--->
 # EasyViewer Constitution
 
 ## Core Principles
