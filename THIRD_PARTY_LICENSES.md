@@ -1,6 +1,6 @@
 # 서드파티 오픈소스 라이선스 고지 (Third-Party Licenses)
 
-**Project**: EasyViewer (`0.1.6`)  
+**Project**: EasyViewer (`0.1.6-beta`)  
 **Project License**: [GNU General Public License v3.0 (GPL-3.0)](./LICENSE)  
 **Updated**: `2026-11-16`
 
@@ -17,6 +17,7 @@
 | `@tauri-apps/plugin-fs` | `^2.7.1` | `2.7.1` | `MIT OR Apache-2.0` |
 | `@tauri-apps/plugin-opener` | `^2.7.3` | `2.7.3` | `MIT OR Apache-2.0` |
 | `@tauri-apps/plugin-store` | `^2.5.1` | `2.5.1` | `MIT OR Apache-2.0` |
+| `css-tree` | `^3.2.1` | `3.2.1` | `MIT` |
 | `epubjs` | `^0.3.93` | `0.3.93` | `BSD-2-Clause` |
 | `jszip` | `^3.10.1` | `3.10.2` | `MIT OR GPL-3.0-or-later` |
 | `lucide-vue-next` | `^0.468.0` | `0.468.0` | `ISC` |
@@ -61,7 +62,13 @@
 | `tauri-plugin-dialog` | `"2"` | `2.8.4` | `Apache-2.0 OR MIT` |
 | `tauri-plugin-opener` | `"2"` | `2.7.3` | `Apache-2.0 OR MIT` |
 | `tauri-plugin-keyring-store` | `"0.3.2"` | `0.3.2` | `MIT OR Apache-2.0` |
-| `reqwest` | `"0.13"` (`rustls`, `http2`) | `0.13.5` | `MIT OR Apache-2.0` |
+| `reqwest` | `"0.13"` (`rustls`, `http2`, `stream`) | `0.13.5` | `MIT OR Apache-2.0` |
+| `tokio` | `"1"` (`fs`, `io-util`, `time`) | `1.54.1` | `MIT` |
+| `futures-util` | `"0.3"` | `0.3.34` | `MIT OR Apache-2.0` |
+| `dunce` | `"1.0.5"` | `1.0.5` | `CC0-1.0 OR MIT-0 OR Apache-2.0` |
+| `sha2` | `"0.11"` | `0.11.1` | `MIT OR Apache-2.0` |
+| `hex` | `"0.4"` | `0.4.3` | `MIT OR Apache-2.0` |
+| `zip` | `"9"` (`deflate`) | `9.6.0` | `MIT` |
 | `url` | `"2"` | `2.5.8` | `MIT OR Apache-2.0` |
 | `base64` | `"0.22"` | `0.22.1` | `MIT OR Apache-2.0` |
 | `serde` | `"1"` (`derive`) | `1.0.229` | `MIT OR Apache-2.0` |
