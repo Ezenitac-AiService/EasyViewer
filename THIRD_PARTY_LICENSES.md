@@ -1,6 +1,6 @@
 # 서드파티 오픈소스 라이선스 고지 (Third-Party Licenses)
 
-**Project**: EasyViewer (`0.1.6-alpha`)  
+**Project**: EasyViewer (`0.1.6`)  
 **Project License**: [GNU General Public License v3.0 (GPL-3.0)](./LICENSE)  
 **Updated**: `2026-11-16`
 

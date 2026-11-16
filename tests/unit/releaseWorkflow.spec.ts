@@ -21,9 +21,9 @@ describe('Multi-platform release GitHub Actions workflows', () => {
     expect(content).toContain('aarch64-apple-darwin,x86_64-apple-darwin')
     expect(content).toContain('npm run mac:build')
     expect(content).toContain('windows-latest')
-    expect(content).toContain('--bundles nsis')
+    expect(content).toContain('--bundles nsis,msi')
     expect(content).toContain('ubuntu-22.04')
-    expect(content).toContain('--bundles deb,appimage')
+    expect(content).toContain('--bundles deb,rpm,appimage')
     expect(content).toContain('libwebkit2gtk-4.1-dev')
     expect(content).toContain('APPIMAGE_EXTRACT_AND_RUN')
 
@@ -34,8 +34,9 @@ describe('Multi-platform release GitHub Actions workflows', () => {
     expect(content).toContain('npm run android:init')
     expect(content).toContain('npm run android:release')
 
-    // GitHub Release upload (create or clobber existing tag release)
+    // GitHub Release upload (create or clobber existing tag release, including build/*.dmg)
     expect(content).toContain('publish-release:')
+    expect(content).toContain('build/*.dmg')
     expect(content).toContain('gh release upload')
     expect(content).toContain('gh release create')
   })

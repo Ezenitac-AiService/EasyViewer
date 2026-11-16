@@ -1,6 +1,6 @@
 # EasyViewer
 
-심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v0.1.6-alpha` 프리릴리즈)
+심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v0.1.6`)
 
 > **라이선스**: 본 프로젝트는 [GNU General Public License v3.0 (GPL-3.0)](./LICENSE) 하에 배포됩니다. 서드파티 오픈소스 라이선스 상세 목록은 [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)를 참고하세요.
 
@@ -146,7 +146,7 @@ npm run tauri build -- --bundles nsis
 npm run tauri build -- --bundles msi
 ```
 
-생성 경로 (`<version>` 예: `0.1.6-alpha`):
+생성 경로 (`<version>` 예: `0.1.6`):
 - 포터블 실행 파일: `src-tauri/target/release/easy-viewer.exe`
 - NSIS 설치 프로그램: `src-tauri/target/release/bundle/nsis/EasyViewer_<version>_x64-setup.exe`
 - MSI 설치 패키지 (정식 버전): `src-tauri/target/release/bundle/msi/EasyViewer_<version>_x64_en-US.msi`
@@ -154,9 +154,9 @@ npm run tauri build -- --bundles msi
 ### Linux 빌드
 
 ```bash
-# Ubuntu/Debian 계열 사전 의존성: libwebkit2gtk-4.1-dev, libappindicator3-dev, librsvg2-dev, patchelf
-# 프리릴리즈(`0.1.6-alpha` 등 하이픈 포함) 버전은 RPM spec 제약으로 deb,appimage 지정 빌드
-APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build -- --bundles deb,appimage
+# Ubuntu/Debian 계열 사전 의존성: libwebkit2gtk-4.1-dev, libappindicator3-dev, librsvg2-dev, patchelf, rpm
+# 정식 버전(`0.1.6` 등)은 deb,rpm,appimage 번들 빌드 지원 (프리릴리즈 하이픈 버전은 deb,appimage 지정)
+APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build -- --bundles deb,rpm,appimage
 ```
 
 ### macOS · iOS 빌드
@@ -182,7 +182,7 @@ npx tauri ios dev --open
 npx tauri ios build --open
 ```
 
-- **배포 및 macOS 서명 참고 (`0.1.6-alpha` 프리릴리즈 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(로컬 검증 아티팩트: `build/EasyViewer_0.1.6-alpha_aarch64.dmg`). Apple Developer 공증(Notarization) 전 프리릴리즈 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/EasyViewer.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
+- **배포 및 macOS 서명 참고 (`0.1.6` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(로컬 검증 아티팩트: `build/EasyViewer_0.1.6_aarch64.dmg`). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/EasyViewer.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
 - **macOS 개발/빌드 시 포트·락 정리(필요 시)**:
 
 ```bash
@@ -202,7 +202,7 @@ npm run android:release:all # 전체 ABI release APK
 
 ### GitHub Actions 멀티 플랫폼 자동 릴리즈
 
-- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)**, **Windows x64 (`-setup.exe`)**, **Linux x64 (`.deb`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
+- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)** 및 `build/*.dmg`, **Windows x64 (`-setup.exe`, `.msi`)**, **Linux x64 (`.deb`, `.rpm`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
 - [`.github/workflows/build-apple.yml`](.github/workflows/build-apple.yml): `main` PR 및 수동 실행용 macOS Universal + iOS 시뮬레이터(`--debug --target aarch64-sim`) 빌드 검증 워크플로우입니다.
 
 ---

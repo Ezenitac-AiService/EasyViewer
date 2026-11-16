@@ -58,15 +58,17 @@ jobs:
           - name: windows-x64
             os: windows-latest
             rust_targets: x86_64-pc-windows-msvc
-            build_cmd: npx tauri build --bundles nsis
+            build_cmd: npx tauri build --bundles nsis,msi
             bundle_path: |
               src-tauri/target/release/bundle/nsis/*.exe
+              src-tauri/target/release/bundle/msi/*.msi
           - name: linux-x64
             os: ubuntu-22.04
             rust_targets: x86_64-unknown-linux-gnu
-            build_cmd: npx tauri build --bundles deb,appimage
+            build_cmd: npx tauri build --bundles deb,rpm,appimage
             bundle_path: |
               src-tauri/target/release/bundle/deb/*.deb
+              src-tauri/target/release/bundle/rpm/*.rpm
               src-tauri/target/release/bundle/appimage/*.AppImage
     runs-on: ${{ matrix.os }}
     steps:
@@ -90,7 +92,8 @@ jobs:
             libwebkit2gtk-4.1-dev \
             libappindicator3-dev \
             librsvg2-dev \
-            patchelf
+            patchelf \
+            rpm
       - run: npm ci
       - name: Build Tauri bundle (${{ matrix.name }})
         env:
@@ -204,6 +207,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
+          if compgen -G "build/*.dmg" > /dev/null; then
+            cp build/*.dmg release-assets/
+          fi
           find release-artifacts -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.msi' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.apk' \) -exec cp {} release-assets/ \;
           ls -lh release-assets
 
