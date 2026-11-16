@@ -94,6 +94,71 @@ export function checkVersionSync(rootDir = process.cwd()) {
     }
   }
 
+  const EXPECTED_APP_ID = 'com.edith.easyviewer'
+
+  const androidConfPath = path.join(rootDir, 'src-tauri/tauri.android.conf.json')
+  if (fs.existsSync(androidConfPath)) {
+    const androidConf = JSON.parse(fs.readFileSync(androidConfPath, 'utf-8'))
+    if (String(androidConf.identifier || '').trim() !== EXPECTED_APP_ID) {
+      return {
+        ok: false,
+        versions,
+        error: `Android 식별자 불일치: tauri.android.conf.json(${androidConf.identifier}) != ${EXPECTED_APP_ID}`
+      }
+    }
+  }
+
+  const gradlePath = path.join(rootDir, 'src-tauri/gen/android/app/build.gradle.kts')
+  if (fs.existsSync(gradlePath)) {
+    const gradle = fs.readFileSync(gradlePath, 'utf-8')
+    const ns = /namespace\s*=\s*"([^"]+)"/.exec(gradle)?.[1]
+    const appId = /applicationId\s*=\s*"([^"]+)"/.exec(gradle)?.[1]
+    if (ns !== EXPECTED_APP_ID || appId !== EXPECTED_APP_ID) {
+      return {
+        ok: false,
+        versions,
+        error: `Android Gradle 식별자 불일치: namespace=${ns}, applicationId=${appId} != ${EXPECTED_APP_ID}`
+      }
+    }
+  }
+
+  const ymlPath = path.join(rootDir, 'src-tauri/gen/apple/project.yml')
+  if (fs.existsSync(ymlPath)) {
+    const yml = fs.readFileSync(ymlPath, 'utf-8')
+    const prefix = /bundleIdPrefix:\s*([^\s]+)/.exec(yml)?.[1]
+    const bundleId = /PRODUCT_BUNDLE_IDENTIFIER:\s*([^\s]+)/.exec(yml)?.[1]
+    const shortVer = /CFBundleShortVersionString:\s*"?([^"\s]+)"?/.exec(yml)?.[1]
+    const cfVer = /CFBundleVersion:\s*"?([^"\s]+)"?/.exec(yml)?.[1]
+    if (prefix !== EXPECTED_APP_ID || bundleId !== EXPECTED_APP_ID) {
+      return {
+        ok: false,
+        versions,
+        error: `Apple project.yml 식별자 불일치: bundleIdPrefix=${prefix}, PRODUCT_BUNDLE_IDENTIFIER=${bundleId}`
+      }
+    }
+    if (shortVer !== versions.packageJson || cfVer !== versions.packageJson) {
+      return {
+        ok: false,
+        versions,
+        error: `Apple project.yml 버전 불일치: ${shortVer}/${cfVer} != ${versions.packageJson}`
+      }
+    }
+  }
+
+  const plistPath = path.join(rootDir, 'src-tauri/gen/apple/easy-viewer_iOS/Info.plist')
+  if (fs.existsSync(plistPath)) {
+    const plist = fs.readFileSync(plistPath, 'utf-8')
+    const shortVer = /<key>CFBundleShortVersionString<\/key>\s*<string>([^<]+)<\/string>/.exec(plist)?.[1]
+    const cfVer = /<key>CFBundleVersion<\/key>\s*<string>([^<]+)<\/string>/.exec(plist)?.[1]
+    if (shortVer !== versions.packageJson || cfVer !== versions.packageJson) {
+      return {
+        ok: false,
+        versions,
+        error: `iOS Info.plist 버전 불일치: ${shortVer}/${cfVer} != ${versions.packageJson}`
+      }
+    }
+  }
+
   return { ok: true, versions }
 }
 

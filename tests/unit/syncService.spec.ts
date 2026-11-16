@@ -80,7 +80,7 @@ describe('syncService characterization', () => {
           },
           bookmarks: {}
         }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
+        { status: 200, headers: { 'Content-Type': 'application/json', 'x-easyviewer-proxy': '1' } }
       )
     )
 
@@ -173,10 +173,10 @@ describe('syncService characterization', () => {
             positions: {},
             bookmarks: {}
           }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
+          { status: 200, headers: { 'Content-Type': 'application/json', 'x-easyviewer-proxy': '1' } }
         )
       )
-      .mockResolvedValueOnce(new Response('Server Error', { status: 500 }))
+      .mockResolvedValueOnce(new Response('Server Error', { status: 500, headers: { 'x-easyviewer-proxy': '1' } }))
 
     const post500Result = await synchronizeReadingData('https://sync.example.com/payload', {}, {}, settings)
     expect(fetchSpy).toHaveBeenCalledTimes(2)

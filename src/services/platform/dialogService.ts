@@ -1,4 +1,24 @@
+import { ref } from 'vue'
 import { isDesktopApp, isTauriEnv } from '@/services/storage/platformAdapter'
+
+export interface WebConfirmDialogState {
+  open: boolean
+  title: string
+  message: string
+  kind: 'info' | 'warning'
+  confirmLabel: string
+  cancelLabel: string
+}
+
+export const webConfirmDialogState = ref<WebConfirmDialogState | null>(null)
+let pendingWebConfirmResolver: ((accepted: boolean) => void) | null = null
+
+export function resolveWebConfirmDialog(accepted: boolean): void {
+  const resolver = pendingWebConfirmResolver
+  pendingWebConfirmResolver = null
+  webConfirmDialogState.value = null
+  resolver?.(accepted)
+}
 
 export const MAX_LOCAL_BOOK_BYTES = 256 * 1024 * 1024 // 256 MiB
 
@@ -44,44 +64,26 @@ export async function readValidatedLocalFileBuffer(
     throw new Error(`허용된 최대 도서 파일 크기(256 MB)를 초과했습니다: ${fileNameFromPath(filePath)}`)
   }
 
-  try {
-    const { stat, readFile } = await import('@tauri-apps/plugin-fs')
-    const meta = await stat(filePath)
-    if (meta.size > MAX_LOCAL_BOOK_BYTES) {
-      throw new Error(`허용된 최대 도서 파일 크기(256 MB)를 초과했습니다: ${fileNameFromPath(filePath)}`)
-    }
-    const bytes = await readFile(filePath)
-    if (bytes.byteLength > MAX_LOCAL_BOOK_BYTES) {
-      throw new Error(`허용된 최대 도서 파일 크기(256 MB)를 초과했습니다: ${fileNameFromPath(filePath)}`)
-    }
-    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
-    return { buffer, size: bytes.byteLength }
-  } catch (err) {
-    // Fallback to validated Rust command for dropped/transient paths outside static FS scope
-    if (err instanceof Error && err.message.includes('최대 도서 파일 크기')) {
-      throw err
-    }
-    const { invoke } = await import('@tauri-apps/api/core')
-    const raw = await invoke<ArrayBuffer | ArrayBufferView | number[]>('read_validated_book_file', {
-      path: filePath,
-      maxBytes: MAX_LOCAL_BOOK_BYTES
-    })
-    if (
-      raw instanceof ArrayBuffer ||
-      Object.prototype.toString.call(raw) === '[object ArrayBuffer]'
-    ) {
-      const ab = raw as ArrayBuffer
-      return { buffer: ab, size: ab.byteLength }
-    }
-    const u8 =
-      raw instanceof Uint8Array
-        ? raw
-        : ArrayBuffer.isView(raw)
-          ? new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength)
-          : Uint8Array.from(raw)
-    const buffer = u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength) as ArrayBuffer
-    return { buffer, size: u8.byteLength }
+  const { invoke } = await import('@tauri-apps/api/core')
+  const raw = await invoke<ArrayBuffer | ArrayBufferView | number[]>('read_validated_book_file', {
+    path: filePath,
+    maxBytes: MAX_LOCAL_BOOK_BYTES
+  })
+  if (
+    raw instanceof ArrayBuffer ||
+    Object.prototype.toString.call(raw) === '[object ArrayBuffer]'
+  ) {
+    const ab = raw as ArrayBuffer
+    return { buffer: ab, size: ab.byteLength }
   }
+  const u8 =
+    raw instanceof Uint8Array
+      ? raw
+      : ArrayBuffer.isView(raw)
+        ? new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength)
+        : Uint8Array.from(raw)
+  const buffer = u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength) as ArrayBuffer
+  return { buffer, size: u8.byteLength }
 }
 
 export class TauriOrWebDialogService implements PlatformDialogPort {
@@ -192,10 +194,20 @@ export class TauriOrWebDialogService implements PlatformDialogPort {
       })
     }
 
-    if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
-      return window.confirm(`${options.title}\n\n${options.message}`)
-    }
-    return false
+    return new Promise<boolean>((resolve) => {
+      if (pendingWebConfirmResolver) {
+        pendingWebConfirmResolver(false)
+      }
+      pendingWebConfirmResolver = resolve
+      webConfirmDialogState.value = {
+        open: true,
+        title: options.title,
+        message: options.message,
+        kind: options.kind ?? 'info',
+        confirmLabel: options.confirmLabel ?? '확인',
+        cancelLabel: options.cancelLabel ?? '취소'
+      }
+    })
   }
 }
 

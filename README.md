@@ -41,24 +41,26 @@ EasyViewer/
 ├── src/
 │   ├── assets/                 # 글로벌 스타일 및 로컬 폰트 스택 (main.css)
 │   ├── components/
-│   │   ├── library/            # 원격 다운로드 모달, 동기화 모달 (NetworkDownloadModal, SyncModal)
+│   │   ├── common/             # 접근성 확인/복구 모달 (InAppConfirmModal)
+│   │   ├── library/            # 원격 다운로드(RemoteUrlDownloadTab, WebDav*), 동기화/폴더 메뉴
 │   │   └── viewer/             # 뷰어 설정 패널, 목차/책갈피/검색 드로어
-│   ├── engines/                # 순수 문서 엔진 (상위 레이어 비의존; @/types만 참조)
-│   │   ├── epub/               # epub.js 래퍼, Zip Bomb/HTML/SVG/CSS 정화, 안정 스크롤 관리자
-│   │   └── txt/                # 인코딩 감지, 청킹·검색, 실측 기반 가로 페이지네이션
+│   ├── composables/            # UI/독서 세션/TXT 가상·페이지 제어/가져오기/표지 URL 컴포저블
+│   ├── engines/                # 순수 문서 엔진 (DocumentReaderPort; 상위 레이어 비의존)
+│   │   ├── epub/               # epub.js 어댑터, css-tree AST 정화, 비차단 위치 색인, 터치/탭 제어
+│   │   └── txt/                # 인코딩 감지, 청킹·검색, 줄박스/실측 기반 가로 페이지네이션
 │   ├── services/
 │   │   ├── platform/           # 플랫폼 추상화 포트 (dialog, dragDrop, path, credential)
-│   │   ├── storage/            # 파일·KV 영속 어댑터 (Tauri FS/Store vs Web IndexedDB)
-│   │   ├── network/            # SSRF 검증기(ssrfValidator), 안전 fetch(remoteFetch), download/webdav
+│   │   ├── storage/            # IndexedDB v2(표지 Blob·색인 캐시 분리), SHA-256 해싱, 네이티브 IPC
+│   │   ├── network/            # SSRF 검증기, 안전 fetch/스트리밍 다운로드, WebDAV 클라이언트
 │   │   ├── sync/               # 기기 간 읽기 위치·책갈피 병합 및 동기화 서비스
 │   │   └── sampleBooks.ts      # 기본 내장 샘플 도서 데이터
-│   ├── stores/                 # Pinia 스토어 (useBookStore, useSettingsStore)
+│   ├── stores/                 # Pinia 스토어 (useBookStore, useSettingsStore) + 마이그레이션/동기화 헬퍼
 │   ├── types/                  # 공통 TypeScript 인터페이스 및 타입 정의
-│   └── views/                  # 라우터 뷰 (LibraryView, ReaderView)
+│   └── views/                  # 슬림 라우터 뷰 (LibraryView, ReaderView - /reader/:id 지연 로딩)
 ├── src-tauri/
 │   ├── capabilities/           # 최소 권한 분리 (default.json, desktop.json)
-│   └── src/lib.rs              # safe_remote_fetch, 경로 화이트리스트, 바이너리 책 읽기 커맨드
-├── scripts/                    # 아키텍처 경계·버전 일치·커밋 규칙·프록시 가드·통합 verify 스크립트
+│   └── src/                    # Rust 보안/SSRF/경로 가드(security/) + 파일·스트리밍·EPUB 메타 커맨드(commands/)
+├── scripts/                    # 450줄/계층 경계, 전 플랫폼(`com.edith.easyviewer`) 버전 일치, 프록시 가드, verify 스크립트
 ├── tests/                      # 1계층 Vitest 단위/계약 + 2계층 Playwright E2E/성능 기준선 테스트
 └── specs/                      # Spec Kit 기능 명세, 아키텍처 계획, 보안 계약 및 검증 체크리스트
 ```
@@ -182,7 +184,7 @@ npx tauri ios dev --open
 npx tauri ios build --open
 ```
 
-- **배포 및 macOS 서명 참고 (`0.1.6` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(로컬 검증 아티팩트: `build/EasyViewer_0.1.6_aarch64.dmg`). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/EasyViewer.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
+- **배포 및 macOS 서명 참고 (`0.1.6` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(전 플랫폼 앱 식별자 `com.edith.easyviewer` 통일). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/EasyViewer.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
 - **macOS 개발/빌드 시 포트·락 정리(필요 시)**:
 
 ```bash
@@ -202,14 +204,14 @@ npm run android:release:all # 전체 ABI release APK
 
 ### GitHub Actions 멀티 플랫폼 자동 릴리즈
 
-- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)** 및 `build/*.dmg`, **Windows x64 (`-setup.exe`, `.msi`, `_portable.zip` 무설치 버전)**, **Linux x64 (`.deb`, `.rpm`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
+- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)**, **Windows x64 (`-setup.exe`, `.msi`, `_portable.zip` 무설치 버전)**, **Linux x64 (`.deb`, `.rpm`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
 - [`.github/workflows/build-apple.yml`](.github/workflows/build-apple.yml): `main` PR 및 수동 실행용 macOS Universal + iOS 시뮬레이터(`--debug --target aarch64-sim`) 빌드 검증 워크플로우입니다.
 
 #### 새 버전 릴리즈 실행 절차 (수동 명령어)
 
 일반 소스 수정 후 `main` 브랜치에 커밋·푸시하는 것만으로는 릴리즈 빌드가 실행되지 않으며, 아래 순서로 **`v*` 태그를 푸시**하거나 **수동 워크플로우를 실행**하면 자동 빌드 및 GitHub Release 배포가 진행됩니다.
 
-1. **버전 동기화 및 검증** (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`을 새 버전 예: `0.1.7`로 수정, `build/` 내 `.dmg` 포함 시 함께 갱신):
+1. **버전 동기화 및 검증** (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, `src-tauri/gen/apple/project.yml`, `Info.plist` 버전 및 Android/iOS 식별자 `com.edith.easyviewer` 일치 검증):
    ```bash
    # 매니페스트 및 락파일 버전 일치 여부 확인
    npm run check:version

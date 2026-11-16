@@ -37,6 +37,7 @@ test.describe('Library flow characterization (Tier 2)', () => {
     const cardContainer = page.locator('main .grid > div', { hasText: '서재 흐름 테스트 도서' }).first()
     await cardContainer.hover()
     await cardContainer.getByTitle('서재에서 삭제').click()
+    await page.getByRole('dialog').getByRole('button', { name: '삭제' }).click()
     await expect(page.locator('main h2', { hasText: '서재 흐름 테스트 도서' })).toHaveCount(0)
   })
 })

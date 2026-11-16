@@ -6,6 +6,7 @@ const WEB_CREDENTIAL_STORAGE_KEY = 'webdav_credentials_web_consent_v2'
 export interface SetCredentialOptions {
   remember?: boolean
   webStorageConsent?: boolean
+  sessionOnly?: boolean
 }
 
 export interface PlatformCredentialPort {
@@ -62,7 +63,7 @@ class DefaultCredentialService implements PlatformCredentialPort {
       throw new Error('자격 증명 저장을 위한 연결 식별자가 필요합니다.')
     }
 
-    const remember = Boolean(options.remember)
+    const remember = Boolean(options.remember) && !options.sessionOnly
     if (!remember) {
       this.sessionSecrets.set(connectionId, password)
       return

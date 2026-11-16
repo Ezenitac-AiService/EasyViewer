@@ -40,7 +40,12 @@ vi.mock('@/services/platform', () => ({
     loadBookBinary: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
     removeBookBinary: vi.fn().mockResolvedValue(undefined),
     setItem: vi.fn().mockResolvedValue(undefined),
-    getItem: vi.fn().mockImplementation(async (_k: string, def: unknown) => def)
+    getItem: vi.fn().mockImplementation(async (_k: string, def: unknown) => def),
+    saveCoverBlob: vi.fn().mockResolvedValue(undefined),
+    loadCoverBlob: vi.fn().mockResolvedValue(null),
+    removeCoverBlob: vi.fn().mockResolvedValue(undefined),
+    saveLocationIndex: vi.fn().mockResolvedValue(undefined),
+    loadLocationIndex: vi.fn().mockResolvedValue(null)
   },
   isTauriEnv: () => false,
   isDesktopApp: async () => true

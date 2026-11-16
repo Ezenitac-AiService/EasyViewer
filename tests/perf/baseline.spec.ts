@@ -24,6 +24,7 @@ test('captures web DOM/layout performance baseline across core user journeys', a
 
   // Seed IndexedDB and localStorage once so cold DB open is warmed before measurement loop
   await page.goto('/')
+  await page.locator('main .grid > div').first().waitFor({ state: 'visible' })
   await page.evaluate(
     async ({ count, targetBookId, txtBody, ts }) => {
       const books = [
@@ -55,10 +56,12 @@ test('captures web DOM/layout performance baseline across core user journeys', a
       const encoder = new TextEncoder()
       const buf = encoder.encode(txtBody).buffer
       await new Promise<void>((resolve, reject) => {
-        const req = indexedDB.open('EasyViewerDB', 1)
+        const req = indexedDB.open('EasyViewerDB', 2)
         req.onupgradeneeded = () => {
           const db = req.result
           if (!db.objectStoreNames.contains('book_files')) db.createObjectStore('book_files')
+          if (!db.objectStoreNames.contains('book_covers')) db.createObjectStore('book_covers')
+          if (!db.objectStoreNames.contains('location_indexes')) db.createObjectStore('location_indexes')
           if (!db.objectStoreNames.contains('key_value')) db.createObjectStore('key_value')
         }
         req.onsuccess = () => {

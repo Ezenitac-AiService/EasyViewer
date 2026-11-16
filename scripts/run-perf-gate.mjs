@@ -10,7 +10,7 @@ const latestPath = path.join(root, 'test-results/perf-latest.json')
 
 const run = spawnSync(
   'npx',
-  ['playwright', 'test', 'tests/perf/baseline.spec.ts', '--project=chromium'],
+  ['playwright', 'test', 'tests/perf/baseline.spec.ts', 'tests/perf/overhaulGates.spec.ts', '--project=chromium'],
   {
     cwd: root,
     stdio: 'inherit',
@@ -63,6 +63,22 @@ for (const curMetric of current.metrics) {
     `[perf] ${curMetric.metric}: before=${baseMetric.medianMs}ms, after=${curMetric.medianMs}ms, delta=${deltaMs}ms (${(ratio * 100).toFixed(1)}%) -> ${regressed ? 'FAIL' : 'PASS'}`
   )
   if (regressed) failed = true
+}
+
+const assetsDir = path.join(root, 'dist', 'assets')
+if (fs.existsSync(assetsDir)) {
+  const entryFiles = fs
+    .readdirSync(assetsDir)
+    .filter((file) => /^index-.*\.js$/.test(file))
+  const maxBundleBytes = 480 * 1024
+  for (const file of entryFiles) {
+    const size = fs.statSync(path.join(assetsDir, file)).size
+    const overBudget = size > maxBundleBytes
+    console.log(
+      `[perf] SC-001 initial-bundle (${file}): ${(size / 1024).toFixed(2)} kB / 480.00 kB -> ${overBudget ? 'FAIL' : 'PASS'}`
+    )
+    if (overBudget) failed = true
+  }
 }
 
 if (failed) {

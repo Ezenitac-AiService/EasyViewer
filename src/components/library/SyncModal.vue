@@ -1,17 +1,25 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useBookStore } from '@/stores/useBookStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { grantHostConsent, RemoteFetchConsentError } from '@/services/network/remoteFetch'
+import { useAccessibleDialog } from '@/composables/ui/useAccessibleDialog'
 import { RefreshCw, Cloud, Copy, Upload, Check, X } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   open: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
+
+const dialogRef = ref<HTMLElement | null>(null)
+useAccessibleDialog({
+  isOpen: computed(() => props.open),
+  containerRef: dialogRef,
+  onClose: () => emit('close')
+})
 
 const bookStore = useBookStore()
 const settingsStore = useSettingsStore()
@@ -92,7 +100,12 @@ async function handleImportJson() {
     @click.self="emit('close')"
   >
     <div
-      class="w-full max-w-lg rounded-2xl border shadow-2xl p-6 space-y-4"
+      ref="dialogRef"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ev-sync-dialog-title"
+      tabindex="-1"
+      class="w-full max-w-lg rounded-2xl border shadow-2xl p-6 space-y-4 outline-none"
       :style="{
         backgroundColor: 'var(--ev-surface)',
         borderColor: 'var(--ev-border)',
@@ -102,10 +115,12 @@ async function handleImportJson() {
       <div class="flex items-center justify-between pb-3 border-b" :style="{ borderColor: 'var(--ev-border)' }">
         <div class="flex items-center gap-2">
           <Cloud class="w-5 h-5 text-indigo-500" />
-          <h3 class="text-base font-bold">마지막 읽은 페이지 및 책갈피 동기화</h3>
+          <h3 id="ev-sync-dialog-title" class="text-base font-bold">마지막 읽은 페이지 및 책갈피 동기화</h3>
         </div>
         <button
           type="button"
+          aria-label="닫기"
+          title="닫기"
           class="p-1.5 rounded-lg opacity-70 hover:opacity-100"
           @click="emit('close')"
         >

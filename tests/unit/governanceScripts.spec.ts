@@ -71,6 +71,19 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     const cargoLockMismatch = checkVersionSync(alphaRoot)
     expect(cargoLockMismatch.ok).toBe(false)
     expect(cargoLockMismatch.error).toMatch(/Cargo\.lock/)
+
+    // Reject mismatched Android identifier in multi-platform config
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/Cargo.lock'),
+      '[[package]]\nname = "easy-viewer"\nversion = "0.1.6-alpha"\n'
+    )
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/tauri.android.conf.json'),
+      JSON.stringify({ identifier: 'com.wrong.id' })
+    )
+    const androidMismatch = checkVersionSync(alphaRoot)
+    expect(androidMismatch.ok).toBe(false)
+    expect(androidMismatch.error).toMatch(/Android/)
   })
 
   it('enforces Korean Conventional Commits header, blank line, >=20 char Korean body, and allows Merge/Revert exceptions', () => {

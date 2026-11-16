@@ -60,6 +60,8 @@ export interface SearchResultItem {
 
 export interface BookMeta {
   id: string
+  contentHash?: string
+  hasCover?: boolean
   title: string
   author: string
   format: BookFormat
@@ -143,6 +145,48 @@ export interface WebDavItem {
   size: number
   lastModified?: string
   format?: BookFormat
+}
+
+export class StorageWriteError extends Error {
+  readonly code = 'STORAGE_DIR_WRITE_FAILED' as const
+  readonly targetDir: string
+  readonly causeMessage: string
+
+  constructor(targetDir: string, causeMessage: string) {
+    super(`STORAGE_DIR_WRITE_FAILED (${targetDir}): ${causeMessage}`)
+    this.name = 'StorageWriteError'
+    this.targetDir = targetDir
+    this.causeMessage = causeMessage
+  }
+}
+
+export interface NativeDownloadResult {
+  storedPath: string
+  fileName: string
+  fileSize: number
+  contentHash: string
+  finalUrl: string
+  detectedFormat: BookFormat
+}
+
+export interface DownloadProgressEvent {
+  receivedBytes: number
+  totalBytes?: number
+  percent: number
+}
+
+export interface CoverAssetRecord {
+  blob: Blob
+  mimeType: string
+  updatedAt: number
+}
+
+export interface LocationIndexCacheRecord {
+  schemaVersion: 1
+  stepChars: number
+  locations: string[]
+  sectionCounts: number[]
+  updatedAt: number
 }
 
 

@@ -11,10 +11,6 @@
       "allow": [{ "path": "$APPDATA/books/**" }]
     },
     {
-      "identifier": "fs:allow-read-file",
-      "allow": [{ "path": "$APPDATA/books/**" }]
-    },
-    {
       "identifier": "fs:allow-write-file",
       "allow": [{ "path": "$APPDATA/books/**" }]
     },

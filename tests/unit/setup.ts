@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterEach, vi } from 'vitest'
 import { clearMocks } from '@tauri-apps/api/mocks'
+import { resetIdbClientForTests } from '@/services/storage/idbClient'
 
 const createdObjectUrls = new Map<string, Blob>()
 let objectUrlCounter = 0
@@ -56,7 +57,7 @@ if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
   })
 }
 
-afterEach(() => {
+afterEach(async () => {
   clearMocks()
   vi.restoreAllMocks()
   delete (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__
@@ -65,4 +66,5 @@ afterEach(() => {
     localStorage.clear()
   }
   createdObjectUrls.clear()
+  await resetIdbClientForTests()
 })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useAccessibleDialog } from '@/composables/ui/useAccessibleDialog'
 import type { BookmarkItem, SearchResultItem, TocItem } from '@/types'
 import {
   ListTree,
@@ -37,6 +38,12 @@ const emit = defineEmits<{
 }>()
 
 const searchQuery = ref('')
+const drawerRef = ref<HTMLElement | null>(null)
+useAccessibleDialog({
+  isOpen: computed(() => props.open),
+  containerRef: drawerRef,
+  onClose: () => emit('close')
+})
 
 function handleSearchSubmit() {
   emit('search', searchQuery.value)
@@ -96,7 +103,12 @@ function formatDate(ts: number): string {
     @click.self="emit('close')"
   >
     <aside
-      class="w-full max-w-md h-full flex flex-col border-r shadow-2xl transition-all"
+      ref="drawerRef"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ev-side-drawer-title"
+      tabindex="-1"
+      class="w-full max-w-md h-full flex flex-col border-r shadow-2xl transition-all outline-none"
       :style="{
         paddingTop: 'env(safe-area-inset-top, 0px)',
         backgroundColor: 'var(--ev-surface)',
@@ -104,6 +116,7 @@ function formatDate(ts: number): string {
         color: 'var(--ev-text)'
       }"
     >
+      <h2 id="ev-side-drawer-title" class="sr-only">목차, 책갈피 및 본문 검색</h2>
       <!-- Drawer Header & Tabs -->
       <div class="p-4 border-b flex items-center justify-between" :style="{ borderColor: 'var(--ev-border)' }">
         <div class="flex items-center gap-1 p-1 rounded-xl bg-black/5 dark:bg-white/5">

@@ -106,4 +106,27 @@ describe('PlatformStorageAdapter & initLibrary IPC characterization', () => {
     await expect(blockedStorage.openStorageDir()).rejects.toThrow('SECURITY_DENIED')
     expect(blockedCalls).not.toContain('plugin:opener|open_path')
   })
+
+  it('routes desktop loadBookBinary strictly through read_validated_book_file IPC without plugin-fs readFile (T011)', async () => {
+    vi.resetModules()
+    const calls: string[] = []
+    const bookBytes = new TextEncoder().encode('ipc-book-payload')
+    mockIPC((cmd) => {
+      calls.push(cmd)
+      if (cmd === 'is_desktop') return true
+      if (cmd === 'read_validated_book_file') {
+        return Array.from(bookBytes)
+      }
+      if (cmd === 'plugin:fs|read_file') {
+        throw new Error('SECURITY_VIOLATION: plugin-fs readFile must not be called')
+      }
+      return null
+    })
+
+    const { platformStorage } = await import('@/services/storage/platformAdapter')
+    const buf = await platformStorage.loadBookBinary('book-1', '/Users/tester/Books/sample.txt')
+    expect(new TextDecoder().decode(buf!)).toBe('ipc-book-payload')
+    expect(calls).toContain('read_validated_book_file')
+    expect(calls).not.toContain('plugin:fs|read_file')
+  })
 })

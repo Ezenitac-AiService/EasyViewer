@@ -1,11 +1,22 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { BookFormat, BookMeta, BookmarkItem, ReadingLocation, SyncPayload } from '@/types'
-import { isDesktopApp, platformPath, platformStorage } from '@/services/platform'
-import { extractEpubMetadata } from '@/engines/epub/epubEngine'
+import type { BookFormat, BookMeta, BookmarkItem, LocationIndexCacheRecord, ReadingLocation } from '@/types'
+import { isDesktopApp, isTauriEnv, platformStorage } from '@/services/platform'
 import { createSampleEpubBook, createSampleTxtBook } from '@/services/sampleBooks'
-import { downloadRemoteBook, type DownloadProgress } from '@/services/network/downloadService'
-import { getOrCreateDeviceId, synchronizeReadingData } from '@/services/sync/syncService'
+import {
+  downloadBookStreamNative,
+  downloadRemoteBook,
+  type DownloadProgress
+} from '@/services/network/downloadService'
+import { computeBufferSha256 } from '@/services/storage/bookHasher'
+import { getOrCreateDeviceId } from '@/services/sync/syncService'
+import { findMatchingBookByHashOrSize, migrateLegacyCoversV1toV2 } from './libraryMigration'
+import {
+  applySyncSnapshotJson,
+  prepareLibraryBookFiles,
+  runBookSync,
+  serializeSyncSnapshot
+} from './librarySyncHelpers'
 import { useSettingsStore } from './useSettingsStore'
 
 const BOOKS_META_KEY = 'library_books_v1'
@@ -13,32 +24,6 @@ const POSITIONS_KEY = 'reading_positions_v1'
 const BOOKMARKS_KEY = 'bookmarks_v1'
 const SAMPLES_SEEDED_KEY = 'samples_seeded_v1'
 const DELETE_FILE_ON_REMOVE_KEY = 'delete_file_on_remove_v1'
-
-/**
- * Generates a deterministic fingerprint ID from file name and byte size / head bytes
- */
-async function computeBookHash(name: string, buffer: ArrayBuffer): Promise<string> {
-  const bytes = new Uint8Array(buffer)
-  const sampleSize = Math.min(bytes.length, 4096)
-  let hash = 2166136261
-  for (let i = 0; i < sampleSize; i++) {
-    hash ^= bytes[i]
-    hash = Math.imul(hash, 16777619)
-  }
-  const cleanName = name.replace(/\.(epub|txt)$/i, '').trim().toLowerCase()
-  for (let i = 0; i < cleanName.length; i++) {
-    hash ^= cleanName.charCodeAt(i)
-    hash = Math.imul(hash, 16777619)
-  }
-  return `book-${(hash >>> 0).toString(16)}-${buffer.byteLength}`
-}
-
-/** File name for a book imported before original names were kept (rebuilt from its metadata). */
-function legacyFileName(book: BookMeta): string {
-  const hasAuthor = book.format === 'txt' && book.author && book.author !== 'TXT 문서'
-  const base = hasAuthor ? `${book.title} - ${book.author}` : book.title
-  return `${base}.${book.format}`
-}
 
 export const useBookStore = defineStore('books', () => {
   const books = ref<BookMeta[]>([])
@@ -48,11 +33,6 @@ export const useBookStore = defineStore('books', () => {
   const isSyncing = ref(false)
   const lastSyncTime = ref<number | null>(null)
   const syncStatusMessage = ref<string>('')
-  /**
-   * Desktop app: also delete the book's file from the storage folder when it is removed from
-   * the library. Off by default (the folder is user-visible and may hold the user's own files).
-   * On mobile/web book files are internal app storage and are always deleted.
-   */
   const deleteFileOnRemove = ref(false)
 
   const sortedBooks = computed(() =>
@@ -66,6 +46,11 @@ export const useBookStore = defineStore('books', () => {
     deleteFileOnRemove.value = await platformStorage.getItem<boolean>(DELETE_FILE_ON_REMOVE_KEY, false)
     bookmarks.value = await platformStorage.getItem<Record<string, BookmarkItem[]>>(BOOKMARKS_KEY, {})
 
+    const coversMigrated = await migrateLegacyCoversV1toV2(books.value)
+    if (coversMigrated) {
+      await platformStorage.setItem(BOOKS_META_KEY, books.value)
+    }
+
     await prepareBookFiles()
 
     const seeded = await platformStorage.getItem<boolean>(SAMPLES_SEEDED_KEY, false)
@@ -74,13 +59,11 @@ export const useBookStore = defineStore('books', () => {
       await platformStorage.setItem(SAMPLES_SEEDED_KEY, true)
     }
 
-    // Attach latest reading locations to book metadata
     for (const book of books.value) {
       if (positions.value[book.id]) {
         book.lastLocation = positions.value[book.id]
       }
     }
-
     isInitialized.value = true
   }
 
@@ -90,47 +73,65 @@ export const useBookStore = defineStore('books', () => {
     await platformStorage.setItem(BOOKMARKS_KEY, bookmarks.value)
   }
 
-  /**
-   * App only: re-allows every folder that holds library books (a storage folder chosen earlier
-   * may be outside the app data directory) and renames books stored the old way
-   * (`books/<id>.bin`) to their readable file names.
-   */
   async function prepareBookFiles() {
-    // Desktop only: Android/iOS keep the internal `books/<id>.bin` files as they are.
-    if (!(await isDesktopApp())) return
-    const dirs: string[] = [await platformStorage.getStorageDir()]
-    for (const book of books.value) {
-      if (book.storedPath) {
-        try {
-          const parent = await platformPath.dirname(book.storedPath)
-          if (parent) dirs.push(parent)
-        } catch {
-          // Ignore malformed paths
-        }
-      }
+    if (await prepareLibraryBookFiles(books.value)) {
+      await platformStorage.setItem(BOOKS_META_KEY, books.value)
     }
-    await platformStorage.allowStorageDirs(dirs)
-
-    let migrated = false
-    for (const book of books.value) {
-      if (book.storedPath) continue
-      const fileName = book.fileName || legacyFileName(book)
-      const newPath = await platformStorage.migrateLegacyBookFile(book.id, fileName)
-      if (newPath) {
-        book.storedPath = newPath
-        book.fileName = fileName
-        migrated = true
-      }
-    }
-    if (migrated) await platformStorage.setItem(BOOKS_META_KEY, books.value)
   }
 
   async function seedSampleBooks() {
-    const epubBuffer = await createSampleEpubBook()
-    await addBookFromBuffer(epubBuffer, 'EasyViewer 완벽 가이드 및 샘플 북.epub', 'epub')
+    await addBookFromBuffer(await createSampleEpubBook(), 'EasyViewer 완벽 가이드 및 샘플 북.epub', 'epub')
+    await addBookFromBuffer(createSampleTxtBook(), '윤동주 시선 - 별 헤는 밤.txt', 'txt')
+  }
 
-    const txtBuffer = createSampleTxtBook()
-    await addBookFromBuffer(txtBuffer, '윤동주 시선 - 별 헤는 밤.txt', 'txt')
+  async function upsertBookRecord(params: {
+    contentHash: string
+    fileSize: number
+    fileName: string
+    format: BookFormat
+    title: string
+    author: string
+    storedPath?: string
+    sourceUrl?: string
+    coverBlob?: Blob | null
+  }): Promise<BookMeta> {
+    const existing = await findMatchingBookByHashOrSize(
+      books.value,
+      params.contentHash,
+      params.fileSize
+    )
+    const id = existing?.id || params.contentHash
+    let hasCover = existing?.hasCover
+    if (params.coverBlob && params.coverBlob.size > 0) {
+      await platformStorage.saveCoverBlob(id, params.coverBlob)
+      hasCover = true
+    }
+
+    const now = Date.now()
+    const existingIdx = books.value.findIndex((b) => b.id === id)
+    const meta: BookMeta = {
+      id,
+      contentHash: params.contentHash,
+      hasCover,
+      title: params.title,
+      author: params.author,
+      format: params.format,
+      fileSize: params.fileSize,
+      sourceUrl: params.sourceUrl,
+      isOfflineCached: true,
+      fileName: params.fileName,
+      storedPath: params.storedPath,
+      addedAt: existingIdx >= 0 ? books.value[existingIdx].addedAt : now,
+      lastOpenedAt: now,
+      lastLocation: positions.value[id]
+    }
+    if (existingIdx >= 0) {
+      books.value[existingIdx] = meta
+    } else {
+      books.value.unshift(meta)
+    }
+    await persistAll()
+    return meta
   }
 
   async function addBookFromBuffer(
@@ -138,18 +139,17 @@ export const useBookStore = defineStore('books', () => {
     filename: string,
     explicitFormat?: BookFormat,
     sourceUrl?: string,
-    /** Where the file is on disk, when known (drag & drop in the app). */
     sourcePath?: string
   ): Promise<BookMeta> {
     const lower = filename.toLowerCase()
-    const format: BookFormat =
-      explicitFormat || (lower.endsWith('.epub') ? 'epub' : 'txt')
-
-    const id = await computeBookHash(filename, buffer)
+    const format: BookFormat = explicitFormat || (lower.endsWith('.epub') ? 'epub' : 'txt')
     const fileName = /\.(epub|txt)$/i.test(filename) ? filename : `${filename}.${format}`
-    const previous = books.value.find((b) => b.id === id)
+
+    const contentHash = await computeBufferSha256(buffer)
+    const previous = await findMatchingBookByHashOrSize(books.value, contentHash, buffer.byteLength)
+    const targetId = previous?.id || contentHash
     const storedPath = await platformStorage.saveBookFile(
-      id,
+      targetId,
       fileName,
       buffer,
       previous?.storedPath,
@@ -158,57 +158,96 @@ export const useBookStore = defineStore('books', () => {
 
     let title = filename.replace(/\.(epub|txt)$/i, '')
     let author = format === 'epub' ? 'EPUB 문서' : 'TXT 문서'
-    let coverUrl: string | undefined
+    let coverBlob: Blob | null = null
 
     if (format === 'epub') {
+      const { extractEpubMetadata } = await import('@/engines/epub/metadataExtractor')
       const epubMeta = await extractEpubMetadata(buffer)
-      if (epubMeta.title && epubMeta.title !== '제목 없는 EPUB') {
-        title = epubMeta.title
-      }
-      if (epubMeta.author) {
-        author = epubMeta.author
-      }
-      coverUrl = epubMeta.coverUrl
+      if (epubMeta.title && epubMeta.title !== '제목 없는 EPUB') title = epubMeta.title
+      if (epubMeta.author) author = epubMeta.author
+      coverBlob = epubMeta.coverBlob ?? null
     } else if (title.includes(' - ')) {
       const parts = title.split(' - ')
       title = parts[0].trim()
       author = parts.slice(1).join(' - ').trim()
     }
 
-    const now = Date.now()
-    const existingIdx = books.value.findIndex((b) => b.id === id)
-    const meta: BookMeta = {
-      id,
+    return upsertBookRecord({
+      contentHash,
+      fileSize: buffer.byteLength,
+      fileName,
+      format,
       title,
       author,
-      format,
-      fileSize: buffer.byteLength,
-      coverUrl,
-      sourceUrl,
-      isOfflineCached: true,
-      fileName,
       storedPath,
-      addedAt: existingIdx >= 0 ? books.value[existingIdx].addedAt : now,
-      lastOpenedAt: now,
-      lastLocation: positions.value[id]
+      sourceUrl,
+      coverBlob
+    })
+  }
+
+  async function addBookFromNativePath(sourcePath: string, filename: string): Promise<BookMeta> {
+    const lower = filename.toLowerCase()
+    const format: BookFormat = lower.endsWith('.epub') ? 'epub' : 'txt'
+    const fileName = /\.(epub|txt)$/i.test(filename) ? filename : `${filename}.${format}`
+    const destDir = await platformStorage.getStorageDir()
+    const imported = await platformStorage.importValidatedBookToStorage(sourcePath, destDir, fileName)
+
+    let title = filename.replace(/\.(epub|txt)$/i, '')
+    let author = format === 'epub' ? 'EPUB 문서' : 'TXT 문서'
+    let coverBlob: Blob | null = null
+    if (format === 'epub') {
+      const epubMeta = await platformStorage
+        .extractEpubMetadataFromPath(imported.storedPath)
+        .catch(() => undefined)
+      if (epubMeta?.title && epubMeta.title !== '제목 없는 EPUB') title = epubMeta.title
+      if (epubMeta?.author) author = epubMeta.author
+      coverBlob = epubMeta?.coverBlob ?? null
+    } else if (title.includes(' - ')) {
+      const parts = title.split(' - ')
+      title = parts[0].trim()
+      author = parts.slice(1).join(' - ').trim()
     }
 
-    if (existingIdx >= 0) {
-      books.value[existingIdx] = meta
-    } else {
-      books.value.unshift(meta)
-    }
-
-    await persistAll()
-    return meta
+    return upsertBookRecord({
+      contentHash: imported.contentHash,
+      fileSize: imported.fileSize,
+      fileName,
+      format,
+      title,
+      author,
+      storedPath: imported.storedPath,
+      coverBlob
+    })
   }
 
   async function importFromUrl(
     url: string,
     onProgress?: (progress: DownloadProgress) => void
   ): Promise<BookMeta> {
+    if (isTauriEnv()) {
+      const destDir = (await isDesktopApp()) ? await platformStorage.getStorageDir() : undefined
+      const nativeRes = await downloadBookStreamNative({
+        url,
+        destDir,
+        onProgress: (ev) =>
+          onProgress?.({ loaded: ev.receivedBytes, total: ev.totalBytes ?? 0, percent: ev.percent })
+      })
+      const fallbackTitle = nativeRes.fileName.replace(/\.(epub|txt)$/i, '')
+      return upsertBookRecord({
+        contentHash: nativeRes.contentHash,
+        fileSize: nativeRes.fileSize,
+        fileName: nativeRes.fileName,
+        format: nativeRes.detectedFormat,
+        title: nativeRes.metadata?.title || fallbackTitle,
+        author: nativeRes.metadata?.author || (nativeRes.detectedFormat === 'epub' ? 'EPUB 문서' : 'TXT 문서'),
+        storedPath: nativeRes.storedPath,
+        sourceUrl: nativeRes.finalUrl,
+        coverBlob: nativeRes.metadata?.coverBlob ?? null
+      })
+    }
+
     const result = await downloadRemoteBook(url, onProgress)
-    return await addBookFromBuffer(
+    return addBookFromBuffer(
       result.buffer,
       `${result.filename}.${result.format}`,
       result.format,
@@ -216,24 +255,51 @@ export const useBookStore = defineStore('books', () => {
     )
   }
 
-  /** Whether removing this book from the library also deletes its file on disk. */
-  async function willDeleteFileOnRemove(bookId: string): Promise<boolean> {
-    const storedPath = books.value.find((b) => b.id === bookId)?.storedPath
-    if (!storedPath || !(await isDesktopApp())) return true
-    return deleteFileOnRemove.value
+  async function ensureBookContentHash(bookId: string): Promise<string | undefined> {
+    const book = books.value.find((b) => b.id === bookId)
+    if (!book) return undefined
+    if (book.contentHash) return book.contentHash
+    let hash: string | undefined
+    if (book.storedPath && isTauriEnv()) {
+      hash = await platformStorage.hashValidatedBookFile(book.storedPath).catch(() => undefined)
+    }
+    if (!hash) {
+      const buf = await platformStorage.loadBookBinary(book.id, book.storedPath)
+      if (buf) hash = await computeBufferSha256(buf)
+    }
+    if (hash) {
+      book.contentHash = hash
+      await platformStorage.setItem(BOOKS_META_KEY, books.value)
+    }
+    return hash
   }
 
-  /** Removes a book from the library; returns whether its file was deleted too. */
+  const loadBookBinary = async (bookId: string): Promise<ArrayBuffer | null> => {
+    const book = books.value.find((b) => b.id === bookId)
+    return book ? platformStorage.loadBookBinary(book.id, book.storedPath) : null
+  }
+  const loadBookCoverBlob = (bookId: string) => platformStorage.loadCoverBlob(bookId)
+  const getStorageDir = () => platformStorage.getStorageDir()
+  const isCustomStorageDir = () => platformStorage.isCustomStorageDir()
+  const setStorageDir = (dir: string | null) => platformStorage.setStorageDir(dir)
+  const openStorageDir = () => platformStorage.openStorageDir()
+
+  async function willDeleteFileOnRemove(bookId: string): Promise<boolean> {
+    const storedPath = books.value.find((b) => b.id === bookId)?.storedPath
+    return !storedPath || !(await isDesktopApp()) ? true : deleteFileOnRemove.value
+  }
+
   async function removeBook(bookId: string): Promise<boolean> {
     const storedPath = books.value.find((b) => b.id === bookId)?.storedPath
     const deleteFile = await willDeleteFileOnRemove(bookId)
     books.value = books.value.filter((b) => b.id !== bookId)
+    await platformStorage.removeCoverBlob(bookId).catch(() => {})
     if (deleteFile) await platformStorage.removeBookBinary(bookId, storedPath)
     await persistAll()
     return deleteFile
   }
 
-  async function setDeleteFileOnRemove(value: boolean) {
+  const setDeleteFileOnRemove = async (value: boolean) => {
     deleteFileOnRemove.value = value
     await platformStorage.setItem(DELETE_FILE_ON_REMOVE_KEY, value)
   }
@@ -241,15 +307,18 @@ export const useBookStore = defineStore('books', () => {
   let cachedDeviceId: string | null = null
   let saveLocationTimer: ReturnType<typeof setTimeout> | null = null
 
+  async function flushReadingLocation(): Promise<void> {
+    if (saveLocationTimer !== null) { clearTimeout(saveLocationTimer); saveLocationTimer = null }
+    await platformStorage.setItem(POSITIONS_KEY, positions.value)
+  }
+
   async function saveReadingLocation(
     bookId: string,
     locator: string,
     percentage: number,
     chapterTitle?: string
   ) {
-    if (!cachedDeviceId) {
-      cachedDeviceId = await getOrCreateDeviceId()
-    }
+    if (!cachedDeviceId) cachedDeviceId = await getOrCreateDeviceId()
     const now = Date.now()
     const location: ReadingLocation = {
       bookId,
@@ -260,25 +329,19 @@ export const useBookStore = defineStore('books', () => {
       deviceId: cachedDeviceId
     }
     positions.value[bookId] = location
-
     const target = books.value.find((b) => b.id === bookId)
     if (target) {
       target.lastLocation = location
       target.lastOpenedAt = now
     }
-
-    if (saveLocationTimer) {
-      clearTimeout(saveLocationTimer)
-    }
-    saveLocationTimer = setTimeout(async () => {
-      await platformStorage.setItem(POSITIONS_KEY, positions.value)
-      await platformStorage.setItem(BOOKS_META_KEY, books.value)
+    if (saveLocationTimer !== null) clearTimeout(saveLocationTimer)
+    saveLocationTimer = setTimeout(() => {
+      saveLocationTimer = null
+      void platformStorage.setItem(POSITIONS_KEY, positions.value)
     }, 400)
   }
 
-  function getBookBookmarks(bookId: string): BookmarkItem[] {
-    return bookmarks.value[bookId] || []
-  }
+  const getBookBookmarks = (bookId: string): BookmarkItem[] => bookmarks.value[bookId] || []
 
   async function addBookmark(
     bookId: string,
@@ -290,7 +353,6 @@ export const useBookStore = defineStore('books', () => {
     const list = bookmarks.value[bookId] ? [...bookmarks.value[bookId]] : []
     const existing = list.find((b) => b.locator === locator)
     if (existing) return existing
-
     const item: BookmarkItem = {
       id: `bm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       bookId,
@@ -316,79 +378,30 @@ export const useBookStore = defineStore('books', () => {
     const settingsStore = useSettingsStore()
     isSyncing.value = true
     try {
-      const result = await synchronizeReadingData(
-        settingsStore.settings.syncEndpoint,
-        positions.value,
-        bookmarks.value,
-        settingsStore.settings
-      )
-      positions.value = result.payload.positions
-      bookmarks.value = result.payload.bookmarks
-
-      for (const book of books.value) {
-        if (positions.value[book.id]) {
-          book.lastLocation = positions.value[book.id]
-        }
-      }
-
+      const res = await runBookSync(books.value, positions.value, bookmarks.value, settingsStore.settings)
+      positions.value = res.positions
+      bookmarks.value = res.bookmarks
       await persistAll()
       lastSyncTime.value = Date.now()
-      const msg =
-        result.mode === 'remote'
-          ? `원격 서버 동기화 완료 (${result.updatedCount}건 갱신)`
-          : `로컬 허브 동기화 완료 (${result.updatedCount}건 갱신)`
-      syncStatusMessage.value = msg
-      return { updatedCount: result.updatedCount, message: msg }
-    } finally {
-      isSyncing.value = false
-    }
+      syncStatusMessage.value = res.message
+      return { updatedCount: res.updatedCount, message: res.message }
+    } finally { isSyncing.value = false }
   }
 
-  async function exportSyncSnapshot(): Promise<string> {
-    const settingsStore = useSettingsStore()
-    const deviceId = await getOrCreateDeviceId()
-    const payload: SyncPayload = {
-      version: 1,
-      exportedAt: Date.now(),
-      deviceId,
-      positions: positions.value,
-      bookmarks: bookmarks.value,
-      settings: settingsStore.settings
-    }
-    return JSON.stringify(payload, null, 2)
-  }
+  const exportSyncSnapshot = async (): Promise<string> =>
+    serializeSyncSnapshot(await getOrCreateDeviceId(), positions.value, bookmarks.value, useSettingsStore().settings)
 
   async function importSyncSnapshot(jsonText: string): Promise<number> {
-    const parsed = JSON.parse(jsonText) as SyncPayload
-    if (!parsed || typeof parsed !== 'object' || !parsed.positions) {
-      throw new Error('유효하지 않은 동기화 데이터 형식입니다.')
-    }
-    let updatedCount = 0
-    for (const [bookId, remoteLoc] of Object.entries(parsed.positions)) {
-      const localLoc = positions.value[bookId]
-      if (!localLoc || remoteLoc.updatedAt >= localLoc.updatedAt) {
-        positions.value[bookId] = remoteLoc
-        updatedCount++
-      }
-    }
-    if (parsed.bookmarks) {
-      for (const [bookId, remoteList] of Object.entries(parsed.bookmarks)) {
-        const current = bookmarks.value[bookId] || []
-        const map = new Map(current.map((b) => [b.locator, b]))
-        for (const item of remoteList) {
-          map.set(item.locator, item)
-        }
-        bookmarks.value[bookId] = Array.from(map.values())
-      }
-    }
-    for (const book of books.value) {
-      if (positions.value[book.id]) {
-        book.lastLocation = positions.value[book.id]
-      }
-    }
+    const updatedCount = applySyncSnapshotJson(jsonText, books.value, positions.value, bookmarks.value)
     await persistAll()
     lastSyncTime.value = Date.now()
     return updatedCount
+  }
+
+  const locationIndexCachePort = {
+    load: (contentHash: string) => platformStorage.loadLocationIndex(contentHash),
+    save: (contentHash: string, record: LocationIndexCacheRecord) =>
+      platformStorage.saveLocationIndex(contentHash, record)
   }
 
   return {
@@ -401,14 +414,24 @@ export const useBookStore = defineStore('books', () => {
     lastSyncTime,
     syncStatusMessage,
     deleteFileOnRemove,
+    locationIndexCachePort,
     setDeleteFileOnRemove,
     willDeleteFileOnRemove,
     initLibrary,
     seedSampleBooks,
     addBookFromBuffer,
+    addBookFromNativePath,
     importFromUrl,
+    ensureBookContentHash,
+    loadBookBinary,
+    loadBookCoverBlob,
+    getStorageDir,
+    isCustomStorageDir,
+    setStorageDir,
+    openStorageDir,
     removeBook,
     saveReadingLocation,
+    flushReadingLocation,
     getBookBookmarks,
     addBookmark,
     removeBookmark,
@@ -417,4 +440,3 @@ export const useBookStore = defineStore('books', () => {
     importSyncSnapshot
   }
 })
-

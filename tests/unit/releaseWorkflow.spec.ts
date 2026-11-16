@@ -35,9 +35,10 @@ describe('Multi-platform release GitHub Actions workflows', () => {
     expect(content).toContain('npm run android:init')
     expect(content).toContain('npm run android:release')
 
-    // GitHub Release upload (create or clobber existing tag release, including build/*.dmg)
+    // GitHub Release upload (create or clobber existing tag release from CI build artifacts)
     expect(content).toContain('publish-release:')
-    expect(content).toContain('build/*.dmg')
+    expect(content).not.toContain('build/*.dmg')
+    expect(content).toContain("-name '*.dmg'")
     expect(content).toContain('gh release upload')
     expect(content).toContain('gh release create')
   })

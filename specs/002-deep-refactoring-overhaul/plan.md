@@ -82,22 +82,23 @@ specs/002-deep-refactoring-overhaul/
 │   ├── router/index.ts                            # ReaderView 지연 로딩 (() => import)
 │   ├── types/
 │   │   ├── index.ts                               # BookMeta.contentHash / hasCover / StorageWriteError
-│   │   ├── scripts-ssrf.d.ts                      # (신규 <=35줄) tsconfig include 내 scripts/ssrfRules.mjs 타입 선언
+│   │   ├── css-tree.d.ts                          # css-tree AST 타입 선언
 │   │   └── epubjs.d.ts
 │   ├── engines/
 │   │   ├── types.ts                               # DocumentReaderPort, ReaderLoadOptions, ExtractedEpubMetadata
 │   │   ├── epub/
-│   │   │   ├── sanitizer.ts                       # (신규 <=240줄) css-tree AST + SVG/XHTML 정화 + Zip Guard
-│   │   │   ├── locationIndexer.ts                 # (신규 <=220줄) 비차단 색인 + IndexedDB 캐시 + 비중 계산
-│   │   │   ├── touchTapController.ts              # (신규 <=130줄) WebKit 탭/스크롤 제스처 & 키 포워딩
-│   │   │   ├── metadataExtractor.ts               # (신규 <=90줄) 지연 임포트 전용 EPUB 메타·Blob 표지 추출
-│   │   │   ├── epubEngine.ts                      # (축소 <=290줄) DocumentReaderPort 구현
+│   │   │   ├── sanitizer.ts                       # (신규 <=250줄) css-tree AST + SVG/XHTML 정화 + Zip Guard
+│   │   │   ├── locationIndexer.ts                 # (신규 <=100줄) 비차단 색인 + IndexedDB 캐시 + 비중 계산
+│   │   │   ├── touchTapController.ts              # (신규 <=100줄) WebKit 탭/스크롤 제스처 & 키 포워딩
+│   │   │   ├── epubCfiMetrics.ts                  # (신규 <=250줄) 스파인 비중·CFI 백분율·TOC 해석 헬퍼
+│   │   │   ├── metadataExtractor.ts               # (신규 <=50줄) 지연 임포트 전용 EPUB 메타·Blob 표지 추출
+│   │   │   ├── epubEngine.ts                      # (축소 <=350줄) DocumentReaderPort 구현
 │   │   │   └── stableScrollManager.ts             # <=325줄
 │   │   └── txt/
 │   │       ├── txtEngine.ts                       # <=297줄
 │   │       ├── txtLineBox.ts                      # (신규 <=180줄) Range/LineBox 텍스트 지오메트리
 │   │       ├── txtPageMeasurer.ts                 # (신규 <=240줄) 페이지 단위 실측 탐색기
-│   │       └── txtMeasuredPagination.ts           # (축소 <=190줄) TxtPaginationSession 스케줄러
+│   │       └── txtMeasuredPagination.ts           # (축소 <=310줄) TxtPaginationSession 스케줄러
 │   ├── composables/
 │   │   ├── ui/
 │   │   │   ├── useToast.ts                        # (신규 <=45줄) 공용 타이머 정리 토스트
@@ -117,27 +118,30 @@ specs/002-deep-refactoring-overhaul/
 │   │   │   ├── bookHasher.ts                      # (신규 <=120줄) Web Crypto / Rust hash_validated_book_file 라우팅
 │   │   │   └── platformAdapter.ts                 # (축소 <=310줄) 자산/네이티브 IPC 위임 및 StorageWriteError
 │   │   ├── network/
-│   │   │   ├── ssrfValidator.ts                   # scripts/ssrfRules.mjs (+src/types/scripts-ssrf.d.ts) 공유 Wrapper
+│   │   │   ├── ssrfValidator.ts                   # scripts/ssrfRules.mjs (+scripts/ssrfRules.d.mts) 공유 Wrapper
 │   │   │   ├── remoteFetch.ts                     # (<=380줄) safe_download_to_storage + 정적 웹 HTTPS/세션 예외
 │   │   │   ├── webdavService.ts                   # <=370줄
 │   │   │   └── downloadService.ts                 # 스트리밍 진행률·디스크 결과·경량 메타 연계
 │   │   └── platform/                              # <=210줄 각 파일 (dialogService/dragDropService 지연 경로·plugin-fs readFile 제거)
 │   ├── stores/
 │   │   ├── libraryMigration.ts                    # (신규 <=170줄) v1->v2 Base64 표지 분리 마이그레이션 헬퍼
-│   │   └── useBookStore.ts                        # (<=380줄) 경량 서재 상태, 온디맨드 중복 판정, flush, 저장소 위임
+│   │   ├── librarySyncHelpers.ts                  # (신규 <=110줄) 동기화·스냅샷·파일 권한 헬퍼
+│   │   └── useBookStore.ts                        # (<=450줄) 경량 서재 상태, 온디맨드 중복 판정, flush, 저장소 위임
 │   ├── components/
-│   │   ├── common/InAppConfirmModal.vue           # (신규 <=120줄) 3테마 인앱 확인/저장소 복구 모달
+│   │   ├── common/InAppConfirmModal.vue           # (신규 <=120줄) 3테마(`--ev-text-muted` 포함) 인앱 확인/복구 모달
 │   │   └── library/
-│   │       ├── NetworkDownloadModal.vue           # (축소 <=170줄) 탭 껍데기
+│   │       ├── NetworkDownloadModal.vue           # (축소 <=300줄) 탭 껍데기
 │   │       ├── RemoteUrlDownloadTab.vue           # (신규 <=160줄)
+│   │       ├── StorageFolderMenu.vue              # (신규 <=110줄) 데스크톱 저장 폴더 메뉴
 │   │       ├── WebDavConnectionForm.vue           # (신규 <=240줄)
 │   │       └── WebDavExplorerView.vue             # (신규 <=280줄)
 │   └── views/
-│       ├── LibraryView.vue                        # (축소 <=330줄, platformStorage 직접 호출 0건)
-│       └── ReaderView.vue                         # (축소 <=280줄, platformStorage 직접 호출 0건, title/클래스 호환 유지)
+│       ├── LibraryView.vue                        # (축소 <=380줄, platformStorage 직접 호출 0건)
+│       └── ReaderView.vue                         # (축소 <=290줄, platformStorage 직접 호출 0건, title/클래스 호환 유지)
 ├── .github/workflows/release.yml                  # 레거시 build/*.dmg 복사 분기 정리 (releaseWorkflow.spec.ts 동기화)
 ├── scripts/
-│   ├── ssrfRules.mjs                              # (신규 <=180줄) 프록시·클라이언트 공용 SSOT SSRF 분류기
+│   ├── ssrfRules.mjs                              # (신규 <=180줄, +ssrfRules.d.mts) 프록시·클라이언트 공용 SSOT SSRF 분류기
+│   ├── remoteProxyDns.mjs                         # (신규 <=120줄) 프록시 DNS Pinning/에이전트 헬퍼
 │   ├── remoteProxyGuard.mjs                       # (축소 <=420줄) ssrfRules 재사용
 │   ├── check-boundaries.mjs                       # 450줄 규모 상한 + 전 루트 스캔(옵션/Phase 6 전환, 하위 모듈 ≤450줄)
 │   ├── check-version-sync.mjs                     # package/Cargo/Tauri + Android/iOS 식별자·버전 검증(부분 fixture 하위호환)

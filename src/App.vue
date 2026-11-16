@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import InAppConfirmModal from '@/components/common/InAppConfirmModal.vue'
+import { resolveWebConfirmDialog, webConfirmDialogState } from '@/services/platform/dialogService'
 </script>
 
 <template>
@@ -11,5 +13,16 @@ import { RouterView } from 'vue-router'
     }"
   />
   <RouterView />
+  <InAppConfirmModal
+    v-if="webConfirmDialogState"
+    :open="webConfirmDialogState.open"
+    :title="webConfirmDialogState.title"
+    :message="webConfirmDialogState.message"
+    :kind="webConfirmDialogState.kind"
+    :confirm-label="webConfirmDialogState.confirmLabel"
+    :cancel-label="webConfirmDialogState.cancelLabel"
+    @confirm="resolveWebConfirmDialog(true)"
+    @cancel="resolveWebConfirmDialog(false)"
+  />
 </template>
 

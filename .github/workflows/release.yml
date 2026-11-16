@@ -216,9 +216,6 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          if compgen -G "build/*.dmg" > /dev/null; then
-            cp build/*.dmg release-assets/
-          fi
           find release-artifacts -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.msi' -o -name '*.zip' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.apk' \) -exec cp {} release-assets/ \;
           ls -lh release-assets
 

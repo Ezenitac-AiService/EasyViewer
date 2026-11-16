@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useAccessibleDialog } from '@/composables/ui/useAccessibleDialog'
 import type { FontFamilyOption, ThemeMode, ViewMode } from '@/types'
 import {
   BookOpen,
@@ -13,7 +15,7 @@ import {
   X
 } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   open: boolean
 }>()
 
@@ -22,6 +24,12 @@ const emit = defineEmits<{
 }>()
 
 const settingsStore = useSettingsStore()
+const dialogRef = ref<HTMLElement | null>(null)
+useAccessibleDialog({
+  isOpen: computed(() => props.open),
+  containerRef: dialogRef,
+  onClose: () => emit('close')
+})
 
 const viewModes: Array<{ value: ViewMode; label: string }> = [
   { value: 'scroll', label: '세로 스크롤' },
@@ -55,7 +63,12 @@ const fonts: Array<{ value: FontFamilyOption; label: string; previewClass: strin
     @click.self="emit('close')"
   >
     <div
-      class="w-full max-w-sm rounded-2xl border shadow-2xl p-5 transition-all overflow-y-auto"
+      ref="dialogRef"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ev-viewer-settings-title"
+      tabindex="-1"
+      class="w-full max-w-sm rounded-2xl border shadow-2xl p-5 transition-all overflow-y-auto outline-none"
       :style="{
         backgroundColor: 'var(--ev-surface)',
         borderColor: 'var(--ev-border)',
@@ -64,12 +77,13 @@ const fonts: Array<{ value: FontFamilyOption; label: string; previewClass: strin
       }"
     >
       <div class="flex items-center justify-between pb-3 mb-4 border-b shrink-0" :style="{ borderColor: 'var(--ev-border)' }">
-        <h3 class="text-base font-bold tracking-tight">뷰어 보기 옵션</h3>
+        <h3 id="ev-viewer-settings-title" class="text-base font-bold tracking-tight">뷰어 보기 옵션</h3>
         <div class="flex items-center gap-1">
           <button
             type="button"
             class="p-2 rounded-xl opacity-75 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all"
             title="기본값 초기화"
+            aria-label="기본값 초기화"
             @click="settingsStore.resetSettings()"
           >
             <RotateCcw class="w-4 h-4" />
@@ -78,6 +92,7 @@ const fonts: Array<{ value: FontFamilyOption; label: string; previewClass: strin
             type="button"
             class="p-2 rounded-xl opacity-75 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all"
             title="닫기"
+            aria-label="닫기"
             @click="emit('close')"
           >
             <X class="w-4 h-4" />

@@ -1,3 +1,12 @@
+<!--
+Sync Impact Report (v3.2.0 -> v3.3.0)
+- Version change: 3.2.0 -> 3.3.0 (MINOR: 450-line module ceiling gate, AST CSS/SVG sanitization, multi-platform app ID sync, and WAI-ARIA dialog gates expanded)
+- Modified principles: None (Principles I–VII preserved unchanged)
+- Modified sections:
+  - 기술 스택 및 플랫폼 제약사항: css-tree ^3.2.1, dunce/sha2/zip 9.x, IndexedDB v2 분리 저장소, DocumentReaderPort, 전 플랫폼 식별자(com.edith.easyviewer) 동기화 명시
+  - 개발 워크플로우 및 품질 게이트: check:boundaries 450줄 규모 상한 게이트, 초기 진입 번들 예산(<= 480 kB), AST 기반 정화 및 WAI-ARIA 대화상자(포커스 트랩·Escape·초점 복귀·3테마) 검증 기준 추가
+- Follow-up TODOs: None
+-->
 # EasyViewer Constitution
 
 ## Core Principles
@@ -114,25 +123,32 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
 - **프레임워크 및 빌드 도구**: Vue 3 (`^3.5`, Composition API, `<script setup lang="ts">`),
   TypeScript (`~5.6`, `strict: true` 필수), Vite (`^6.0`), `vue-tsc` (`^2.2`), Pinia (`^2.3`),
   Vue Router (`^4.5`), Tailwind CSS (`^3.4`), `lucide-vue-next` (`^0.468`).
-- **문서 렌더링 엔진**: `epubjs` (`^0.3.93`) 및 `jszip` (`^3.10`) 기반 EPUB 엔진(CFI 정밀 위치 추적
-  및 스타일 주입), 자동 인코딩 감지(`TextDecoder`)·청크 분할·측정 기반 페이지네이션을 수행하는 커스텀
-  TXT 엔진.
-- **크로스 플랫폼 런타임 및 Rust 백엔드**: Tauri 2 (`@tauri-apps/api`, `@tauri-apps/cli` `^2.12.x`, 공식 플러그인 `plugin-fs`, `plugin-store`, `plugin-dialog`, `plugin-opener` 최신 `2.x` 및 OS 키체인/키스토어 자격증명 분리 `tauri-plugin-keyring-store` — WebView 직접 `plugin-http` 비허용), Rust (`src-tauri/Cargo.toml`, edition `2021`, `rustc >= 1.90.0` 권장, `tauri` v2, `reqwest` `0.13` `rustls` + `rustls-platform-verifier`,
-  `serde`, `serde_json`), 웹 브라우저 표준 스토리지(`IndexedDB`, `localStorage`). 데스크톱(Windows,
-  `macOS 11.0+`, Linux) 및 모바일(`iOS 15.0+`, Android `scripts/android.mjs`)을 지원하며 최소 OS
-  기준은 `src-tauri/tauri.conf.json`을 따른다(MUST).
+- **문서 렌더링 엔진**: `epubjs` (`^0.3.93`) 및 `jszip` (`^3.10`) 기반 EPUB 엔진(`DocumentReaderPort`
+  추상화 포트 뒤로 격리, `css-tree` `^3.2.1` AST 기반 정화 및 비차단 CFI 위치 색인·캐시), 자동
+  인코딩 감지(`TextDecoder`)·청크 분할·실측 기반 페이지네이션을 수행하는 커스텀 TXT 엔진.
+- **크로스 플랫폼 런타임 및 Rust 백엔드**: Tauri 2 (`@tauri-apps/api`, `@tauri-apps/cli` `^2.12.x`, 공식
+  플러그인 `plugin-fs`, `plugin-store`, `plugin-dialog`, `plugin-opener` 최신 `2.x` 및 OS 키체인/키스토어
+  자격증명 분리 `tauri-plugin-keyring-store` — WebView 직접 `plugin-http` 비허용), Rust
+  (`src-tauri/Cargo.toml`, edition `2021`, `rustc >= 1.90.0` 권장, `tauri` v2, `reqwest` `0.13`
+  `rustls` + `stream`, `tokio`, `futures-util`, `dunce`, `sha2`, `hex`, `zip` `9.x`, `serde`,
+  `serde_json`), 웹 브라우저 `IndexedDB v2`(`book_files`, `book_covers`, `location_indexes`,
+  `key_value`) 및 소형 설정 전용 `localStorage` 폴백. 데스크톱(Windows, `macOS 11.0+`, Linux) 및
+  모바일(`iOS 15.0+`, Android `scripts/android.mjs`)을 지원하며 전 플랫폼 앱 식별자는
+  `com.edith.easyviewer` 단일 기준으로 통일한다(MUST).
 - **표준 테스트 스택**: 프론트엔드 단위·통합 테스트는 Vitest(`vite ^6.0` 호환 버전) +
   `@vue/test-utils` + `jsdom` + `@tauri-apps/api/mocks`(`mockIPC`, `clearMocks`), 실제 브라우저
-  레이아웃·CSP·성능 검증은 브라우저 E2E 러너(`Playwright` 등), Rust 백엔드는 `cargo test`를 표준으로
-  채택한다(MUST).
+  레이아웃·CSP·접근성·성능 검증은 브라우저 E2E 러너(`Playwright` 등), Rust 백엔드는 `cargo test`를
+  표준으로 채택한다(MUST).
 - **보안 및 권한 제약**: 제로 트러스트(제7원칙)에 따라 `src-tauri/tauri.conf.json`의 `security.csp`를
-  `null`(비활성화) 상태로 두어서는 안 되며(MUST NOT), 모든 원격·웹뷰 기능 설계 및 릴리스 전에는 명시적
-  기본 거부 CSP, 플랫폼별 최소 권한 Capabilities(`desktop` vs `mobile` 분리), 파일 접근 스코프
-  (`allow_storage_dir`), 프록시·네이티브 HTTP SSRF/TLS 검증 및 안전 자격증명 격리를 반드시 적용해야
+  `null`(비활성화) 상태로 두어서는 안 되며(MUST NOT), 명시적 기본 거부 CSP, AST 기반 콘텐츠 정화
+  (`css-tree` 허용 목록 — 정규식 단독 CSS 치환 금지), 플랫폼별 최소 권한 Capabilities(`desktop` vs
+  `mobile` 분리, `fs:allow-read-file` 제거 및 단일 `read_validated_book_file` 경계 일원화), `dunce`
+  기반 경로 정규화(`allow_storage_dir`), SSOT SSRF/TLS 검증 및 안전 자격증명 격리를 반드시 적용해야
   한다(MUST).
-- **버전 동기화**: 애플리케이션 버전 변경 시 `package.json`, `src-tauri/Cargo.toml`,
-  `src-tauri/tauri.conf.json` 세 파일(및 존재하는 경우 `package-lock.json`, `src-tauri/Cargo.lock`
-  락파일의 루트 패키지 버전)을 반드시 동일하게 유지해야 한다(MUST).
+- **버전·식별자 동기화**: 애플리케이션 버전 및 식별자 변경 시 `package.json`, `src-tauri/Cargo.toml`,
+  `src-tauri/tauri.conf.json`, `package-lock.json`, `src-tauri/Cargo.lock`, Android
+  (`tauri.android.conf.json`, `build.gradle.kts`, `MainActivity.kt`) 및 Apple (`project.yml`,
+  `Info.plist`) 메타데이터를 `npm run check:version`으로 검증해 반드시 동일하게 유지해야 한다(MUST).
 
 ## 개발 워크플로우 및 품질 게이트 (Development Workflow & Quality Gates)
 
@@ -149,12 +165,15 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   우회 분기·미실행 게이트의 허위 PASS 보고가 발견될 경우 즉시 반려(Reject)한다(MUST).
 - **근거 기반 검증 게이트**: 외부 기술·아키텍처·보안·성능 결정에는 공식 문서·표준·우수 사례 출처를,
   내부 코드·문서 점검에는 관찰된 파일 경로·심볼·실행 결과를 명시해야 한다(MUST).
-- **타입·빌드·테스트 검증 게이트**: 모든 프론트엔드 변경은 `npm run build` (`vue-tsc -b && vite build`)
-  및 테스트 스위트(`npm test`, 구축 이후 필수)를 에러 없이 통과해야 하며(MUST), `src-tauri/` Rust
-  코드 변경 시 `cargo check` 및 `cargo test`를 통과해야 한다(MUST). 도구 부재 환경에서 미실행된
+- **타입·빌드·테스트·경계 검증 게이트**: 모든 프론트엔드 변경은 `npm run build` (`vue-tsc -b && vite build`),
+  단위·통합 테스트(`npm test`), 계층·규모 경계 게이트(`npm run check:boundaries`: 전 프로덕션 파일
+  `src/**/*.{ts,vue}`·`src-tauri/src/**/*.rs`·`scripts/**/*.mjs` **450줄 이하** 및 뷰 계층 저장소 직접
+  호출 금지), 초기 번들 예산(`dist/assets/index-*.js <= 480 kB`)을 통과해야 하며(MUST), `src-tauri/`
+  Rust 코드 변경 시 `cargo check` 및 `cargo test`를 통과해야 한다(MUST). 도구 부재 환경에서 미실행된
   검증은 `BLOCKED` 미검증 상태로 구분 보고해야 하며, 해당 Rust 변경분의 최종 완료는 CI 또는 Rust
-  툴체인 보유 호스트 검증 통과 전까지 보류한다(MUST). UI 변경은 `light`·`dark`·`sepia` 테마와
-  데스크톱/모바일 입력 환경을 모두 지원해야 한다(MUST).
+  툴체인 보유 호스트 검증 통과 전까지 보류한다(MUST). UI 변경은 `light`·`dark`·`sepia` 테마,
+  데스크톱/모바일 입력 환경 및 WAI-ARIA 대화상자 규약(`role="dialog"`, `aria-modal="true"`, 포커스
+  트랩, `Escape` 닫기, 초점 복귀)을 모두 지원해야 한다(MUST).
 - **커밋 메시지 게이트**: 모든 Git 커밋 메시지는 Conventional Commits 타입 접두사와 한국어 요약 제목을
   갖추고, 본문에 ① 변경 이유(Why), ② 핵심 수정 내용(What), ③ 영향 범위 및 검증 결과(Scope &
   Verification)를 구체적으로 담아 누구나 변경 맥락을 쉽게 파악할 수 있어야 한다(MUST).
@@ -179,4 +198,4 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   부트스트랩, 무결성 및 정당한 경계 격리, 외부 리서치·내부 실측 근거 확보, 플랫폼 추상화·엔진 분리,
   지속적 의심·다층 검증, Zero Trust 보안)과 문서 분리 게이트 준수 여부를 반드시 검증해야 한다(MUST).
 
-**Version**: 3.2.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-16
+**Version**: 3.3.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-16

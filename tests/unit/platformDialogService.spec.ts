@@ -2,26 +2,30 @@ import { describe, expect, it, vi } from 'vitest'
 import { mockIPC } from '@tauri-apps/api/mocks'
 
 describe('PlatformDialogPort contract (US2)', () => {
-  it('returns null from pickStorageDirectory in web fallback and invokes window.confirm for confirmAction', async () => {
+  it('returns null from pickStorageDirectory in web fallback and resolves confirmAction via InAppConfirmModal state without window.confirm', async () => {
     vi.resetModules()
-    const { platformDialog } = await import('@/services/platform/dialogService')
+    const { platformDialog, webConfirmDialogState, resolveWebConfirmDialog } = await import(
+      '@/services/platform/dialogService'
+    )
 
     expect(await platformDialog.pickStorageDirectory('/tmp')).toBeNull()
 
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true)
-    expect(
-      await platformDialog.confirmAction({
-        title: '책 삭제',
-        message: '삭제할까요?'
-      })
-    ).toBe(false)
-    expect(
-      await platformDialog.confirmAction({
-        title: '책 삭제',
-        message: '삭제할까요?'
-      })
-    ).toBe(true)
-    expect(confirmSpy).toHaveBeenCalledTimes(2)
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const p1 = platformDialog.confirmAction({
+      title: '책 삭제',
+      message: '삭제할까요?'
+    })
+    expect(webConfirmDialogState.value?.open).toBe(true)
+    resolveWebConfirmDialog(false)
+    expect(await p1).toBe(false)
+
+    const p2 = platformDialog.confirmAction({
+      title: '책 삭제',
+      message: '삭제할까요?'
+    })
+    resolveWebConfirmDialog(true)
+    expect(await p2).toBe(true)
+    expect(confirmSpy).not.toHaveBeenCalled()
   })
 
   it('picks files lazily in Tauri mode and maps cancel/ok confirmation via mockIPC', async () => {
@@ -39,8 +43,11 @@ describe('PlatformDialogPort contract (US2)', () => {
       if (cmd === 'plugin:fs|stat') {
         return { size: bytes.length, isFile: true, isDirectory: false }
       }
-      if (cmd === 'plugin:fs|read_file') {
+      if (cmd === 'read_validated_book_file') {
         return bytes
+      }
+      if (cmd === 'plugin:fs|read_file') {
+        throw new Error('SECURITY_VIOLATION: plugin-fs read_file must not be called')
       }
       if (cmd === 'plugin:dialog|message') {
         return '삭제'

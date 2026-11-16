@@ -36,7 +36,6 @@ playwright/.cache
 
 *.epub
 
-# Build outputs (exclude all except DMG as requested)
+# Build outputs
 build/*
-!build/*.dmg
 

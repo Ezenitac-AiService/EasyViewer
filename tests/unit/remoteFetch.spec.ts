@@ -62,4 +62,42 @@ describe('remoteFetch proxy header & timeout forwarding (T061)', () => {
     })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
+
+  it('rejects HTTP auth unconditionally on non-proxy static web (including SPA 200 HTML fallback) and allows HTTPS auth only with explicit session consent (T011)', async () => {
+    const spaHtmlRes = new Response('<!doctype html><html><body>SPA</body></html>', {
+      status: 200,
+      headers: { 'Content-Type': 'text/html' }
+    })
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(spaHtmlRes.clone())
+      .mockResolvedValueOnce(new Response('Not Found', { status: 404 }))
+      .mockResolvedValueOnce(new Response('Not Found', { status: 404 }))
+      .mockResolvedValueOnce(new Response('webdav-ok', { status: 200 }))
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    await expect(
+      remoteFetch('http://nas.example.com/dav/', {
+        headers: { Authorization: 'Basic dXNlcjpwYXNz' },
+        allowDirectStaticAuth: true
+      } as any)
+    ).rejects.toMatchObject({
+      code: 'INSECURE_AUTH_BLOCKED'
+    })
+
+    await expect(
+      remoteFetch('https://nas.example.com/dav/', {
+        headers: { Authorization: 'Basic dXNlcjpwYXNz' }
+      })
+    ).rejects.toMatchObject({
+      code: 'STATIC_WEB_AUTH_CONFIRM_REQUIRED'
+    })
+
+    const consented = await remoteFetch('https://nas.example.com/dav/', {
+      headers: { Authorization: 'Basic dXNlcjpwYXNz' },
+      allowDirectStaticAuth: true
+    } as any)
+    expect(consented.status).toBe(200)
+    expect(await consented.text()).toBe('webdav-ok')
+  })
 })

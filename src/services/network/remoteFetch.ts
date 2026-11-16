@@ -9,6 +9,8 @@ export type RemoteFetchErrorCode =
   | 'BLOCKED_HIGH_RISK'
   | 'PRIVATE_NETWORK_CONFIRM_REQUIRED'
   | 'SELF_SIGNED_TLS_CONFIRM_REQUIRED'
+  | 'INSECURE_AUTH_BLOCKED'
+  | 'STATIC_WEB_AUTH_CONFIRM_REQUIRED'
   | 'NETWORK_ERROR'
 
 export class RemoteFetchConsentError extends Error {
@@ -29,6 +31,7 @@ export interface RemoteFetchOptions {
   body?: string | ArrayBuffer | Uint8Array
   allowPrivateNas?: boolean
   allowSelfSignedTls?: boolean
+  allowDirectStaticAuth?: boolean
   timeoutMs?: number
   maxResponseBytes?: number
 }
@@ -245,7 +248,7 @@ export async function remoteFetch(url: string, options: RemoteFetchOptions = {})
   })
 
   const isProxyHandled = proxyRes.headers.get('x-easyviewer-proxy') === '1'
-  if (proxyRes.status !== 404 || isProxyHandled) {
+  if (isProxyHandled) {
     if (proxyRes.status === 403 || proxyRes.status === 502) {
       let jsonErr: { code?: string; error?: string } | null = null
       const cloneText = await proxyRes.clone().text().catch(() => '')
@@ -273,13 +276,34 @@ export async function remoteFetch(url: string, options: RemoteFetchOptions = {})
   }
 
   // Static production web hosting without proxy middleware cannot bypass CORS/private IPs;
-  // only allow public HTTPS/HTTP direct fetch when proxy endpoint itself is absent (404).
+  // only allow public HTTPS/HTTP direct fetch when proxy endpoint itself is absent.
   if (validated.classification !== 'public') {
     throw new RemoteFetchConsentError(
       'PRIVATE_NETWORK_CONFIRM_REQUIRED',
       origin,
       '브라우저 환경에서는 보안 프록시 없이 사설 네트워크 주소에 직접 연결할 수 없습니다.'
     )
+  }
+
+  const hasAuthHeader = Boolean(
+    options.headers &&
+      Object.keys(options.headers).some((key) => key.toLowerCase() === 'authorization')
+  )
+  if (hasAuthHeader) {
+    if (validated.url.protocol !== 'https:') {
+      throw new RemoteFetchConsentError(
+        'INSECURE_AUTH_BLOCKED',
+        origin,
+        '보안 프록시가 없는 정적 웹 환경에서는 평문(HTTP) 인증 요청이 무조건 차단됩니다.'
+      )
+    }
+    if (!options.allowDirectStaticAuth) {
+      throw new RemoteFetchConsentError(
+        'STATIC_WEB_AUTH_CONFIRM_REQUIRED',
+        origin,
+        '보안 프록시가 없는 정적 웹 환경에서 HTTPS 인증 요청을 직접 보내려면 위험 고지 확인 및 명시적 동의가 필요합니다.'
+      )
+    }
   }
 
   return fetch(validated.url.toString(), {

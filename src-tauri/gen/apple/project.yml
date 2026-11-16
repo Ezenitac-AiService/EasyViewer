@@ -1,6 +1,6 @@
 name: easy-viewer
 options:
-  bundleIdPrefix: com.easyviewer.app
+  bundleIdPrefix: com.edith.easyviewer
   deploymentTarget:
     iOS: 15.0
 fileGroups: [../../src]
@@ -56,8 +56,8 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        CFBundleShortVersionString: 0.1.0
-        CFBundleVersion: "0.1.0"
+        CFBundleShortVersionString: 0.1.6
+        CFBundleVersion: "0.1.6"
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
           NSAllowsLocalNetworking: true
