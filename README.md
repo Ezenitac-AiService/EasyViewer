@@ -205,6 +205,41 @@ npm run android:release:all # 전체 ABI release APK
 - [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)** 및 `build/*.dmg`, **Windows x64 (`-setup.exe`, `.msi`)**, **Linux x64 (`.deb`, `.rpm`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
 - [`.github/workflows/build-apple.yml`](.github/workflows/build-apple.yml): `main` PR 및 수동 실행용 macOS Universal + iOS 시뮬레이터(`--debug --target aarch64-sim`) 빌드 검증 워크플로우입니다.
 
+#### 새 버전 릴리즈 실행 절차 (수동 명령어)
+
+일반 소스 수정 후 `main` 브랜치에 커밋·푸시하는 것만으로는 릴리즈 빌드가 실행되지 않으며, 아래 순서로 **`v*` 태그를 푸시**하거나 **수동 워크플로우를 실행**하면 자동 빌드 및 GitHub Release 배포가 진행됩니다.
+
+1. **버전 동기화 및 검증** (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`을 새 버전 예: `0.1.7`로 수정, `build/` 내 `.dmg` 포함 시 함께 갱신):
+   ```bash
+   # 매니페스트 및 락파일 버전 일치 여부 확인
+   npm run check:version
+
+   # 전체 통합 검증 (선택)
+   npm run verify
+   ```
+
+2. **변경사항 커밋·푸시 및 버전 태그(`v*`) 푸시로 릴리즈 트리거**:
+   ```bash
+   git add -A
+   git commit -m "chore(release): 0.1.7 버전 업데이트 및 릴리즈 준비" -m "- 변경 이유 및 주요 수정 내역 요약 (20자 이상 한국어 본문)"
+   git push origin main
+
+   # v* 태그 생성 및 원격 푸시 (푸시 즉시 GitHub Actions release.yml 자동 실행)
+   git tag v0.1.7
+   git push origin v0.1.7
+   ```
+
+3. **태그 푸시 없이 수동으로 워크플로우 실행하는 방법 (`workflow_dispatch`)**:
+   - **GitHub 웹 UI**: 저장소 **Actions** 탭 → **Release Multi-Platform** 선택 → **Run workflow** 클릭 (필요 시 대상 태그명 `tag_name` 입력)
+   - **GitHub CLI (`gh`) 명령어**:
+     ```bash
+     # package.json 버전 기준(기본값 v<version>)으로 즉시 빌드 및 릴리즈 실행
+     gh workflow run release.yml
+
+     # 특정 태그명을 지정하여 실행
+     gh workflow run release.yml -f tag_name=v0.1.7 -f publish_release=true
+     ```
+
 ---
 
 ## 라이선스 (License)
