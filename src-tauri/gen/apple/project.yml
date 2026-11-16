@@ -56,8 +56,8 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        CFBundleShortVersionString: 0.1.6
-        CFBundleVersion: "0.1.6"
+        CFBundleShortVersionString: 0.1.6-beta
+        CFBundleVersion: "0.1.6-beta"
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
           NSAllowsLocalNetworking: true
