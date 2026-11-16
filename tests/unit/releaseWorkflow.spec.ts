@@ -22,6 +22,7 @@ describe('Multi-platform release GitHub Actions workflows', () => {
     expect(content).toContain('npm run mac:build')
     expect(content).toContain('windows-latest')
     expect(content).toContain('--bundles nsis,msi')
+    expect(content).toContain('_x64_portable.zip')
     expect(content).toContain('ubuntu-22.04')
     expect(content).toContain('--bundles deb,rpm,appimage')
     expect(content).toContain('libwebkit2gtk-4.1-dev')
