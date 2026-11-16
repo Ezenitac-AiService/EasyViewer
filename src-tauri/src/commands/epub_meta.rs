@@ -42,6 +42,85 @@ fn read_bounded_zip_entry<R: Read + std::io::Seek>(
     Ok(buf)
 }
 
+fn decode_xml_entities(raw: &str) -> String {
+    let trimmed = raw
+        .trim()
+        .strip_prefix("<![CDATA[")
+        .and_then(|s| s.strip_suffix("]]>"))
+        .unwrap_or(raw.trim());
+    let mut out = String::with_capacity(trimmed.len());
+    let mut rest = trimmed;
+    while let Some(amp) = rest.find('&') {
+        out.push_str(&rest[..amp]);
+        let after_amp = &rest[amp + 1..];
+        if let Some(semi) = after_amp.find(';') {
+            let entity = &after_amp[..semi];
+            let decoded = match entity {
+                "amp" => Some('&'),
+                "lt" => Some('<'),
+                "gt" => Some('>'),
+                "quot" => Some('"'),
+                "apos" => Some('\''),
+                _ if entity.starts_with("#x") || entity.starts_with("#X") => u32::from_str_radix(&entity[2..], 16).ok().and_then(char::from_u32),
+                _ if entity.starts_with('#') => entity[1..].parse::<u32>().ok().and_then(char::from_u32),
+                _ => None,
+            };
+            if let Some(ch) = decoded {
+                out.push(ch);
+                rest = &after_amp[semi + 1..];
+                continue;
+            }
+        }
+        out.push('&');
+        rest = after_amp;
+    }
+    out.push_str(rest);
+    out
+}
+
+fn percent_decode(raw: &str) -> String {
+    let bytes = raw.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let (Some(h), Some(l)) = (
+                (bytes[i + 1] as char).to_digit(16),
+                (bytes[i + 2] as char).to_digit(16),
+            ) {
+                out.push(((h << 4) | l) as u8);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).to_string()
+}
+
+fn resolve_zip_entry_path(opf_dir: &str, href: &str) -> String {
+    let without_frag = href.split('#').next().unwrap_or(href).split('?').next().unwrap_or(href);
+    let decoded = percent_decode(without_frag);
+    let combined = if decoded.starts_with('/') {
+        decoded.trim_start_matches('/').to_string()
+    } else {
+        format!("{opf_dir}{decoded}")
+    };
+    let mut parts: Vec<&str> = Vec::new();
+    for seg in combined.split('/') {
+        if seg.is_empty() || seg == "." {
+            continue;
+        }
+        if seg == ".." {
+            parts.pop();
+        } else {
+            parts.push(seg);
+        }
+    }
+    parts.join("/")
+}
+
 fn extract_tag_text(xml: &str, local_tag: &str) -> Option<String> {
     let lower = xml.to_ascii_lowercase();
     let needle_gt = format!("{local_tag}>");
@@ -62,11 +141,11 @@ fn extract_tag_text(xml: &str, local_tag: &str) -> Option<String> {
             let colon_pos = lower[content_start..].find(&close_colon)?;
             lower[content_start..content_start + colon_pos].rfind("</")
         })?;
-    let val = xml[content_start..content_start + end].trim();
+    let val = decode_xml_entities(&xml[content_start..content_start + end]);
     if val.is_empty() {
         None
     } else {
-        Some(val.to_string())
+        Some(val)
     }
 }
 
@@ -106,6 +185,8 @@ pub fn extract_epub_metadata_from_reader<R: Read + std::io::Seek>(
 
     let mut cover_href: Option<String> = None;
     let mut cover_mime: Option<String> = None;
+    let mut epub2_cover_id: Option<String> = None;
+
     for chunk in opf_xml.split('<') {
         let lower = chunk.to_ascii_lowercase();
         if lower.starts_with("item ") && lower.contains("cover-image") {
@@ -113,11 +194,27 @@ pub fn extract_epub_metadata_from_reader<R: Read + std::io::Seek>(
             cover_mime = extract_attr(chunk, "media-type");
             break;
         }
+        if lower.starts_with("meta ") && extract_attr(chunk, "name").as_deref() == Some("cover") {
+            epub2_cover_id = extract_attr(chunk, "content");
+        }
+    }
+
+    if cover_href.is_none() {
+        if let Some(target_id) = epub2_cover_id {
+            for chunk in opf_xml.split('<') {
+                let lower = chunk.to_ascii_lowercase();
+                if lower.starts_with("item ") && extract_attr(chunk, "id").as_deref() == Some(target_id.as_str()) {
+                    cover_href = extract_attr(chunk, "href");
+                    cover_mime = extract_attr(chunk, "media-type");
+                    break;
+                }
+            }
+        }
     }
 
     let cover_bytes = match cover_href {
         Some(href) => {
-            let full_cover = format!("{opf_dir}{href}");
+            let full_cover = resolve_zip_entry_path(&opf_dir, &href);
             read_bounded_zip_entry(&mut archive, &full_cover, max_entry_bytes).ok()
         }
         None => None,
@@ -177,5 +274,27 @@ mod tests {
         cursor.set_position(0);
         let err = extract_epub_metadata_from_reader(cursor, 10).unwrap_err();
         assert!(err.contains("ZIP_BOMB_GUARD"));
+    }
+
+    #[test]
+    fn extracts_epub2_cover_meta_relative_paths_and_xml_entities_t052() {
+        let mut cursor = Cursor::new(Vec::new());
+        {
+            let mut zw = zip::ZipWriter::new(&mut cursor);
+            let opts = SimpleFileOptions::default();
+            zw.start_file("META-INF/container.xml", opts).unwrap();
+            zw.write_all(b"<container><rootfiles><rootfile full-path=\"OPS/Text/package.opf\"/></rootfiles></container>").unwrap();
+            zw.start_file("OPS/Text/package.opf", opts).unwrap();
+            zw.write_all(b"<package><metadata><dc:title>Tom &amp; Jerry&#x27;s Guide</dc:title><dc:creator>A &lt;B&gt;</dc:creator><meta name=\"cover\" content=\"cover-img\"/></metadata><manifest><item id=\"cover-img\" href=\"../Images/cover%20art.jpg\" media-type=\"image/jpeg\"/></manifest></package>").unwrap();
+            zw.start_file("OPS/Images/cover art.jpg", opts).unwrap();
+            zw.write_all(&[0xff, 0xd8, 0xff, 0xe0]).unwrap();
+            zw.finish().unwrap();
+        }
+        cursor.set_position(0);
+        let parsed = extract_epub_metadata_from_reader(cursor, MAX_METADATA_ENTRY_BYTES).unwrap();
+        assert_eq!(parsed.title.as_deref(), Some("Tom & Jerry's Guide"));
+        assert_eq!(parsed.author.as_deref(), Some("A <B>"));
+        assert_eq!(parsed.cover_mime.as_deref(), Some("image/jpeg"));
+        assert_eq!(parsed.cover_bytes.as_deref(), Some(&[0xff, 0xd8, 0xff, 0xe0][..]));
     }
 }

@@ -108,16 +108,52 @@ export function classifyIpAddress(rawIp) {
 
   const v6 = expandIpv6Groups(cleaned)
   if (v6) {
+    const classifyEmbeddedV4 = (hi, lo) =>
+      classifyIpv4Bytes([(hi >>> 8) & 0xff, hi & 0xff, (lo >>> 8) & 0xff, lo & 0xff])
+
+    // IPv4-mapped (::ffff:a.b.c.d) & IPv4-translated (::ffff:0:a.b.c.d)
     const isMapped =
       v6[0] === 0 && v6[1] === 0 && v6[2] === 0 && v6[3] === 0 && v6[4] === 0 && v6[5] === 0xffff
-    if (isMapped) {
-      const mappedBytes = [
-        (v6[6] >>> 8) & 0xff,
-        v6[6] & 0xff,
-        (v6[7] >>> 8) & 0xff,
-        v6[7] & 0xff
-      ]
-      return classifyIpv4Bytes(mappedBytes)
+    const isTranslated =
+      v6[0] === 0 && v6[1] === 0 && v6[2] === 0 && v6[3] === 0 && v6[4] === 0xffff && v6[5] === 0
+    if (isMapped || isTranslated) {
+      return classifyEmbeddedV4(v6[6], v6[7])
+    }
+
+    // Deprecated IPv4-compatible (::a.b.c.d, excluding :: and ::1)
+    const isCompatible =
+      v6[0] === 0 &&
+      v6[1] === 0 &&
+      v6[2] === 0 &&
+      v6[3] === 0 &&
+      v6[4] === 0 &&
+      v6[5] === 0 &&
+      (v6[6] !== 0 || v6[7] > 1)
+    if (isCompatible) {
+      return classifyEmbeddedV4(v6[6], v6[7])
+    }
+
+    // NAT64 Well-Known (64:ff9b::/96) and Local-Use NAT64 (64:ff9b:1::/48)
+    const isNat64WellKnown =
+      v6[0] === 0x0064 &&
+      v6[1] === 0xff9b &&
+      v6[2] === 0 &&
+      v6[3] === 0 &&
+      v6[4] === 0 &&
+      v6[5] === 0
+    const isNat64Local = v6[0] === 0x0064 && v6[1] === 0xff9b && v6[2] === 1
+    if (isNat64WellKnown || isNat64Local) {
+      return classifyEmbeddedV4(v6[6], v6[7])
+    }
+
+    // 6to4 (2002::/16) embeds IPv4 in groups 1 and 2
+    if (v6[0] === 0x2002) {
+      return classifyEmbeddedV4(v6[1], v6[2])
+    }
+
+    // Teredo (2001:0000::/32) tunneling
+    if (v6[0] === 0x2001 && v6[1] === 0x0000) {
+      return 'blocked-high-risk'
     }
 
     const allZero = v6.every((g) => g === 0)

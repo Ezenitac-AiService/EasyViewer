@@ -8,9 +8,9 @@
 
 모든 모달·서랍(`NetworkDownloadModal`, `SyncModal`, `ViewerSettingsPanel`, `ViewerSideDrawer`, `InAppConfirmModal`)은 다음 계약을 준수한다:
 
-1. **시맨틱 속성**: 루트 대화상자 컨테이너에 `role="dialog"`, `aria-modal="true"`, `aria-labelledby="<title-id>"` 부여.
-2. **포커스 트랩**: 열림 시 첫 포커스 가능 요소(또는 지정 초기 요소)로 포커스 이동. 대화상자 내부에서 `Tab` / `Shift+Tab` 순환 시 외부 배경으로 포커스 이탈 금지.
-3. **닫기 및 포커스 복원**: `Escape` 키 입력 또는 배경 클릭 시 `close` 이벤트 발행. 닫힌 직후 대화상자를 열었던 트리거 요소(`previousActiveElement`)로 포커스 자동 복원(`requestAnimationFrame` / `nextTick`).
+1. **시맨틱 속성 및 배경 격리**: 루트 대화상자 컨테이너에 `role="dialog"`, `aria-modal="true"`, `aria-labelledby="<title-id>"`를 부여하고, 모달이 열려 있는 동안 모달 외부 배경 형제 영역에 `inert`(또는 `aria-hidden="true"`)를 적용해 보조 기술 가상 커서 탐색 시 배경 콘텐츠가 노출되지 않도록 격리한다.
+2. **가시성 필터링 기반 포커스 트랩**: 열림 시 첫 포커스 가능 요소(또는 지정 초기 요소)로 포커스를 이동한다. 포커스 후보 수집 시 `disabled`, `hidden`, `aria-hidden="true"`, `[inert]` 조상, 또는 `display: none` / `visibility: hidden` 상태인 비가시 요소를 제외하며, 대화상자 내부에서 `Tab` / `Shift+Tab` 순환 시 외부 배경으로 포커스 이탈을 금지한다.
+3. **중첩 대화상자 스택 및 닫기·포커스 복원**: 대화상자 위에 확인/동의 대화상자(예: `NetworkDownloadModal` 위의 `InAppConfirmModal`)가 중첩 오픈될 때에는 활성 대화상자 스택의 **최상위(Topmost) 대화상자만** `Tab`/`Shift+Tab` 포커스 트랩과 `Escape` 키 닫기 이벤트를 처리하여 하위 대화상자가 동시에 닫히지 않도록 보장한다. 닫힌 직후 대화상자를 열었던 트리거 요소(`previousActiveElement`)로 포커스를 자동 복원한다(`requestAnimationFrame` / `nextTick`).
 4. **인앱 확인 대화상자 (`InAppConfirmModal.vue`)**: 웹 환경 삭제 확인(`window.confirm` 제거) 및 데스크톱 저장 폴더 쓰기 실패 복구("기본 폴더 전환" / "다른 폴더 선택")가 모두 `light`/`dark`/`sepia` 3테마 CSS 변수를 준수하는 본 모달을 통해 처리된다.
 5. **아이콘 버튼 레이블**: `ReaderView`, `LibraryView`, 모달/서랍 내 텍스트 없는 모든 아이콘 버튼에 `aria-label` 필수 부여.
 

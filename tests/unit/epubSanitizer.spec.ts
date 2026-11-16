@@ -131,4 +131,45 @@ describe('EPUB sanitizer, Zip Bomb guard, and <base>/CSP compatibility (US3 - TD
     const inlineStyle = doc.getElementById('inline-p')?.getAttribute('style') || ''
     expect(inlineStyle).not.toContain('evil.example.com')
   })
+
+  it('enforces explicit URI scheme allowlist across img[src], form[action], link[rel=stylesheet], and conditional CSS at-rules (T051)', () => {
+    const html = `<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link id="ext-css" rel="stylesheet" href="https://evil.example.com/track.css" />
+    <link id="local-css" rel="stylesheet" href="../Styles/main.css" />
+    <style>
+      @media screen { .m { background-image: url("https://evil.example.com/media.png"); color: #222; } }
+      @supports (display: grid) { .s { background: url("ftp://evil.example.com/ftp.png"); } }
+      @container (min-width: 100px) { .c { background: url("data:image/png;base64,iVBORw0KGgo="); } }
+    </style>
+  </head>
+  <body>
+    <img id="ext-img" src="https://evil.example.com/beacon.gif" alt="beacon" />
+    <img id="local-img" src="images/cover.jpg" alt="cover" />
+    <img id="data-img" src="data:image/png;base64,iVBORw0KGgo=" alt="inline" />
+    <form id="ext-form" action="https://evil.example.com/steal" formaction="https://evil.example.com/steal2"></form>
+    <a id="anchor-link" href="chapter2.xhtml#sec1">2장 이동</a>
+    <a id="ext-link" href="https://evil.example.com/phish">외부 링크</a>
+  </body>
+</html>`
+
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    sanitizeSectionDocument(doc)
+
+    expect(doc.getElementById('ext-css')).toBeNull()
+    expect(doc.getElementById('local-css')).not.toBeNull()
+    expect(doc.getElementById('ext-img')?.getAttribute('src')).toBeNull()
+    expect(doc.getElementById('local-img')?.getAttribute('src')).toBe('images/cover.jpg')
+    expect(doc.getElementById('data-img')?.getAttribute('src')).toContain('data:image/png')
+    expect(doc.getElementById('ext-form')?.getAttribute('action')).toBeNull()
+    expect(doc.getElementById('ext-form')?.getAttribute('formaction')).toBeNull()
+    expect(doc.getElementById('anchor-link')?.getAttribute('href')).toBe('chapter2.xhtml#sec1')
+    expect(doc.getElementById('ext-link')?.getAttribute('href')).toBeNull()
+
+    const css = doc.querySelector('style')?.textContent || ''
+    expect(css).not.toContain('evil.example.com')
+    expect(css).not.toContain('ftp://')
+    expect(css).toContain('data:image/png')
+  })
 })

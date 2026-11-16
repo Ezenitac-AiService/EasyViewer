@@ -19,17 +19,27 @@ const URL_ATTRIBUTES = new Set([
   'href', 'xlink:href', 'src', 'srcset', 'poster', 'ping', 'background', 'action', 'formaction', 'data', 'srcdoc'
 ])
 
-function isBlockedUri(value: string, blockExternalHttp = false): boolean {
-  const normalized = value.replace(/[\s\u0000-\u001f]/g, '').toLowerCase()
-  if (
-    normalized.startsWith('javascript:') ||
-    normalized.startsWith('vbscript:') ||
-    normalized.startsWith('data:text/html') ||
-    normalized.startsWith('data:image/svg+xml')
-  ) {
-    return true
+const SAFE_RASTER_DATA_URI_RE =
+  /^data:image\/(?:png|jpe?g|gif|webp|avif|bmp|x-icon)(?:;[a-z0-9=+.-]+)*,/i
+const EXPLICIT_SCHEME_RE = /^([a-z][a-z0-9+.-]*):/i
+
+function isBlockedUri(value: string, _blockExternalHttp = true): boolean {
+  const normalized = value.replace(/[\s\u0000-\u001f]/g, '')
+  if (!normalized) return false
+  if (normalized.startsWith('//')) return true
+
+  const schemeMatch = EXPLICIT_SCHEME_RE.exec(normalized)
+  if (!schemeMatch) {
+    // Relative internal paths and #fragments are allowed
+    return false
   }
-  return blockExternalHttp && /^https?:/i.test(normalized)
+  const scheme = schemeMatch[1].toLowerCase()
+  if (scheme === 'blob') return false
+  if (scheme === 'data') {
+    return !SAFE_RASTER_DATA_URI_RE.test(normalized)
+  }
+  // Default-Deny all other schemes (http:, https:, ftp:, javascript:, vbscript:, file:, etc.)
+  return true
 }
 
 function hasUnsafeSrcset(value: string): boolean {
@@ -135,8 +145,11 @@ export function sanitizeCssWithAst(cssText: string, isInlineStyle = false): stri
     return ''
   }
   if (isInlineStyle) return generated
-  return generated.replace(/\{([^}]*)\}/g, (_m: string, body: string) => {
-    const cleanBody = body.trim().replace(/:/g, ': ').replace(/;/g, '; ')
+  return generated.replace(/\{([^{}]*)\}/g, (_m: string, body: string) => {
+    const cleanBody = body
+      .trim()
+      .replace(/(^|;)\s*([a-zA-Z-]+)\s*:\s*/g, '$1 $2: ')
+      .trim()
     if (!cleanBody) return ' {}'
     return cleanBody.endsWith(';') ? ` { ${cleanBody} }` : ` { ${cleanBody}; }`
   })
@@ -204,9 +217,9 @@ export function sanitizeSectionDocument(doc: Document): void {
       }
       if (URL_ATTRIBUTES.has(name) || URL_ATTRIBUTES.has(localAttr)) {
         const block =
-          name === 'srcset'
-            ? hasUnsafeSrcset(attr.value)
-            : isBlockedUri(attr.value, name === 'poster' || name === 'ping' || name === 'background')
+          name === 'srcdoc' ||
+          name === 'ping' ||
+          (name === 'srcset' ? hasUnsafeSrcset(attr.value) : isBlockedUri(attr.value, true))
         if (block) {
           el.removeAttributeNode(attr)
           continue

@@ -1,10 +1,37 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { resolveDesktopBuildCommand } from '../../scripts/ci-build-desktop.mjs'
 
 const ROOT_DIR = path.resolve(__dirname, '../..')
 
 describe('Multi-platform release GitHub Actions workflows', () => {
+  it('resolves desktop build command for stable vs pre-release versions across Windows, Linux, and macOS (T048)', () => {
+    expect(
+      resolveDesktopBuildCommand('windows-x64', '0.1.6', 'npx tauri build --bundles nsis,msi')
+    ).toBe('npx tauri build --bundles nsis,msi')
+    expect(
+      resolveDesktopBuildCommand('windows-x64', '0.1.6-beta', 'npx tauri build --bundles nsis,msi')
+    ).toBe('npx tauri build --bundles nsis')
+    expect(
+      resolveDesktopBuildCommand('windows-x64', '0.1.6-0', 'npx tauri build --bundles nsis,msi')
+    ).toBe('npx tauri build --bundles nsis')
+
+    expect(
+      resolveDesktopBuildCommand('linux-x64', '0.1.6', 'npx tauri build --bundles deb,rpm,appimage')
+    ).toBe('npx tauri build --bundles deb,rpm,appimage')
+    expect(
+      resolveDesktopBuildCommand(
+        'linux-x64',
+        '0.1.6-beta',
+        'npx tauri build --bundles deb,rpm,appimage'
+      )
+    ).toBe('npx tauri build --bundles deb,appimage')
+
+    expect(resolveDesktopBuildCommand('macos-universal', '0.1.6-beta', 'npm run mac:build')).toBe(
+      'npm run mac:build'
+    )
+  })
   it('defines unified tag & dispatch release workflow covering verify, macOS universal, Windows, Linux, Android, and GitHub Release upload', () => {
     const releasePath = path.join(ROOT_DIR, '.github/workflows/release.yml')
     expect(fs.existsSync(releasePath)).toBe(true)

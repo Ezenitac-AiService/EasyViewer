@@ -44,9 +44,10 @@ describe('Storage v1->v2 cover Blob migration, decoupled position flush & non-fa
 
     const setItemSpy = vi.spyOn(platformStorage, 'setItem')
     await store.saveReadingLocation('legacy-book-0', 'epubcfi(/6/2)', 45, '제1장')
+    expect(setItemSpy).not.toHaveBeenCalledWith('library_books_v1', expect.any(Array))
     await store.flushReadingLocation()
     expect(setItemSpy).toHaveBeenCalledWith('reading_positions_v1', expect.any(Object))
-    expect(setItemSpy).not.toHaveBeenCalledWith('library_books_v1', expect.any(Array))
+    expect(setItemSpy).toHaveBeenCalledWith('library_books_v1', expect.any(Array))
   })
 
   it('flushes debounced location saves immediately and throws StorageWriteError on desktop write failures', async () => {

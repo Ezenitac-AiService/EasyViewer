@@ -51,4 +51,96 @@ describe('Non-blocking EPUB locationIndexer, cache reuse & destroy cancellation 
     expect(cancelled.precisionReady).toBe(false)
     expect(generateCalls).toBe(1)
   })
+
+  it('renders first page via rendition.display() BEFORE starting background locations.generate() even when contentHash is absent or uncached (T053)', async () => {
+    const { vi } = await import('vitest')
+    vi.resetModules()
+    const events: string[] = []
+    let resolveGenerate: ((locs: string[]) => void) | null = null
+
+    vi.doMock('epubjs', () => {
+      class FakeEpubCFI {
+        compare() {
+          return 0
+        }
+      }
+      const fakeEpub = () => ({
+        ready: Promise.resolve(),
+        loaded: {
+          metadata: Promise.resolve({ title: 'Test EPUB', creator: 'Author' }),
+          navigation: Promise.resolve({ toc: [] })
+        },
+        spine: {
+          spineItems: [{ index: 0, href: 'ch1.xhtml' }],
+          hooks: { content: { register: () => {} } }
+        },
+        locations: {
+          generate: () => {
+            events.push('locations.generate:start')
+            return new Promise<string[]>((resolve) => {
+              resolveGenerate = resolve
+            })
+          },
+          load: () => {
+            events.push('locations.load:cache')
+          },
+          length: () => 2
+        },
+        renderTo: () => ({
+          themes: { default: () => {} },
+          hooks: { content: { register: () => {} } },
+          on: () => {},
+          display: async () => {
+            events.push('rendition.display')
+          },
+          destroy: () => {}
+        }),
+        destroy: () => {}
+      })
+      return { default: fakeEpub, EpubCFI: FakeEpubCFI }
+    })
+
+    const { EpubViewerEngine } = await import('@/engines/epub/epubEngine')
+    const { createCleanEpubBuffer } = await import('../fixtures/bookFixtures')
+    const buffer = await createCleanEpubBuffer()
+    const container = document.createElement('div')
+
+    let indexReadyValue: boolean | null = null
+    const engine = new EpubViewerEngine({
+      load: async () => null,
+      save: async () => {}
+    })
+
+    const res = await engine.loadBook({
+      buffer,
+      container,
+      settings: {
+        theme: 'light',
+        fontFamily: 'sans',
+        fontSize: 16,
+        lineHeight: 1.6,
+        pageMargin: 24,
+        viewMode: 'paginated',
+        syncEndpoint: ''
+      },
+      onIndexReady: (ready) => {
+        indexReadyValue = ready
+        events.push(`onIndexReady:${ready}`)
+      }
+    })
+    events.push(`loadBookResolved:${res.precisionReady}`)
+
+    expect(res.precisionReady).toBe(false)
+    expect(events.indexOf('rendition.display')).toBeGreaterThanOrEqual(0)
+    expect(events.indexOf('locations.generate:start')).toBeGreaterThan(
+      events.indexOf('rendition.display')
+    )
+
+    resolveGenerate?.(['epubcfi(/6/2)', 'epubcfi(/6/4)'])
+    await new Promise((r) => setTimeout(r, 10))
+    expect(indexReadyValue).toBe(true)
+
+    engine.destroy()
+    vi.doUnmock('epubjs')
+  })
 })

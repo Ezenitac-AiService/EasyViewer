@@ -100,4 +100,26 @@ describe('remoteFetch proxy header & timeout forwarding (T061)', () => {
     expect(consented.status).toBe(200)
     expect(await consented.text()).toBe('webdav-ok')
   })
+
+  it('blocks IPv6 transition/embedded-IPv4 bypass vectors (NAT64, 6to4, Teredo, IPv4-compatible) in SSRF validator (T050)', async () => {
+    const blockedUrls = [
+      'http://[64:ff9b::7f00:1]/secret.epub',
+      'http://[64:ff9b:1::a9fe:a9fe]/latest/meta-data',
+      'http://[2002:7f00:1::]/admin',
+      'http://[2001:0000:4136:e378:8000:63bf:3fff:fdd2]/tunnel',
+      'http://[::127.0.0.1]/loopback'
+    ]
+    for (const target of blockedUrls) {
+      await expect(remoteFetch(target)).rejects.toMatchObject({
+        name: RemoteFetchConsentError.name,
+        code: 'BLOCKED_HIGH_RISK'
+      })
+    }
+
+    // NAT64 / 6to4 embedding private LAN IPv4 (192.168.1.1 = c0a8:0101) should require private network consent
+    await expect(remoteFetch('http://[64:ff9b::c0a8:101]/nas.epub')).rejects.toMatchObject({
+      name: RemoteFetchConsentError.name,
+      code: 'PRIVATE_NETWORK_CONFIRM_REQUIRED'
+    })
+  })
 })

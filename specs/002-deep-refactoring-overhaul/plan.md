@@ -29,7 +29,7 @@
 - **Performance Goals**:
   - 초기 진입 번들(`dist/assets/index-*.js`) 비압축 크기 기준선(`742.07 kB`) 대비 **35% 이상 축소** (`<= 480 kB`), 서재 초기화 중 `epubjs`/`jszip`/`css-tree` 미적재
   - 100권 표지 서재 기준 위치 저장 시 직렬화량 **90% 이상 절감**, 네이티브 원격 다운로드 시 추가 메모리 **<= 25% 또는 <= 32 MiB**
-  - 대용량 EPUB 첫 화면 표시 **<= 500ms** (로딩 직후 즉시), 재열람 색인 복원 0ms 재계산
+  - 대용량 EPUB 첫 화면 표시: 도서 버퍼 전달 후 엔진 첫 페이지 표시 **<= 500ms** (서재 도서 선택 후 라우트·지연 청크 적재 포함 E2E 전체 여정 **<= 3000ms**), 재열람 색인 복원 0ms 재계산
 - **Constraints**:
   - 모든 프로덕션 소스 파일(`src/**/*.{ts,vue}`, `src-tauri/src/**/*.rs`, `scripts/**/*.mjs`) **450줄 이하** (`SC-005`)
   - `spec.md`·문서 한국어 및 코드/식별자 영어(`constitution.md` 원칙 I), Strict TDD Red → Green(`원칙 II`), Zero Trust(`원칙 VII`)
@@ -83,15 +83,16 @@ specs/002-deep-refactoring-overhaul/
 │   ├── types/
 │   │   ├── index.ts                               # BookMeta.contentHash / hasCover / StorageWriteError
 │   │   ├── css-tree.d.ts                          # css-tree AST 타입 선언
+│   │   ├── scripts-ssrf.d.ts                      # scripts/ssrfRules.mjs TS 모듈 선언
 │   │   └── epubjs.d.ts
 │   ├── engines/
 │   │   ├── types.ts                               # DocumentReaderPort, ReaderLoadOptions, ExtractedEpubMetadata
 │   │   ├── epub/
-│   │   │   ├── sanitizer.ts                       # (신규 <=250줄) css-tree AST + SVG/XHTML 정화 + Zip Guard
-│   │   │   ├── locationIndexer.ts                 # (신규 <=100줄) 비차단 색인 + IndexedDB 캐시 + 비중 계산
-│   │   │   ├── touchTapController.ts              # (신규 <=100줄) WebKit 탭/스크롤 제스처 & 키 포워딩
+│   │   │   ├── sanitizer.ts                       # (신규 <=250줄) css-tree AST + SVG/XHTML 허용목록 정화 + Zip Guard
+│   │   │   ├── locationIndexer.ts                 # (신규 <=220줄) 첫 화면 이후 비차단 색인 + IndexedDB 캐시 + 비중 계산
+│   │   │   ├── touchTapController.ts              # (신규 <=130줄) WebKit 탭/스크롤 제스처 & 키 포워딩
 │   │   │   ├── epubCfiMetrics.ts                  # (신규 <=250줄) 스파인 비중·CFI 백분율·TOC 해석 헬퍼
-│   │   │   ├── metadataExtractor.ts               # (신규 <=50줄) 지연 임포트 전용 EPUB 메타·Blob 표지 추출
+│   │   │   ├── metadataExtractor.ts               # (신규 <=90줄) 지연 임포트 전용 EPUB 메타·Blob 표지 추출
 │   │   │   ├── epubEngine.ts                      # (축소 <=350줄) DocumentReaderPort 구현
 │   │   │   └── stableScrollManager.ts             # <=325줄
 │   │   └── txt/
@@ -102,7 +103,7 @@ specs/002-deep-refactoring-overhaul/
 │   ├── composables/
 │   │   ├── ui/
 │   │   │   ├── useToast.ts                        # (신규 <=45줄) 공용 타이머 정리 토스트
-│   │   │   └── useAccessibleDialog.ts             # (신규 <=140줄) role=dialog, Tab 트랩, Escape, 초점 복귀
+│   │   │   └── useAccessibleDialog.ts             # (신규 <=160줄) role=dialog, 가시성 필터, 중첩 스택, inert, 초점 복귀
 │   │   ├── reader/
 │   │   │   ├── useReaderSession.ts                # (신규 <=220줄) 라우트 watch, AbortSignal, unload flush
 │   │   │   ├── useTxtReaderController.ts          # (신규 <=250줄) TXT 가상 스크롤 + 페이지네이션 조율
@@ -118,7 +119,7 @@ specs/002-deep-refactoring-overhaul/
 │   │   │   ├── bookHasher.ts                      # (신규 <=120줄) Web Crypto / Rust hash_validated_book_file 라우팅
 │   │   │   └── platformAdapter.ts                 # (축소 <=310줄) 자산/네이티브 IPC 위임 및 StorageWriteError
 │   │   ├── network/
-│   │   │   ├── ssrfValidator.ts                   # scripts/ssrfRules.mjs (+scripts/ssrfRules.d.mts) 공유 Wrapper
+│   │   │   ├── ssrfValidator.ts                   # scripts/ssrfRules.mjs (+src/types/scripts-ssrf.d.ts) 공유 Wrapper
 │   │   │   ├── remoteFetch.ts                     # (<=380줄) safe_download_to_storage + 정적 웹 HTTPS/세션 예외
 │   │   │   ├── webdavService.ts                   # <=370줄
 │   │   │   └── downloadService.ts                 # 스트리밍 진행률·디스크 결과·경량 메타 연계
@@ -138,33 +139,34 @@ specs/002-deep-refactoring-overhaul/
 │   └── views/
 │       ├── LibraryView.vue                        # (축소 <=380줄, platformStorage 직접 호출 0건)
 │       └── ReaderView.vue                         # (축소 <=290줄, platformStorage 직접 호출 0건, title/클래스 호환 유지)
-├── .github/workflows/release.yml                  # 레거시 build/*.dmg 복사 분기 정리 (releaseWorkflow.spec.ts 동기화)
+├── .github/workflows/release.yml                  # 레거시 build/*.dmg 복사 분기 정리 및 프리릴리즈 번들 분기 연동
 ├── scripts/
-│   ├── ssrfRules.mjs                              # (신규 <=180줄, +ssrfRules.d.mts) 프록시·클라이언트 공용 SSOT SSRF 분류기
+│   ├── ssrfRules.mjs                              # (신규 <=220줄, +src/types/scripts-ssrf.d.ts) 프록시·클라이언트 공용 SSOT SSRF 분류기 (IPv6 전환 대역 포함)
 │   ├── remoteProxyDns.mjs                         # (신규 <=120줄) 프록시 DNS Pinning/에이전트 헬퍼
 │   ├── remoteProxyGuard.mjs                       # (축소 <=420줄) ssrfRules 재사용
+│   ├── ci-build-desktop.mjs                       # (신규 <=50줄) resolveDesktopBuildCommand 순수 함수 + CI 정식/프리릴리즈 번들 분기
 │   ├── check-boundaries.mjs                       # 450줄 규모 상한 + 전 루트 스캔(옵션/Phase 6 전환, 하위 모듈 ≤450줄)
-│   ├── check-version-sync.mjs                     # package/Cargo/Tauri + Android/iOS 식별자·버전 검증(부분 fixture 하위호환)
+│   ├── check-version-sync.mjs                     # package/Cargo/Tauri + Android(MainActivity·buildSrc·레거시 폴더 차단)/iOS 식별자·버전 검증
 │   └── run-perf-gate.mjs                          # 001 기준선 호환 유지 + 신규 SC-001~SC-003 보조 게이트(overhaulGates) 확장
 ├── tests/perf/
 │   ├── baseline.spec.ts                           # EasyViewerDB v2 호환 오픈 (VersionError 방지, 001 시드 유지)
-│   └── overhaulGates.spec.ts                      # (신규) SC-002 직렬화 절감 / SC-003 대용량 EPUB <=500ms 게이트
+│   └── overhaulGates.spec.ts                      # (신규) SC-002 직렬화 절감 / SC-003 대용량 EPUB 엔진 <=500ms · E2E <=3000ms 게이트
 └── src-tauri/
     ├── Cargo.toml                                 # reqwest("stream"), tokio, futures-util, dunce, sha2, hex, zip(9.x)
     ├── capabilities/{default,desktop}.json        # desktop+mobile read_validated_book_file 일원화로 fs:allow-read-file 제거
     ├── tauri.android.conf.json                    # "identifier": "com.edith.easyviewer"
-    ├── gen/{android,apple}/                       # Android/Apple 식별자(com.edith.easyviewer)·버전·init 정합
+    ├── gen/{android,apple}/                       # Android/Apple 식별자(com.edith.easyviewer)·버전·init 정합 (레거시 com/easyviewer 제거)
     └── src/
         ├── lib.rs                                 # (축소 <=80줄) 빌더/핸들러 등록
         ├── security/
         │   ├── mod.rs
-        │   ├── ssrf.rs                            # (신규 <=230줄)
-        │   └── path_guard.rs                      # (신규 <=250줄) dunce + Windows/POSIX 시스템 경로 + fs_scope 정규화
+        │   ├── ssrf.rs                            # (신규 <=300줄, 단위 테스트 포함 <=450줄) IPv6 전환 대역 포함 SSRF 검증
+        │   └── path_guard.rs                      # (신규 <=360줄, 단위 테스트 포함 <=450줄) dunce + Windows/POSIX 시스템 경로 + fs_scope 정규화
         └── commands/
             ├── mod.rs
-            ├── files.rs                           # (신규 <=220줄) read/hash/import_validated_book_to_storage (desktop+mobile)
-            ├── epub_meta.rs                       # (신규 <=220줄) extract_epub_metadata_from_path (zip 9.x + ZIP Bomb 가드)
-            └── remote.rs                          # (신규 <=290줄) safe_remote_fetch + safe_download_to_storage(고유 .part, desktop/mobile)
+            ├── files.rs                           # (신규 <=260줄, 단위 테스트 포함 <=450줄) read/hash/import_validated_book_to_storage
+            ├── epub_meta.rs                       # (신규 <=260줄, 단위 테스트 포함 <=450줄) extract_epub_metadata_from_path (EPUB 2/3 + 상대경로 + 엔티티 + ZIP Bomb 가드)
+            └── remote.rs                          # (신규 <=380줄, 단위 테스트 포함 <=450줄) safe_remote_fetch + safe_download_to_storage(데드라인/TLS/고유 .part)
 ```
 
 **Structure Decision**: 기존 Tauri 2 + Vue 3 단일 저장소 구조를 유지하되 6개 비대 모듈을 책임별 하위 파일(`composables/`, `engines/{epub,txt}/`, `storage/`, `components/library/`, `src-tauri/src/{security,commands}/`)로 해체해 모든 프로덕션 파일이 450줄 이하 상한을 충족하도록 설계한다.

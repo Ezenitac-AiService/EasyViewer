@@ -122,6 +122,51 @@ export function checkVersionSync(rootDir = process.cwd()) {
     }
   }
 
+  const legacyAndroidDirs = [
+    'src-tauri/gen/android/app/src/main/java/com/easyviewer',
+    'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer'
+  ]
+  for (const relLegacy of legacyAndroidDirs) {
+    if (fs.existsSync(path.join(rootDir, relLegacy))) {
+      return {
+        ok: false,
+        versions,
+        error: `Android 레거시 패키지 디렉터리 잔존 발견(com/easyviewer): ${relLegacy}`
+      }
+    }
+  }
+
+  const mainActivityPath = path.join(
+    rootDir,
+    'src-tauri/gen/android/app/src/main/java/com/edith/easyviewer/MainActivity.kt'
+  )
+  if (fs.existsSync(mainActivityPath)) {
+    const kt = fs.readFileSync(mainActivityPath, 'utf-8')
+    const pkgDecl = /^\s*package\s+([^\s;]+)/m.exec(kt)?.[1]
+    if (pkgDecl !== EXPECTED_APP_ID) {
+      return {
+        ok: false,
+        versions,
+        error: `Android MainActivity.kt 패키지 불일치: package=${pkgDecl} != ${EXPECTED_APP_ID}`
+      }
+    }
+  }
+
+  const buildSrcDir = path.join(
+    rootDir,
+    'src-tauri/gen/android/buildSrc/src/main/java/com/edith/easyviewer/kotlin'
+  )
+  if (
+    fs.existsSync(path.join(rootDir, 'src-tauri/gen/android/buildSrc')) &&
+    !fs.existsSync(path.join(buildSrcDir, 'RustPlugin.kt'))
+  ) {
+    return {
+      ok: false,
+      versions,
+      error: 'Android buildSrc 패키지 경로 불일치: com/edith/easyviewer/kotlin/RustPlugin.kt 누락'
+    }
+  }
+
   const ymlPath = path.join(rootDir, 'src-tauri/gen/apple/project.yml')
   if (fs.existsSync(ymlPath)) {
     const yml = fs.readFileSync(ymlPath, 'utf-8')

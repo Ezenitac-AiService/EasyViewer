@@ -3,7 +3,11 @@ import type { SearchResultItem, TocItem, ViewerSettings } from '@/types'
 import type { DocumentReaderPort, ReaderLoadOptions } from '@/engines/types'
 import { getStableScrollManager } from './stableScrollManager'
 import { CONTENT_CSP, sanitizeSectionDocument, validateEpubArchiveBounds } from './sanitizer'
-import { loadOrBuildLocationIndex, type LocationIndexCachePort } from './locationIndexer'
+import {
+  loadOrBuildLocationIndex,
+  tryLoadCachedLocationIndex,
+  type LocationIndexCachePort
+} from './locationIndexer'
 import { TouchTapController } from './touchTapController'
 import {
   buildSectionMetrics,
@@ -129,25 +133,18 @@ export class EpubViewerEngine implements DocumentReaderPort {
     this.tocList = normalizeToc(navigation?.toc || [])
     this.sectionMetrics = buildSectionMetrics(book)
 
+    const isLegacyPositionalCall = bufferOrOptions instanceof ArrayBuffer
     const abortController = new AbortController()
     this.activeAbortController = abortController
     const signal = opts.signal
       ? AbortSignal.any([opts.signal, abortController.signal])
       : abortController.signal
 
-    const indexPromise = loadOrBuildLocationIndex(book as any, opts.contentHash, 150, signal, this.cachePort)
-      .then((res) => {
-        if (this.book === book && !signal.aborted) {
-          this.locationsReady = res.precisionReady
-          if (res.precisionReady) this.sectionMetrics = buildSectionMetrics(book)
-          opts.onIndexReady?.(res.precisionReady)
-        }
-        return res.precisionReady
-      })
-      .catch(() => false)
-
-    if (!opts.contentHash) {
-      await indexPromise
+    // Fast path: restore cached locations before display if already indexed
+    if (await tryLoadCachedLocationIndex(book as any, opts.contentHash, signal, this.cachePort)) {
+      this.locationsReady = true
+      this.sectionMetrics = buildSectionMetrics(book)
+      opts.onIndexReady?.(true)
     }
 
     this.container = opts.container
@@ -165,6 +162,29 @@ export class EpubViewerEngine implements DocumentReaderPort {
       await rendition.display(target).catch(() => rendition.display())
     } else {
       await rendition.display()
+    }
+
+    if (!this.locationsReady) {
+      const indexPromise = loadOrBuildLocationIndex(
+        book as any,
+        opts.contentHash,
+        150,
+        signal,
+        this.cachePort
+      )
+        .then((res) => {
+          if (this.book === book && !signal.aborted) {
+            this.locationsReady = res.precisionReady
+            if (res.precisionReady) this.sectionMetrics = buildSectionMetrics(book)
+            opts.onIndexReady?.(res.precisionReady)
+          }
+          return res.precisionReady
+        })
+        .catch(() => false)
+
+      if (isLegacyPositionalCall) {
+        await indexPromise
+      }
     }
 
     return {

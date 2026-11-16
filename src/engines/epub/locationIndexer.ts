@@ -32,6 +32,34 @@ export function computeApproximatePercentage(
   return metric.startPct + (metric.endPct - metric.startPct) * clamped
 }
 
+export async function tryLoadCachedLocationIndex(
+  book: { locations?: { load?: (locs: string[]) => void } },
+  contentHash?: string,
+  signal?: AbortSignal,
+  cachePort?: LocationIndexCachePort
+): Promise<boolean> {
+  if (!contentHash || signal?.aborted || !book?.locations) return false
+  const mem = memoryIndexCache.get(contentHash)
+  if (mem && mem.locations.length > 0) {
+    book.locations.load?.(mem.locations)
+    return true
+  }
+  if (cachePort) {
+    try {
+      const cached = await cachePort.load(contentHash)
+      if (signal?.aborted) return false
+      if (cached && cached.locations.length > 0) {
+        memoryIndexCache.set(contentHash, cached)
+        book.locations.load?.(cached.locations)
+        return true
+      }
+    } catch {
+      return false
+    }
+  }
+  return false
+}
+
 export async function loadOrBuildLocationIndex(
   book: { locations?: { generate: (chars: number) => Promise<string[]>; load?: (locs: string[]) => void } },
   contentHash?: string,
@@ -43,25 +71,8 @@ export async function loadOrBuildLocationIndex(
     return { precisionReady: false, fromCache: false }
   }
 
-  if (contentHash) {
-    const mem = memoryIndexCache.get(contentHash)
-    if (mem && mem.locations.length > 0) {
-      book.locations.load?.(mem.locations)
-      return { precisionReady: true, fromCache: true }
-    }
-    if (cachePort) {
-      try {
-        const cached = await cachePort.load(contentHash)
-        if (signal?.aborted) return { precisionReady: false, fromCache: false }
-        if (cached && cached.locations.length > 0) {
-          memoryIndexCache.set(contentHash, cached)
-          book.locations.load?.(cached.locations)
-          return { precisionReady: true, fromCache: true }
-        }
-      } catch {
-        // Cache miss; fall through to generation
-      }
-    }
+  if (await tryLoadCachedLocationIndex(book, contentHash, signal, cachePort)) {
+    return { precisionReady: true, fromCache: true }
   }
 
   if (signal?.aborted) return { precisionReady: false, fromCache: false }

@@ -55,6 +55,7 @@ pub struct SafeRemoteFetchResponse {
 #[serde(rename_all = "camelCase")]
 pub struct SafeDownloadRequest {
     pub url: String,
+    pub headers: Option<HashMap<String, String>>,
     pub dest_dir: Option<String>,
     pub allow_private_nas: Option<bool>,
     pub allow_self_signed_tls: Option<bool>,
@@ -133,6 +134,50 @@ pub fn make_unique_part_path(dir: &Path, sanitized_name: &str, nonce: u128) -> P
     dir.join(format!("{sanitized_name}.{nonce}.part"))
 }
 
+pub fn map_remote_transport_error(msg: &str, allow_self_signed: bool, timed_out: bool) -> String {
+    let lower = msg.to_ascii_lowercase();
+    if timed_out || lower.contains("timed out") {
+        format!("TIMEOUT: 원격 요청 제한 시간이 초과되었습니다: {msg}")
+    } else if !allow_self_signed
+        && (lower.contains("certificate")
+            || lower.contains("tls")
+            || lower.contains("self-signed")
+            || lower.contains("unknown issuer")
+            || lower.contains("unknownissuer"))
+    {
+        format!("SELF_SIGNED_TLS_CONFIRM_REQUIRED: TLS 인증서 검증에 실패했습니다: {msg}")
+    } else {
+        format!("REMOTE_FETCH_FAILED: 원격 요청 실패: {msg}")
+    }
+}
+
+pub fn strip_sensitive_redirect_headers(
+    initial_url: &reqwest::Url,
+    next_url: &reqwest::Url,
+    headers: &mut HeaderMap,
+) {
+    if !same_origin(initial_url, next_url) {
+        headers.remove(AUTHORIZATION);
+        headers.remove(COOKIE);
+    }
+}
+
+fn build_sanitized_header_map(raw_headers: Option<HashMap<String, String>>) -> HeaderMap {
+    let mut header_map = HeaderMap::new();
+    if let Some(map) = raw_headers {
+        for (k, v) in map {
+            let lower = k.to_ascii_lowercase();
+            if lower == "host" || lower == "content-length" || lower == "connection" {
+                continue;
+            }
+            if let (Ok(name), Ok(val)) = (HeaderName::from_bytes(k.as_bytes()), HeaderValue::from_str(&v)) {
+                header_map.insert(name, val);
+            }
+        }
+    }
+    header_map
+}
+
 fn sanitize_download_filename(url: &reqwest::Url) -> String {
     let raw = url
         .path_segments()
@@ -165,17 +210,7 @@ pub async fn safe_remote_fetch(request: SafeRemoteFetchRequest) -> Result<SafeRe
         return Err("PAYLOAD_TOO_LARGE: 요청 본문이 허용 상한(1 MiB)을 초과했습니다.".into());
     }
 
-    let mut header_map = HeaderMap::new();
-    if let Some(raw_headers) = request.headers {
-        for (k, v) in raw_headers {
-            let lower = k.to_ascii_lowercase();
-            if lower == "host" || lower == "content-length" || lower == "connection" { continue; }
-            if let (Ok(name), Ok(val)) = (HeaderName::from_bytes(k.as_bytes()), HeaderValue::from_str(&v)) {
-                header_map.insert(name, val);
-            }
-        }
-    }
-
+    let mut header_map = build_sanitized_header_map(request.headers);
     let initial_url = current_url.clone();
     let deadline = Instant::now() + timeout;
     let pinned_map = Arc::new(Mutex::new(HashMap::<String, IpAddr>::new()));
@@ -191,15 +226,11 @@ pub async fn safe_remote_fetch(request: SafeRemoteFetchRequest) -> Result<SafeRe
             req_builder = req_builder.body(body_bytes.clone());
         }
         let mut response = req_builder.send().await.map_err(|e| {
-            let msg = e.to_string();
-            let lower = msg.to_ascii_lowercase();
-            if e.is_timeout() || Instant::now() >= deadline {
-                format!("TIMEOUT: 원격 요청 제한 시간이 초과되었습니다: {msg}")
-            } else if !allow_self_signed && (lower.contains("certificate") || lower.contains("tls") || lower.contains("self-signed") || lower.contains("unknown issuer")) {
-                format!("SELF_SIGNED_TLS_CONFIRM_REQUIRED: TLS 인증서 검증에 실패했습니다: {msg}")
-            } else {
-                format!("REMOTE_FETCH_FAILED: 원격 요청 실패: {msg}")
-            }
+            map_remote_transport_error(
+                &e.to_string(),
+                allow_self_signed,
+                e.is_timeout() || Instant::now() >= deadline,
+            )
         })?;
 
         let status = response.status();
@@ -208,7 +239,7 @@ pub async fn safe_remote_fetch(request: SafeRemoteFetchRequest) -> Result<SafeRe
             let location = response.headers().get(LOCATION).and_then(|v| v.to_str().ok()).ok_or_else(|| "INVALID_REDIRECT: Location 헤더가 없습니다.".to_string())?;
             let next_url = current_url.join(location).map_err(|e| format!("INVALID_REDIRECT: 잘못된 Location URI: {e}"))?;
             validate_url_syntax(next_url.as_str())?;
-            if !same_origin(&initial_url, &next_url) { header_map.remove(AUTHORIZATION); header_map.remove(COOKIE); }
+            strip_sensitive_redirect_headers(&initial_url, &next_url, &mut header_map);
             if status.as_u16() == 303 { method = reqwest::Method::GET; body_bytes.clear(); }
             current_url = next_url;
             continue;
@@ -250,6 +281,8 @@ pub async fn safe_download_to_storage(
     let allow_private_nas = request.allow_private_nas.unwrap_or(false);
     let allow_self_signed = request.allow_self_signed_tls.unwrap_or(false);
     let timeout = Duration::from_millis(request.timeout_ms.unwrap_or(120_000).clamp(1_000, 300_000));
+    let mut header_map = build_sanitized_header_map(request.headers);
+    let initial_url = current_url.clone();
     let deadline = Instant::now() + timeout;
     let pinned_map = Arc::new(Mutex::new(HashMap::<String, IpAddr>::new()));
     let client = build_http_client(allow_self_signed, Arc::clone(&pinned_map))?;
@@ -259,12 +292,25 @@ pub async fn safe_download_to_storage(
         let (host, pinned_addr) = resolve_and_pin_host(&current_url, allow_private_nas)?;
         if let Ok(mut guard) = pinned_map.lock() { guard.insert(host, pinned_addr.ip()); }
 
-        let response = client.get(current_url.clone()).timeout(remaining).send().await.map_err(|e| format!("REMOTE_FETCH_FAILED: {e}"))?;
+        let response = client
+            .get(current_url.clone())
+            .timeout(remaining)
+            .headers(header_map.clone())
+            .send()
+            .await
+            .map_err(|e| {
+                map_remote_transport_error(
+                    &e.to_string(),
+                    allow_self_signed,
+                    e.is_timeout() || Instant::now() >= deadline,
+                )
+            })?;
         if response.status().is_redirection() {
             if hop >= MAX_REDIRECTS { return Err("TOO_MANY_REDIRECTS: 리다이렉트 횟수 초과".into()); }
             let loc = response.headers().get(LOCATION).and_then(|v| v.to_str().ok()).ok_or_else(|| "INVALID_REDIRECT: Location 헤더 없음".to_string())?;
             let next_url = current_url.join(loc).map_err(|e| format!("INVALID_REDIRECT: {e}"))?;
             validate_url_syntax(next_url.as_str())?;
+            strip_sensitive_redirect_headers(&initial_url, &next_url, &mut header_map);
             current_url = next_url;
             continue;
         }
@@ -288,11 +334,19 @@ pub async fn safe_download_to_storage(
         let mut received: u64 = 0;
 
         while let Some(chunk_res) = stream.next().await {
+            if let Err(e) = compute_remaining_budget(deadline, Instant::now()) {
+                let _ = tokio::fs::remove_file(&part_path).await;
+                return Err(e);
+            }
             let chunk = match chunk_res {
                 Ok(c) => c,
                 Err(e) => {
                     let _ = tokio::fs::remove_file(&part_path).await;
-                    return Err(format!("REMOTE_STREAM_FAILED: {e}"));
+                    return Err(map_remote_transport_error(
+                        &e.to_string(),
+                        allow_self_signed,
+                        e.is_timeout() || Instant::now() >= deadline,
+                    ));
                 }
             };
             received += chunk.len() as u64;
@@ -344,5 +398,26 @@ mod tests {
         let p2 = make_unique_part_path(dir, "novel.epub", 102);
         assert_ne!(p1, p2);
         assert!(p1.to_string_lossy().ends_with(".part"));
+    }
+
+    #[test]
+    fn maps_tls_errors_and_strips_cross_origin_auth_headers_t052() {
+        assert!(
+            map_remote_transport_error("invalid peer certificate: UnknownIssuer", false, false)
+                .starts_with("SELF_SIGNED_TLS_CONFIRM_REQUIRED:")
+        );
+        assert!(
+            map_remote_transport_error("operation timed out", false, true)
+                .starts_with("TIMEOUT:")
+        );
+
+        let mut headers = HeaderMap::new();
+        headers.insert(AUTHORIZATION, HeaderValue::from_static("Basic dXNlcjpwYXNz"));
+        headers.insert(COOKIE, HeaderValue::from_static("sid=123"));
+        let origin_a = reqwest::Url::parse("https://nas.example.com/books/a.epub").unwrap();
+        let origin_b = reqwest::Url::parse("https://cdn.other.com/books/a.epub").unwrap();
+        strip_sensitive_redirect_headers(&origin_a, &origin_b, &mut headers);
+        assert!(!headers.contains_key(AUTHORIZATION));
+        assert!(!headers.contains_key(COOKIE));
     }
 }

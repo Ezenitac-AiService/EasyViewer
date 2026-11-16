@@ -63,10 +63,45 @@ pub fn classify_ipv6(ip: Ipv6Addr) -> IpClassification {
     if let Some(mapped_v4) = ip.to_ipv4_mapped() {
         return classify_ipv4(mapped_v4);
     }
+    let seg = ip.segments();
+    let classify_embedded = |hi: u16, lo: u16| -> IpClassification {
+        classify_ipv4(Ipv4Addr::new(
+            (hi >> 8) as u8,
+            (hi & 0xff) as u8,
+            (lo >> 8) as u8,
+            (lo & 0xff) as u8,
+        ))
+    };
+
+    // IPv4-translated (::ffff:0:a.b.c.d) & deprecated IPv4-compatible (::a.b.c.d, excluding :: and ::1)
+    if seg[0..4] == [0, 0, 0, 0] && seg[4] == 0xffff && seg[5] == 0 {
+        return classify_embedded(seg[6], seg[7]);
+    }
+    if seg[0..6] == [0, 0, 0, 0, 0, 0] && (seg[6] != 0 || seg[7] > 1) {
+        return classify_embedded(seg[6], seg[7]);
+    }
+
+    // NAT64 Well-Known (64:ff9b::/96) and Local-Use NAT64 (64:ff9b:1::/48)
+    let is_nat64_well_known = seg[0] == 0x0064 && seg[1] == 0xff9b && seg[2..6] == [0, 0, 0, 0];
+    let is_nat64_local = seg[0] == 0x0064 && seg[1] == 0xff9b && seg[2] == 1;
+    if is_nat64_well_known || is_nat64_local {
+        return classify_embedded(seg[6], seg[7]);
+    }
+
+    // 6to4 (2002::/16)
+    if seg[0] == 0x2002 {
+        return classify_embedded(seg[1], seg[2]);
+    }
+
+    // Teredo (2001:0000::/32)
+    if seg[0] == 0x2001 && seg[1] == 0x0000 {
+        return IpClassification::BlockedHighRisk;
+    }
+
     if ip.is_unspecified() || ip.is_loopback() || ip.is_multicast() {
         return IpClassification::BlockedHighRisk;
     }
-    let seg0 = ip.segments()[0];
+    let seg0 = seg[0];
     if (seg0 & 0xffc0) == 0xfe80 {
         return IpClassification::BlockedHighRisk;
     }
@@ -240,6 +275,12 @@ mod tests {
             ("fc00::1", IpClassification::PrivateNetwork),
             ("8.8.8.8", IpClassification::Public),
             ("2001:4860:4860::8888", IpClassification::Public),
+            ("64:ff9b::7f00:1", IpClassification::BlockedHighRisk),
+            ("64:ff9b:1::a9fe:a9fe", IpClassification::BlockedHighRisk),
+            ("64:ff9b::c0a8:101", IpClassification::PrivateNetwork),
+            ("2002:7f00:1::", IpClassification::BlockedHighRisk),
+            ("2001:0000:4136:e378:8000:63bf:3fff:fdd2", IpClassification::BlockedHighRisk),
+            ("::127.0.0.1", IpClassification::BlockedHighRisk),
         ];
         for (raw, expected) in vectors {
             assert_eq!(classify_ip_str(raw).unwrap(), expected, "vector {raw}");

@@ -306,10 +306,15 @@ export const useBookStore = defineStore('books', () => {
 
   let cachedDeviceId: string | null = null
   let saveLocationTimer: ReturnType<typeof setTimeout> | null = null
+  let booksMetaDirty = false
 
   async function flushReadingLocation(): Promise<void> {
     if (saveLocationTimer !== null) { clearTimeout(saveLocationTimer); saveLocationTimer = null }
     await platformStorage.setItem(POSITIONS_KEY, positions.value)
+    if (booksMetaDirty) {
+      booksMetaDirty = false
+      await platformStorage.setItem(BOOKS_META_KEY, books.value)
+    }
   }
 
   async function saveReadingLocation(
@@ -333,6 +338,7 @@ export const useBookStore = defineStore('books', () => {
     if (target) {
       target.lastLocation = location
       target.lastOpenedAt = now
+      booksMetaDirty = true
     }
     if (saveLocationTimer !== null) clearTimeout(saveLocationTimer)
     saveLocationTimer = setTimeout(() => {

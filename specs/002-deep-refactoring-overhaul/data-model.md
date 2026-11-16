@@ -39,7 +39,7 @@
    - `data:` URI를 디코딩해 `Blob`으로 변환 → `book_covers` 스토어에 `bookId` 키로 저장
    - 메타 객체에 `hasCover = true` 설정 및 `coverUrl` 필드 제거
    - `library_books_v1`을 `key_value` 스토어에 재저장하고, 레거시 `localStorage`의 비대 키(`library_books_v1`, `reading_positions_v1`, `bookmarks_v1` 폴백 잔여물)를 안전 정리한다(다른 기기/세션 영향 없이 무손실).
-2. `positions` 갱신(`saveReadingLocation`)은 `reading_positions_v1`만 별도 키로 기록하며, `lastOpenedAt` 변경이 필요한 경우(열람 시작 또는 위치 플러시 시점)에만 경량 `library_books_v1`(표지 제거 상태)을 저장한다. 또한 `ReaderView` 언마운트·`beforeunload`·`visibilitychange === 'hidden'` 시 디바운스 타이머를 즉시 `flush()`한다 (`FR-005`).
+2. `positions` 갱신(`saveReadingLocation`) 시 디바운스 타이머(400ms)는 페이지 전환마다 전체 도서 목록을 재직렬화하지 않도록 `reading_positions_v1`만 단독 기록한다. 단, `flushReadingLocation()`(뷰어 이탈·`ReaderView` 언마운트·`beforeunload`·`pagehide`·`visibilitychange === 'hidden'` 시점)이 호출될 때에는 대기 중인 디바운스 타이머를 즉시 취소하고 `reading_positions_v1`과 함께 갱신된 `lastOpenedAt`·`lastLocation`이 반영된 경량 `library_books_v1`(표지 제거 상태)도 함께 영속화해 앱 재시작 후 최근 열람 순서 정렬이 유실되지 않도록 보장한다 (`FR-004`, `FR-005`).
 
 ### 2.3 `WebDavConnection` (`FR-003` 정적 웹 강화)
 

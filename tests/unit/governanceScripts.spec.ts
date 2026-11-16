@@ -84,6 +84,38 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     const androidMismatch = checkVersionSync(alphaRoot)
     expect(androidMismatch.ok).toBe(false)
     expect(androidMismatch.error).toMatch(/Android/)
+
+    // Restore valid tauri.android.conf.json, then verify legacy com/easyviewer directory and MainActivity package checks (T049)
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/tauri.android.conf.json'),
+      JSON.stringify({ identifier: 'com.edith.easyviewer' })
+    )
+    const legacyDir = path.join(
+      alphaRoot,
+      'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer/app/kotlin'
+    )
+    fs.mkdirSync(legacyDir, { recursive: true })
+    fs.writeFileSync(path.join(legacyDir, 'RustPlugin.kt'), 'package com.easyviewer.app.kotlin\n')
+    const legacyRes = checkVersionSync(alphaRoot)
+    expect(legacyRes.ok).toBe(false)
+    expect(legacyRes.error).toMatch(/com\/easyviewer/)
+
+    fs.rmSync(path.join(alphaRoot, 'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer'), {
+      recursive: true,
+      force: true
+    })
+    const mainActivityDir = path.join(
+      alphaRoot,
+      'src-tauri/gen/android/app/src/main/java/com/edith/easyviewer'
+    )
+    fs.mkdirSync(mainActivityDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(mainActivityDir, 'MainActivity.kt'),
+      'package com.wrong.pkg\nclass MainActivity\n'
+    )
+    const badPkgRes = checkVersionSync(alphaRoot)
+    expect(badPkgRes.ok).toBe(false)
+    expect(badPkgRes.error).toMatch(/MainActivity\.kt/)
   })
 
   it('enforces Korean Conventional Commits header, blank line, >=20 char Korean body, and allows Merge/Revert exceptions', () => {
