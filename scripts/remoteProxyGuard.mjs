@@ -194,7 +194,7 @@ export function createRemoteProxyHandler({
 
       const outHeaders = {
         Host: parsedUrl.host,
-        'User-Agent': 'EasyViewer-WebDAV/1.0',
+        'User-Agent': 'Pagelight-WebDAV/1.0',
         Accept: '*/*',
         ...baseHeaders
       }

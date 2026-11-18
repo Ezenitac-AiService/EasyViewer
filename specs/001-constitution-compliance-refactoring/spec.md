@@ -1,5 +1,7 @@
 # Feature Specification: 헌법 준수 기반 아키텍처·품질·보안 리팩토링
 
+> **003 이후 변경 안내**: 앱 식별자와 지원 범위는 [003 독립 포크 분리](../003-independent-fork-separation/spec.md)에서 바뀌었습니다(식별자 `com.ezenitac.easyviewer`, 중점 지원 macOS·iOS·Linux, Windows 배포 중단). 이 문서는 작성 당시의 기록으로 보존합니다.
+
 **Feature Branch**: `001-constitution-compliance-refactoring`
 
 **Created**: 2026-11-15

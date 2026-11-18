@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Windows 사용자 — 원저작자 EasyViewer
+    url: https://github.com/edith2580/EasyViewer
+    about: 이 포크는 Windows를 지원·배포하지 않습니다. Windows에서는 원저작자의 EasyViewer를 사용하세요. 이 포크의 Windows 프리릴리스를 쓰던 경우에는 저장소의 docs/windows-migration.md를 참고하세요.

@@ -1,0 +1,175 @@
+# Pull-request and main-branch verification (spec 003 contracts/release-and-ci.md §1).
+# No job needs secrets, so external pull requests run every check. Signing lives in release.yml.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: './src-tauri -> target'
+      - name: Install Linux Tauri system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: npm ci
+      - run: npm run verify
+
+  licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+      - uses: taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519 # v2.90.5
+        with:
+          tool: cargo-deny,cargo-about
+      - run: npm ci
+      - name: Rust dependency licenses, bans and sources (cargo-deny)
+        working-directory: src-tauri
+        run: cargo deny check
+      - name: License audit and generated notices match every shipped target
+        run: node scripts/check-licenses.mjs
+
+  # Windows is not a release target (FR-008), but its code paths keep compiling and passing tests.
+  windows-compile-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: './src-tauri -> target'
+      - run: npm ci
+      - run: npm test
+      # tauri::generate_context! needs the built frontend; no installer bundle is produced.
+      - run: npm run build
+      - name: cargo check
+        working-directory: src-tauri
+        run: cargo check
+      - name: cargo test
+        working-directory: src-tauri
+        run: cargo test
+
+  macos-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: './src-tauri -> target'
+          prefix-key: macos-rust
+      - run: npm ci
+      - run: npm run mac:build
+      - name: Verify ad-hoc signature
+        run: codesign --verify --deep --strict -vvv src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
+
+  # iOS ships as a source build only (FR-021); the unsigned simulator build must keep working.
+  ios-sim-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+          targets: aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: './src-tauri -> target'
+          prefix-key: ios-sim-rust
+      - run: npm ci
+      # The committed Xcode project (src-tauri/gen/apple) is used as is; no signing identity needed.
+      - run: npx tauri ios build --target aarch64-sim --debug
+
+  android-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: 'platform-tools'
+      - name: Install Android SDK platform, build-tools and NDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null || true
+          PACKAGES="$(sdkmanager --list | awk '{print $1}')"
+          NDK="$(printf '%s\n' "$PACKAGES" | grep -E '^ndk;2[78]\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+          PLATFORM="$(printf '%s\n' "$PACKAGES" | grep -E '^platforms;android-3[67](\.0)?$' | sort -V | tail -n 1)"
+          BUILD_TOOLS="$(printf '%s\n' "$PACKAGES" | grep -E '^build-tools;3[67]\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+          sdkmanager "platform-tools" "$PLATFORM" "$BUILD_TOOLS" "$NDK"
+          if [ -d "$ANDROID_HOME/platforms/android-37.0" ] && [ ! -e "$ANDROID_HOME/platforms/android-37" ]; then
+            ln -sfn "$ANDROID_HOME/platforms/android-37.0" "$ANDROID_HOME/platforms/android-37"
+          fi
+          echo "NDK_HOME=$ANDROID_HOME/ndk/${NDK#ndk;}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+          targets: aarch64-linux-android
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: './src-tauri -> target'
+          prefix-key: android-rust
+      - run: npm ci
+      - run: npm run android:init
+        env:
+          CI: 'true'
+      # Spike S4: init must not rewrite the committed identifier and release-signing setup.
+      - name: Committed Android project is unchanged by init
+        run: git diff --exit-code -- src-tauri/gen/android
+      - run: npm run android:build
+        env:
+          CI: 'true'

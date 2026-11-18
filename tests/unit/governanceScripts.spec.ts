@@ -44,7 +44,7 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     fs.writeFileSync(path.join(alphaRoot, 'src-tauri/Cargo.toml'), '[package]\nversion = "0.1.6-alpha"\n')
     fs.writeFileSync(
       path.join(alphaRoot, 'src-tauri/Cargo.lock'),
-      '[[package]]\nname = "easy-viewer"\nversion = "0.1.6-alpha"\n'
+      '[[package]]\nname = "pagelight"\nversion = "0.1.6-alpha"\n'
     )
     fs.writeFileSync(path.join(alphaRoot, 'src-tauri/tauri.conf.json'), JSON.stringify({ version: '0.1.6-alpha' }))
 
@@ -66,7 +66,7 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     )
     fs.writeFileSync(
       path.join(alphaRoot, 'src-tauri/Cargo.lock'),
-      '[[package]]\nname = "easy-viewer"\nversion = "0.1.5"\n'
+      '[[package]]\nname = "pagelight"\nversion = "0.1.5"\n'
     )
     const cargoLockMismatch = checkVersionSync(alphaRoot)
     expect(cargoLockMismatch.ok).toBe(false)
@@ -75,7 +75,7 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     // Reject mismatched Android identifier in multi-platform config
     fs.writeFileSync(
       path.join(alphaRoot, 'src-tauri/Cargo.lock'),
-      '[[package]]\nname = "easy-viewer"\nversion = "0.1.6-alpha"\n'
+      '[[package]]\nname = "pagelight"\nversion = "0.1.6-alpha"\n'
     )
     fs.writeFileSync(
       path.join(alphaRoot, 'src-tauri/tauri.android.conf.json'),
@@ -85,11 +85,26 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     expect(androidMismatch.ok).toBe(false)
     expect(androidMismatch.error).toMatch(/Android/)
 
-    // Restore valid tauri.android.conf.json, then verify legacy com/easyviewer directory and MainActivity package checks (T049)
+    // Restore valid tauri.android.conf.json (spec 003: com.ezenitac.easyviewer), then verify that
+    // both legacy package trees (com/easyviewer and the upstream com/edith) are rejected.
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/tauri.android.conf.json'),
+      JSON.stringify({ identifier: 'com.ezenitac.easyviewer' })
+    )
+    expect(checkVersionSync(alphaRoot).ok).toBe(true)
+
     fs.writeFileSync(
       path.join(alphaRoot, 'src-tauri/tauri.android.conf.json'),
       JSON.stringify({ identifier: 'com.edith.easyviewer' })
     )
+    const oldId = checkVersionSync(alphaRoot)
+    expect(oldId.ok).toBe(false)
+    expect(oldId.error).toMatch(/com\.ezenitac\.easyviewer/)
+    fs.writeFileSync(
+      path.join(alphaRoot, 'src-tauri/tauri.android.conf.json'),
+      JSON.stringify({ identifier: 'com.ezenitac.easyviewer' })
+    )
+
     const legacyDir = path.join(
       alphaRoot,
       'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer/app/kotlin'
@@ -99,14 +114,28 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     const legacyRes = checkVersionSync(alphaRoot)
     expect(legacyRes.ok).toBe(false)
     expect(legacyRes.error).toMatch(/com\/easyviewer/)
-
     fs.rmSync(path.join(alphaRoot, 'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer'), {
       recursive: true,
       force: true
     })
+
+    for (const rel of [
+      'src-tauri/gen/android/app/src/main/java/com/edith/easyviewer',
+      'src-tauri/gen/android/buildSrc/src/main/java/com/edith/easyviewer/kotlin'
+    ]) {
+      const dir = path.join(alphaRoot, rel)
+      fs.mkdirSync(dir, { recursive: true })
+      fs.writeFileSync(path.join(dir, 'Stale.kt'), 'package com.edith.easyviewer\n')
+      const upstreamTree = checkVersionSync(alphaRoot)
+      expect(upstreamTree.ok).toBe(false)
+      expect(upstreamTree.error).toMatch(/com\/edith/)
+      fs.rmSync(path.join(alphaRoot, 'src-tauri/gen/android/app/src/main/java/com/edith'), { recursive: true, force: true })
+      fs.rmSync(path.join(alphaRoot, 'src-tauri/gen/android/buildSrc/src/main/java/com/edith'), { recursive: true, force: true })
+    }
+
     const mainActivityDir = path.join(
       alphaRoot,
-      'src-tauri/gen/android/app/src/main/java/com/edith/easyviewer'
+      'src-tauri/gen/android/app/src/main/java/com/ezenitac/easyviewer'
     )
     fs.mkdirSync(mainActivityDir, { recursive: true })
     fs.writeFileSync(
@@ -116,6 +145,23 @@ describe('Governance scripts: version sync & commit message validation (US4 - TD
     const badPkgRes = checkVersionSync(alphaRoot)
     expect(badPkgRes.ok).toBe(false)
     expect(badPkgRes.error).toMatch(/MainActivity\.kt/)
+
+    // Correct package, but buildSrc must live under com/ezenitac/easyviewer/kotlin (spec 003)
+    fs.writeFileSync(
+      path.join(mainActivityDir, 'MainActivity.kt'),
+      'package com.ezenitac.easyviewer\nclass MainActivity\n'
+    )
+    const missingPlugin = checkVersionSync(alphaRoot)
+    expect(missingPlugin.ok).toBe(false)
+    expect(missingPlugin.error).toMatch(/com\/ezenitac\/easyviewer\/kotlin\/RustPlugin\.kt/)
+
+    const newBuildSrc = path.join(
+      alphaRoot,
+      'src-tauri/gen/android/buildSrc/src/main/java/com/ezenitac/easyviewer/kotlin'
+    )
+    fs.mkdirSync(newBuildSrc, { recursive: true })
+    fs.writeFileSync(path.join(newBuildSrc, 'RustPlugin.kt'), 'package com.ezenitac.easyviewer.kotlin\n')
+    expect(checkVersionSync(alphaRoot).ok).toBe(true)
   })
 
   it('enforces Korean Conventional Commits header, blank line, >=20 char Korean body, and allows Merge/Revert exceptions', () => {

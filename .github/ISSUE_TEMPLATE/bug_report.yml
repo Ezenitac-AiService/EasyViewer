@@ -1,0 +1,45 @@
+name: 버그 신고
+description: 이 포크(macOS·iOS·Linux·Android)에서 발견한 문제를 알려 주세요.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Windows는 이 포크의 지원 대상이 아닙니다. Windows에서는 원저작자의 EasyViewer(https://github.com/edith2580/EasyViewer)를 사용하세요.
+
+        보안 취약점은 이 양식이 아니라 SECURITY.md의 비공개 신고 경로를 이용해 주세요.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 플랫폼
+      options:
+        - macOS
+        - iOS
+        - Linux
+        - Android
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 앱 버전
+      description: 앱 정보 화면에 표시된 버전
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS 버전·배포판
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 절차
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 동작과 실제 동작
+    validations:
+      required: true

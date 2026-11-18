@@ -1,0 +1,75 @@
+{
+  "name": "Pagelight",
+  "version": "1.0.0-alpha.1",
+  "license": "GPL-3.0-only",
+  "repository": "https://github.com/Ezenitac-AiService/EasyViewer",
+  "upstream": "https://github.com/edith2580/EasyViewer",
+  "separatedAt": "2026-11-17",
+  "thirdParty": [
+    {
+      "name": "@tauri-apps/api",
+      "version": "2.12.4",
+      "license": "MIT"
+    },
+    {
+      "name": "@tauri-apps/plugin-dialog",
+      "version": "2.8.4",
+      "license": "MIT"
+    },
+    {
+      "name": "@tauri-apps/plugin-fs",
+      "version": "2.7.1",
+      "license": "MIT"
+    },
+    {
+      "name": "@tauri-apps/plugin-opener",
+      "version": "2.7.3",
+      "license": "MIT"
+    },
+    {
+      "name": "@tauri-apps/plugin-store",
+      "version": "2.5.1",
+      "license": "MIT"
+    },
+    {
+      "name": "css-tree",
+      "version": "3.2.1",
+      "license": "MIT"
+    },
+    {
+      "name": "epubjs",
+      "version": "0.3.93",
+      "license": "BSD-2-Clause"
+    },
+    {
+      "name": "jszip",
+      "version": "3.10.2",
+      "license": "MIT"
+    },
+    {
+      "name": "lucide-vue-next",
+      "version": "0.468.0",
+      "license": "ISC"
+    },
+    {
+      "name": "pinia",
+      "version": "2.3.1",
+      "license": "MIT"
+    },
+    {
+      "name": "tauri-plugin-keyring-store-api",
+      "version": "0.3.2",
+      "license": "MIT"
+    },
+    {
+      "name": "vue",
+      "version": "3.5.45",
+      "license": "MIT"
+    },
+    {
+      "name": "vue-router",
+      "version": "4.6.4",
+      "license": "MIT"
+    }
+  ]
+}

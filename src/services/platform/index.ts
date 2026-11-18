@@ -14,6 +14,7 @@ import {
   type DroppedBookInput,
   type PlatformDragDropPort
 } from '@/services/platform/dragDropService'
+import { isAllowedExternalUrl, openExternalLink } from '@/services/platform/externalLink'
 import {
   platformCredential,
   type PlatformCredentialPort,
@@ -33,7 +34,9 @@ export async function getPlatformCapabilities(): Promise<PlatformCapabilities> {
 }
 
 export {
+  isAllowedExternalUrl,
   isDesktopApp,
+  openExternalLink,
   isSupportedBookFileName,
   isTauriEnv,
   MAX_LOCAL_BOOK_BYTES,

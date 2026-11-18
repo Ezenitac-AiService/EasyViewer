@@ -80,7 +80,7 @@ export const useBookStore = defineStore('books', () => {
   }
 
   async function seedSampleBooks() {
-    await addBookFromBuffer(await createSampleEpubBook(), 'EasyViewer 완벽 가이드 및 샘플 북.epub', 'epub')
+    await addBookFromBuffer(await createSampleEpubBook(), 'Pagelight 완벽 가이드 및 샘플 북.epub', 'epub')
     await addBookFromBuffer(createSampleTxtBook(), '윤동주 시선 - 별 헤는 밤.txt', 'txt')
   }
 

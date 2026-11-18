@@ -59,8 +59,11 @@ IPC `mockIPC`, 파일 시스템, 네트워크, `IndexedDB`/`localStorage`, 브�
 파일 시스템 접근, 영속 데이터 저장, 네트워크/WebDAV/동기화 원격 통신, 시스템 다이얼로그, 경로
 처리, 네이티브 드래그앤드롭 등 플랫폼 분기가 필요한 기능은 통합 플랫폼 추상화 계층
 (`src/services/platform/`, `src/services/storage/`, `src/services/network/`)을 경유해야 하며(MUST),
-Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`IndexedDB`, `localStorage`,
-`File API`)에서 일관되게 동작해야 한다(MUST). 기존 뷰·스토어·동기화 서비스(`LibraryView.vue`,
+지원 플랫폼 등급(기술 스택 및 플랫폼 제약사항의 "지원 플랫폼 등급")에 따라 중점 플랫폼(macOS, iOS,
+Linux)과 유지 플랫폼(Android), 그리고 개발 보조 웹 폴백(`IndexedDB`, `localStorage`, `File API`)에서
+일관되게 동작해야 한다(MUST). 비지원 플랫폼(Windows)을 대상으로 하는 코드 경로는 별도 명세로 제거하기
+전까지 추상화 계층 안에 유지하고, 컴파일과 자동 테스트를 계속 통과해야 한다(MUST). 검증되지 않는
+플랫폼 코드를 방치해서는 안 된다(MUST NOT). 기존 뷰·스토어·동기화 서비스(`LibraryView.vue`,
 `useBookStore.ts`, `syncService.ts` 등)에 남아 있는 직접 `@tauri-apps/*` 및 외부 `fetch` 호출부는
 신규 기능 추가나 해당 모듈 수정 시 추상화 계층으로 점진 이관해야 하며(MUST), 신규 코드에서 상위 계층이
 플랫폼 플러그인이나 환경 분기 API를 직접 호출하는 것은 금지한다(MUST NOT). 데스크톱 전용 사용자 저장
@@ -70,8 +73,9 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
 `TocItem`, `SearchResultItem`)을 통해 뷰 및 Pinia 스토어(`src/stores/`)와 분리되어야 하며(MUST),
 보기 모드(`scroll` ↔ `paginated`)나 테마·글꼴 변경 시 사용자의 독서 위치를 정확히 보존해야 한다(MUST).
 
-근거(Rationale): 5개 플랫폼과 다중 문서 포맷 간 호환성을 유지하면서도, 현행 코드베이스의 직접 호출부를
-무리 없이 어댑터 계층으로 수렴시킬 수 있는 현실적 아키텍처 경계를 정의한다.
+근거(Rationale): 지원 등급별 플랫폼과 다중 문서 포맷 간 호환성을 유지하면서도, 현행 코드베이스의 직접
+호출부를 무리 없이 어댑터 계층으로 수렴시킬 수 있는 현실적 아키텍처 경계를 정의한다. 배포하지 않는
+플랫폼 코드도 검증을 유지해야 보안 결함이 숨지 않는다.
 
 ### VI. 지속적 의심과 다층 검증 원칙 (Skeptical Verification & Non-Complacency)
 어떠한 명세, 설계, 코드, 설정, 외부 응답 또는 테스트 결과도 **완벽하거나 오류가 없다고 가정해서는
@@ -109,6 +113,33 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
 근거(Rationale): 정상 사용자·안전한 파일·선한 서버라는 암묵적 가정이 무너질 때 XSS, SSRF, 경로 탈출,
 권한 상승, 자격증명 유출 등 치명적 침해가 발생하므로 모든 신뢰 경계를 코드와 정책으로 강제한다.
 
+### VIII. 독립 포크 운영 원칙 (Independent Fork Governance)
+EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6`(`44c4d37`, 불변
+주석 태그 `upstream-base-v0.1.6`)에서 갈라진 **독립 포크**이며, 이 저장소가 배포하는 앱의 제품 표시명은
+**`Pagelight`**이다. 다음을 지켜야 한다.
+- **업스트림 병합·동기화 금지**: 업스트림 변경을 병합·체리픽·동기화해서는 안 된다(MUST NOT). 업스트림
+  아이디어가 필요하면 별도 명세로 재구현한다(MUST). 단, 포크가 찾은 보안 결함이 원저작자 최신 릴리스에도
+  남아 있으면 공개 비교나 공지 전에 원저작자에게 비공개로 알리거나 수정을 제안하고 그 기록을 남겨야
+  한다(MUST). 이 보안 조율 기여는 병합 금지의 유일한 예외다.
+- **표현 원칙**: 공개 문구(문서, 릴리스 노트, 앱 화면, 이슈 양식)는 포크 자신의 범위만 서술해야
+  한다(MUST). 원저작자 프로젝트의 역할·의도·지원 범위를 대신 규정하거나, 원저작자가 동의하지 않은
+  "역할 분담"·"경쟁하지 않는다" 같은 표현을 쓰거나, 원저작자 앱을 낮추어 평가해서는 안 된다(MUST NOT).
+  원저작자 앱과의 비교는 검증 가능한 사실만 담아야 한다(MUST).
+- **라이선스와 귀속**: 라이선스는 `GPL-3.0-only`로 선언하고 모든 패키지·설치 메타데이터에서 일치시켜야
+  한다(MUST). 라이선스 전문을 바꾸지 않으며(MUST NOT), 원저작자 귀속 표기와 GPLv3 §5(a) 변경 사실·날짜
+  고지를 유지해야 한다(MUST). 원래 없던 고지를 "보존된 원문"처럼 표현해서는 안 된다(MUST NOT).
+- **구분되는 정체성**: 포크 앱은 원저작자 앱과 구분되는 제품 표시명(`Pagelight`)·설치 이름·패키지
+  이름(`pagelight`, Rust 라이브러리 `pagelight_lib`)·앱 아이콘과 고유 앱 식별자를 써야 하며(MUST),
+  원저작자 앱과 같은 기기에 함께 설치되어도 서로 덮어쓰거나 데이터·자격증명을 공유해서는 안
+  된다(MUST NOT). 버전 번호만으로 포크를 구분해서는 안 되며, 릴리스 제목과 산출물 이름에 포크 정체성이
+  드러나야 한다(MUST). 저장소 이름(`EasyViewer`)은 URL·이력 보존을 위해 유지하지만, 앱 안과 공개
+  문서에서 원저작자 앱 이름은 출처 표기와 Windows 사용자 안내 목적으로만 써야 한다(MUST).
+- **이력 보존**: 공유 브랜치의 이력 재작성(강제 푸시 등)과 저작권·출처 고지 삭제는 금지한다(MUST NOT).
+  원저작자 유래 코드의 일반적인 수정·삭제는 허용한다.
+
+근거(Rationale): 원저작자가 같은 이름의 멀티플랫폼 앱을 계속 배포하므로, 법적 의무·사용자 혼동·
+원저작자에 대한 예의를 규범으로 고정해야 독립 운영이 지속 가능하다.
+
 ## 기술 스택 및 플랫폼 제약사항 (Technology Stack & Platform Constraints)
 
 - **프레임워크 및 빌드 도구**: Vue 3 (`^3.5`, Composition API, `<script setup lang="ts">`),
@@ -123,9 +154,23 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   (`src-tauri/Cargo.toml`, edition `2021`, `rustc >= 1.90.0` 권장, `tauri` v2, `reqwest` `0.13`
   `rustls` + `stream`, `tokio`, `futures-util`, `dunce`, `sha2`, `hex`, `zip` `9.x`, `serde`,
   `serde_json`), 웹 브라우저 `IndexedDB v2`(`book_files`, `book_covers`, `location_indexes`,
-  `key_value`) 및 소형 설정 전용 `localStorage` 폴백. 데스크톱(Windows, `macOS 11.0+`, Linux) 및
-  모바일(`iOS 15.0+`, Android `scripts/android.mjs`)을 지원하며 전 플랫폼 앱 식별자는
-  `com.edith.easyviewer` 단일 기준으로 통일한다(MUST).
+  `key_value`) 및 소형 설정 전용 `localStorage` 폴백. 전 플랫폼 앱 식별자는
+  `com.ezenitac.easyviewer` 단일 기준으로 통일해야 하며(MUST), 구 식별자 `com.edith.easyviewer`와
+  원저작자 앱 이름(`EasyViewer`, `easy-viewer`)은 기존 사용자 데이터 마이그레이션, 구 구조 재발 차단
+  검증, 출처 고지, 지원 범위 원문과 Windows 안내, 과거 명세 이력에서만 남길 수 있다(MUST NOT 그 밖의
+  사용). 단, 기존 사용자 데이터 연속성을 위해 내부 저장 키(IndexedDB 이름 `EasyViewerDB`,
+  `localStorage` 접두사 `easyviewer:`, 자격증명 계정 키 접두사 `easyviewer:webdav:`, 웹 자격증명 키
+  `webdav_credentials_web_consent_v2`)는 별도 명세와 이전 경로 없이 바꿔서는 안 된다(MUST NOT).
+- **지원 플랫폼 등급 (단일 원문)**: 공개 문서·이슈 양식·앱 정보 화면의 지원 범위 문구는 이 항목과
+  같은 의미여야 한다(MUST).
+  - **중점**: macOS(`11.0+`), iOS(`15.0+`), Linux — 설계·검증·품질 투자의 기준. iOS는 공개 배포
+    채널 없이 **소스 빌드로만 제공**한다.
+  - **유지(우선순위 낮음)**: Android(`scripts/android.mjs`) — 릴리스 산출물, 포크 소유 고정 서명 키,
+    업데이트 연속성을 유지한다.
+  - **비지원**: Windows — 배포·공식 지원을 하지 않으며 Windows 사용자에게는 원저작자
+    (`edith2580/EasyViewer`) 애플리케이션 사용을 권장한다. 해당 코드는 유지하고 CI에서 컴파일·자동
+    테스트를 계속 수행한다(MUST).
+  - **개발 보조**: 웹 브라우저 폴백.
 - **표준 테스트 스택**: 프론트엔드 단위·통합 테스트는 Vitest(`vite ^6.0` 호환 버전) +
   `@vue/test-utils` + `jsdom` + `@tauri-apps/api/mocks`(`mockIPC`, `clearMocks`), 실제 브라우저
   레이아웃·CSP·접근성·성능 검증은 브라우저 E2E 러너(`Playwright` 등), Rust 백엔드는 `cargo test`를
@@ -135,11 +180,16 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   (`css-tree` 허용 목록 — 정규식 단독 CSS 치환 금지), 플랫폼별 최소 권한 Capabilities(`desktop` vs
   `mobile` 분리, `fs:allow-read-file` 제거 및 단일 `read_validated_book_file` 경계 일원화), `dunce`
   기반 경로 정규화(`allow_storage_dir`), SSOT SSRF/TLS 검증 및 안전 자격증명 격리를 반드시 적용해야
-  한다(MUST).
+  한다(MUST). Android 서명 키·비밀번호, Apple 개발 팀 ID, 개인 기기 식별자(UDID)는 저장소에 고정하지
+  않고 빌드 환경 변수(`ANDROID_KEYSTORE_*`·`ANDROID_KEY_*`, `APPLE_DEVELOPMENT_TEAM`,
+  `IOS_DEVICE_ID`)로만 전달해야 하며(MUST), release 빌드는 서명 정보가 없을 때 debug 키로 대체 서명하지
+  않고 실패해야 한다(MUST).
 - **버전·식별자 동기화**: 애플리케이션 버전 및 식별자 변경 시 `package.json`, `src-tauri/Cargo.toml`,
   `src-tauri/tauri.conf.json`, `package-lock.json`, `src-tauri/Cargo.lock`, Android
   (`tauri.android.conf.json`, `build.gradle.kts`, `MainActivity.kt`) 및 Apple (`project.yml`,
-  `Info.plist`) 메타데이터를 `npm run check:version`으로 검증해 반드시 동일하게 유지해야 한다(MUST).
+  `Info.plist`) 메타데이터를 `npm run check:version`으로 검증해 반드시 동일하게 유지해야 하며(MUST),
+  제품 표시명·패키지 이름·내부 저장 키·원저작자 이름 잔존·아이콘 재사용은 `npm run check:identity`로
+  검증해야 한다(MUST).
 
 ## 개발 워크플로우 및 품질 게이트 (Development Workflow & Quality Gates)
 
@@ -165,13 +215,21 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   툴체인 보유 호스트 검증 통과 전까지 보류한다(MUST). UI 변경은 `light`·`dark`·`sepia` 테마,
   데스크톱/모바일 입력 환경 및 WAI-ARIA 대화상자 규약(`role="dialog"`, `aria-modal="true"`, 포커스
   트랩, `Escape` 닫기, 초점 복귀)을 모두 지원해야 한다(MUST).
+- **라이선스 감사 게이트**: 네이티브와 프론트엔드 런타임 의존성 모두 GPLv3 호환 허용 목록 기반 자동
+  감사를 모든 PR과 `main` 반영 시 통과해야 하며(MUST), 서드파티 고지 문서는 실제 의존성과 일치해야
+  한다(MUST). 감사 도구가 갖춰지기 전에는 이 게이트를 `BLOCKED`로 보고하고 릴리스를 게시하지
+  않는다(MUST NOT 게시).
+- **지원 범위·릴리스 게이트**: 릴리스는 지원 등급의 중점·유지 플랫폼 산출물과 체크섬 목록만 게시해야
+  하며(MUST), Windows 설치 파일을 게시해서는 안 된다(MUST NOT). 워크플로는 저장소에 실제로 있는
+  스크립트만 호출해야 하고(MUST), 비밀값이 없는 외부 PR 빌드에서도 서명을 제외한 검증은 수행해야
+  한다(MUST).
 - **커밋 메시지 게이트**: 모든 Git 커밋 메시지는 Conventional Commits 타입 접두사와 한국어 요약 제목을
   갖추고, 본문에 ① 변경 이유(Why), ② 핵심 수정 내용(What), ③ 영향 범위 및 검증 결과(Scope &
   Verification)를 구체적으로 담아 누구나 변경 맥락을 쉽게 파악할 수 있어야 한다(MUST).
 
 ## Governance
 
-본 헌법(Constitution)은 EasyViewer 프로젝트의 모든 설계, 계획, 구현, 리뷰 및 커밋 작업에서 최우선
+본 헌법(Constitution)은 EasyViewer 저장소(제품 Pagelight)의 모든 설계, 계획, 구현, 리뷰 및 커밋 작업에서 최우선
 규범으로 적용된다(MUST). 규범 키워드(`MUST`, `MUST NOT`, `SHOULD`)는 RFC 2119 / RFC 8174 정의를
 따른다.
 
@@ -185,8 +243,9 @@ Tauri 2 네이티브 환경(Windows, macOS, Android, iOS)과 웹 브라우저(`I
   - `MINOR`: 새로운 핵심 원칙 또는 섹션의 추가, 개발 가이드라인의 실질적 확장.
   - `PATCH`: 의미 변경 없는 문구 다듬기, 오타 수정, 명확화.
 - **규정 준수 검토 (Compliance Review)**: 모든 명세(`spec.md`), 구현 계획(`plan.md`), 태스크(`tasks.md`),
-  커밋 이력 및 코드 리뷰는 본 헌법의 7대 핵심 원칙(한국어 문서·커밋 및 영어 코드, TDD 및 테스트
+  커밋 이력 및 코드 리뷰는 본 헌법의 8대 핵심 원칙(한국어 문서·커밋 및 영어 코드, TDD 및 테스트
   부트스트랩, 무결성 및 정당한 경계 격리, 외부 리서치·내부 실측 근거 확보, 플랫폼 추상화·엔진 분리,
-  지속적 의심·다층 검증, Zero Trust 보안)과 문서 분리 게이트 준수 여부를 반드시 검증해야 한다(MUST).
+  지속적 의심·다층 검증, Zero Trust 보안, 독립 포크 운영)과 문서 분리 게이트 준수 여부를 반드시 검증해야
+  한다(MUST).
 
-**Version**: 3.3.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-16
+**Version**: 4.1.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-18

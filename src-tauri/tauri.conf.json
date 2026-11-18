@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "EasyViewer",
-  "version": "0.1.6-beta",
-  "identifier": "com.edith.easyviewer",
+  "productName": "Pagelight",
+  "version": "1.0.0-alpha.1",
+  "identifier": "com.ezenitac.easyviewer",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "EasyViewer",
+        "label": "main",
+        "create": false,
+        "title": "Pagelight",
         "width": 1180,
         "height": 820,
         "minWidth": 360,
@@ -47,13 +49,17 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "android": {
+      "versionCode": 1000001
+    },
     "macOS": {
       "minimumSystemVersion": "11.0",
       "signingIdentity": "-"
     },
     "iOS": {
-      "minimumSystemVersion": "15.0",
-      "developmentTeam": "GMXNVH8YU9"
-    }
+      "minimumSystemVersion": "15.0"
+    },
+    "license": "GPL-3.0-only",
+    "licenseFile": "../LICENSE"
   }
 }

@@ -1,0 +1,58 @@
+# cargo-deny policy (spec 003 FR-005, research R5).
+# Only shipped targets are evaluated. Windows stays in the graph because its code is
+# still compiled and tested in CI (constitution v4.0.0 principle V), even though it is not distributed.
+
+[graph]
+targets = [
+  "aarch64-apple-darwin",
+  "x86_64-apple-darwin",
+  "x86_64-unknown-linux-gnu",
+  "aarch64-linux-android",
+  "aarch64-apple-ios",
+  "x86_64-pc-windows-msvc",
+]
+all-features = false
+
+[advisories]
+version = 2
+yanked = "deny"
+# "Unmaintained" notices (not vulnerabilities) that arrive only through Tauri's own dependencies.
+# Re-check on every Tauri upgrade; remove an entry as soon as upstream drops the crate.
+ignore = [
+  { id = "RUSTSEC-2024-0370", reason = "proc-macro-error: build-time proc macro via gtk/glib-macros (Linux, Tauri runtime); no fix available downstream" },
+  { id = "RUSTSEC-2026-0370", reason = "zvariant: via zbus <- tauri-plugin-opener (Linux D-Bus); no vulnerability, awaiting upstream migration" },
+  { id = "RUSTSEC-2026-0371", reason = "zbus_names: via zbus <- tauri-plugin-opener (Linux D-Bus); no vulnerability, awaiting upstream migration" },
+  { id = "RUSTSEC-2026-0372", reason = "zvariant_derive: via zbus <- tauri-plugin-opener (Linux D-Bus); no vulnerability, awaiting upstream migration" },
+]
+
+[licenses]
+version = 2
+confidence-threshold = 0.9
+# GPLv3-compatible licenses actually used by the dependency graph (cargo deny list, 2026-11-17).
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-3-Clause",
+  "ISC",
+  "CC0-1.0",
+  "Zlib",
+  "Unicode-3.0",
+  # cssparser / selectors (via tauri-utils). MPL-2.0 is GPL-compatible (MPL-2.0 §3.3).
+  "MPL-2.0",
+  # webpki-root-certs: permissive data license for the bundled root certificate list.
+  "CDLA-Permissive-2.0",
+]
+
+[licenses.private]
+ignore = true
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

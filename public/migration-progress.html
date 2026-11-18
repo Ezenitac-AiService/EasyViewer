@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagelight</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #f8fafc; --fg: #0f172a; --muted: #475569; --bar: #0d9488; --track: #e2e8f0; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #0b0f19; --fg: #e2e8f0; --muted: #94a3b8; --track: #1e293b; } }
+      body { margin: 0; padding: 24px; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, -apple-system, sans-serif; }
+      h1 { font-size: 15px; margin: 0 0 6px; }
+      p { margin: 0 0 14px; color: var(--muted); }
+      .track { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; }
+      .bar { height: 100%; width: 0; background: var(--bar); transition: width 0.2s; }
+    </style>
+  </head>
+  <body>
+    <main role="status" aria-live="polite">
+      <h1>이전 버전 데이터를 옮기는 중입니다</h1>
+      <p id="detail">서재와 설정을 새 위치로 복사하고 있습니다. 원본은 그대로 남습니다.</p>
+      <div class="track" role="progressbar" aria-label="데이터 옮기기 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="bar" id="bar"></div>
+      </div>
+    </main>
+    <script src="./migration-progress.js"></script>
+  </body>
+</html>

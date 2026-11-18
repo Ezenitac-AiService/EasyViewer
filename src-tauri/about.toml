@@ -1,0 +1,25 @@
+# cargo-about configuration (spec 003 FR-005, research R5).
+# Generates copyright notices and full license texts for every Rust crate linked into a shipped build.
+# The target list is the union of shipped targets so the output is identical on every host.
+accepted = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-3-Clause",
+  "ISC",
+  "CC0-1.0",
+  "Zlib",
+  "Unicode-3.0",
+  "MPL-2.0",
+  "CDLA-Permissive-2.0",
+]
+targets = [
+  "aarch64-apple-darwin",
+  "x86_64-apple-darwin",
+  "x86_64-unknown-linux-gnu",
+  "aarch64-linux-android",
+  "aarch64-apple-ios",
+]
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
+private = { ignore = true }

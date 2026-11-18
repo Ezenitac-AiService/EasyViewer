@@ -1,4 +1,7 @@
-name: Release Multi-Platform
+# Tag release for the supported platforms only (spec 003 contracts/release-and-ci.md §2).
+# gate (FR-025, before any build) → macOS/Linux/Android builds → publish (artifact gate, checksums).
+# Rehearsal runs only from workflow_dispatch, never from a tag push, and only creates a draft.
+name: Release
 
 on:
   push:
@@ -7,44 +10,71 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag to publish assets to (default: v<package.json version>)'
-        required: false
+        description: 'Tag to release. A rehearsal tag must end with -rehearsal.'
+        required: true
         type: string
-      publish_release:
-        description: 'Attach built installers and APKs to the GitHub Release'
+      rehearsal:
+        description: 'Rehearsal: maintainer items become warnings and only a [REHEARSAL] draft is created'
         required: false
-        default: true
+        default: false
         type: boolean
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  verify:
-    runs-on: ubuntu-22.04
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.mode.outputs.tag }}
+      rehearsal: ${{ steps.mode.outputs.rehearsal }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: 'npm'
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-      - name: Install Linux Tauri system dependencies
+      - name: Resolve tag and mode
+        id: mode
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag_name }}
+          INPUT_REHEARSAL: ${{ inputs.rehearsal }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf
-      - run: npm ci
-      - run: npm run verify
+          set -euo pipefail
+          if [ "$EVENT" = "push" ]; then
+            TAG="$GITHUB_REF_NAME"; REHEARSAL=false
+          else
+            TAG="$INPUT_TAG"; REHEARSAL="${INPUT_REHEARSAL:-false}"
+          fi
+          if [ "$REHEARSAL" = "true" ] && [[ "$TAG" != *-rehearsal ]]; then
+            echo "::error::A rehearsal tag must end with -rehearsal"; exit 1
+          fi
+          if [ "$REHEARSAL" != "true" ] && [[ "$TAG" == *-rehearsal ]]; then
+            echo "::error::A -rehearsal tag can only be used with rehearsal=true"; exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "rehearsal=$REHEARSAL" >> "$GITHUB_OUTPUT"
+      - name: Release gate before any build (FR-025 1–5, 8, version, versionCode)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.mode.outputs.tag }}
+          REHEARSAL: ${{ steps.mode.outputs.rehearsal }}
+        run: |
+          set -euo pipefail
+          if [ "$REHEARSAL" = "true" ]; then
+            node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild --rehearsal
+          else
+            node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild
+          fi
 
   build-desktop:
-    needs: verify
+    needs: gate
     strategy:
       fail-fast: false
       matrix:
@@ -55,14 +85,6 @@ jobs:
             build_cmd: npm run mac:build
             bundle_path: |
               src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-          - name: windows-x64
-            os: windows-latest
-            rust_targets: x86_64-pc-windows-msvc
-            build_cmd: npx tauri build --bundles nsis,msi
-            bundle_path: |
-              src-tauri/target/release/bundle/nsis/*.exe
-              src-tauri/target/release/bundle/msi/*.msi
-              src-tauri/target/release/bundle/portable/*.zip
           - name: linux-x64
             os: ubuntu-22.04
             rust_targets: x86_64-unknown-linux-gnu
@@ -73,15 +95,16 @@ jobs:
               src-tauri/target/release/bundle/appimage/*.AppImage
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'npm'
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
         with:
+          toolchain: stable
           targets: ${{ matrix.rust_targets }}
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: './src-tauri -> target'
           prefix-key: ${{ matrix.name }}-rust
@@ -89,12 +112,7 @@ jobs:
         if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            rpm
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf rpm
       - run: npm ci
       - name: Build Tauri bundle (${{ matrix.name }})
         env:
@@ -102,14 +120,6 @@ jobs:
           MATRIX_NAME: ${{ matrix.name }}
           MATRIX_BUILD_CMD: ${{ matrix.build_cmd }}
         run: node scripts/ci-build-desktop.mjs
-      - name: Package Windows portable ZIP
-        if: matrix.name == 'windows-x64'
-        shell: pwsh
-        run: |
-          $version = node -p "require('./package.json').version"
-          New-Item -ItemType Directory -Force -Path "src-tauri/target/release/bundle/portable" | Out-Null
-          Copy-Item "src-tauri/target/release/easy-viewer.exe" "src-tauri/target/release/bundle/portable/EasyViewer.exe" -Force
-          Compress-Archive -Path "src-tauri/target/release/bundle/portable/EasyViewer.exe" -DestinationPath "src-tauri/target/release/bundle/portable/EasyViewer_${version}_x64_portable.zip" -Force
       - name: Verify macOS bundle signature and DMG integrity
         if: matrix.name == 'macos-universal'
         run: |
@@ -117,132 +127,146 @@ jobs:
           for dmg in src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg; do
             hdiutil verify "$dmg"
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bundle-${{ matrix.name }}
           path: ${{ matrix.bundle_path }}
           if-no-files-found: error
 
   build-android:
-    needs: verify
+    needs: gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'npm'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: android-actions/setup-android@v4
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
         with:
           packages: 'platform-tools'
-      - name: Install Android SDK platform, build-tools, and NDK
+      - name: Install Android SDK platform, build-tools and NDK
         shell: bash
         run: |
           set -euo pipefail
           yes | sdkmanager --licenses >/dev/null || true
           PACKAGES="$(sdkmanager --list | awk '{print $1}')"
-          LATEST_NDK="$(printf '%s\n' "$PACKAGES" | grep -E '^ndk;28\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 || true)"
-          if [ -z "$LATEST_NDK" ]; then
-            LATEST_NDK="$(printf '%s\n' "$PACKAGES" | grep -E '^ndk;27\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
-          fi
-          LATEST_PLATFORM="$(printf '%s\n' "$PACKAGES" | grep -E '^platforms;android-37(\.0)?$' | sort -V | tail -n 1 || true)"
-          if [ -z "$LATEST_PLATFORM" ]; then
-            LATEST_PLATFORM="$(printf '%s\n' "$PACKAGES" | grep -E '^platforms;android-36(\.0)?$' | sort -V | tail -n 1)"
-          fi
-          LATEST_BUILD_TOOLS="$(printf '%s\n' "$PACKAGES" | grep -E '^build-tools;3[67]\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
-          sdkmanager "platform-tools" "$LATEST_PLATFORM" "$LATEST_BUILD_TOOLS" "$LATEST_NDK"
+          NDK="$(printf '%s\n' "$PACKAGES" | grep -E '^ndk;2[78]\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+          PLATFORM="$(printf '%s\n' "$PACKAGES" | grep -E '^platforms;android-3[67](\.0)?$' | sort -V | tail -n 1)"
+          BUILD_TOOLS="$(printf '%s\n' "$PACKAGES" | grep -E '^build-tools;3[67]\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+          sdkmanager "platform-tools" "$PLATFORM" "$BUILD_TOOLS" "$NDK"
           if [ -d "$ANDROID_HOME/platforms/android-37.0" ] && [ ! -e "$ANDROID_HOME/platforms/android-37" ]; then
             ln -sfn "$ANDROID_HOME/platforms/android-37.0" "$ANDROID_HOME/platforms/android-37"
           fi
-          NDK_VER="${LATEST_NDK#ndk;}"
-          echo "NDK_HOME=$ANDROID_HOME/ndk/$NDK_VER" >> "$GITHUB_ENV"
-      - uses: dtolnay/rust-toolchain@stable
+          echo "NDK_HOME=$ANDROID_HOME/ndk/${NDK#ndk;}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
         with:
+          toolchain: stable
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: './src-tauri -> target'
           prefix-key: android-rust
       - run: npm ci
-      - name: Initialize Android project and build arm64 release APK
+      - run: npm run android:init
         env:
           CI: 'true'
+      # Spike S4: init must not rewrite the committed identifier and release-signing setup.
+      - name: Committed Android project is unchanged by init
+        run: git diff --exit-code -- src-tauri/gen/android
+      - name: Build arm64 APK signed with the fork release key
+        shell: bash
+        env:
+          CI: 'true'
+          REHEARSAL: ${{ needs.gate.outputs.rehearsal }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          npm run android:init
-          npm run android:release
+          set -euo pipefail
+          trap 'rm -f "$RUNNER_TEMP/pagelight-release.keystore"' EXIT
+          SUFFIX=""
+          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/pagelight-release.keystore"
+            export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/pagelight-release.keystore"
+            npm run android:release
+          elif [ "$REHEARSAL" = "true" ]; then
+            echo "::warning::No signing secrets: the rehearsal APK is debug-signed and named -rehearsal"
+            npm run android:build
+            SUFFIX="-rehearsal"
+          else
+            echo "::error::Android signing secrets are missing (see docs/android-signing.md)"
+            exit 1
+          fi
+          echo "APK_SUFFIX=$SUFFIX" >> "$GITHUB_ENV"
       - name: Stage versioned Android APK
         shell: bash
         run: |
           set -euo pipefail
           VERSION="$(node -p "require('./package.json').version")"
+          APK="$(find src-tauri/gen/android/app/build/outputs/apk -type f -name '*.apk' | sort | head -n 1)"
+          if [ -z "$APK" ]; then echo "No Android APK produced" >&2; exit 1; fi
           mkdir -p dist-android
-          FOUND=0
-          while IFS= read -r -d '' apk; do
-            cp "$apk" "dist-android/EasyViewer_${VERSION}_android-arm64.apk"
-            FOUND=1
-            break
-          done < <(find src-tauri/gen/android/app/build/outputs/apk -type f -name '*.apk' -print0 | sort -z)
-          if [ "$FOUND" -eq 0 ]; then
-            echo "No Android APK produced" >&2
-            exit 1
-          fi
+          cp "$APK" "dist-android/Pagelight_${VERSION}_android-arm64${APK_SUFFIX}.apk"
           ls -lh dist-android
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bundle-android-arm64
           path: dist-android/*.apk
           if-no-files-found: error
 
-  publish-release:
-    needs: [build-desktop, build-android]
-    if: github.event_name == 'push' || inputs.publish_release == true
+  publish:
+    needs: [gate, build-desktop, build-android]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: release-artifacts
           merge-multiple: true
-      - name: Publish multi-platform assets to GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_TAG: ${{ inputs.tag_name }}
+      - name: Collect artifacts, refuse Windows files, write SHA256SUMS.txt
         shell: bash
         run: |
           set -euo pipefail
+          if find release-artifacts -type f | grep -Eiq '\.(exe|msi)$|windows|portable\.zip$'; then
+            echo "::error::Windows artifacts are not published by this fork (FR-008)"; exit 1
+          fi
           mkdir -p release-assets
-          find release-artifacts -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.msi' -o -name '*.zip' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.apk' \) -exec cp {} release-assets/ \;
+          find release-artifacts -type f \( -name '*.dmg' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.apk' \) -exec cp {} release-assets/ \;
+          (cd release-assets && sha256sum * > SHA256SUMS.txt)
           ls -lh release-assets
-
-          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
-            TAG="${GITHUB_REF_NAME}"
-          elif [ -n "${INPUT_TAG}" ]; then
-            TAG="${INPUT_TAG}"
-          else
-            TAG="v$(node -p "require('./package.json').version")"
-          fi
-
-          PRERELEASE_FLAG=""
-          if [[ "$TAG" == *-* ]]; then
-            PRERELEASE_FLAG="--prerelease"
-          fi
-
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" release-assets/* --clobber
-          elif [ -n "$PRERELEASE_FLAG" ]; then
+      - name: Release gate on the artifacts (FR-025 6–7)
+        env:
+          TAG: ${{ needs.gate.outputs.tag }}
+        run: node scripts/check-release-gate.mjs --release --tag "$TAG" --phase publish --assets release-assets
+      - name: Create the GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.gate.outputs.tag }}
+          REHEARSAL: ${{ needs.gate.outputs.rehearsal }}
+        run: |
+          set -euo pipefail
+          if [ "$REHEARSAL" = "true" ]; then
             gh release create "$TAG" release-assets/* \
-              --title "EasyViewer $TAG" \
-              --generate-notes \
-              --prerelease
-          else
-            gh release create "$TAG" release-assets/* \
-              --title "EasyViewer $TAG" \
-              --generate-notes
+              --title "[REHEARSAL] Pagelight $TAG" \
+              --notes-file .github/release-notes.md \
+              --target "$GITHUB_SHA" --draft --prerelease
+            exit 0
           fi
+          PRERELEASE=()
+          if [[ "$TAG" == *-* ]]; then PRERELEASE=(--prerelease); fi
+          gh release create "$TAG" release-assets/* \
+            --title "Pagelight $TAG" \
+            --notes-file .github/release-notes.md \
+            --verify-tag "${PRERELEASE[@]}"
