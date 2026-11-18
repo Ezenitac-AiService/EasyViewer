@@ -51,7 +51,7 @@ description: "독립 포크 분리 작업 목록"
 - [ ] T006 스파이크 S2를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
   - 일회성 테스트 바이너리로 `tauri_plugin_keyring_store::KeyringStore::new("com.edith.easyviewer").get_password("easyviewer:webdav:<id>")`를 새 식별자 빌드에서 호출한다.
   - macOS에서는 키체인 접근 대화상자 표시 여부와 거부 시 오류 종류를, Linux Secret Service에서는 동작 여부를 기록한다.
-- [ ] T007 [P] 스파이크 S4를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
+- [X] T007 [P] 스파이크 S4를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
   - 깨끗한 체크아웃에서 `npm run android:init`을 실행한 뒤 `git status`로 `src-tauri/gen/android/app/build.gradle.kts`가 덮어써지는지 확인한다
 - [ ] T008 [P] 스파이크 S5를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
   - 서명 비밀값 없이 `npm run ios:init && npm run ios:build -- --debug --target aarch64-sim`가 통과하는지 확인한다
@@ -383,7 +383,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T072 [US6] `src/services/platform/libraryReconstruction.ts`를 구현한다. 새 앱 데이터 폴더 `books/`에 이미 있는 파일은 **복사하지 않고 그 자리에서** 서재에 등록한다. 검증은 기존 경계(`read_validated_book_file`·`hash_validated_book_file`·`extract_epub_metadata_from_path`)를 거친다. 해시가 이미 등록된 파일은 건너뛰어(기존 `bookHashDedupe` 규칙) 중복 항목·중복 파일이 0건이어야 한다. `useBookStore.ts`(448줄)에는 코드를 더하지 않고 공개 API만 쓴다
 - [X] T073 [US6] `src/components/library/MigrationNotice.vue`를 구현해 T067을 통과시키고, `src/views/LibraryView.vue`에 배치한다. 450줄 이하를 유지하고, 접근성 대화상자 또는 알림 영역 규약, `light`·`dark`·`sepia` 테마, 데스크톱·모바일 입력 환경을 모두 지원한다(헌법 품질 게이트)
 - [X] T074 [P] [US6] `docs/mobile-migration.md`를 작성한다. 새 식별자 앱은 별도 앱으로 설치되고 자동 이전이 없다는 사실, 대체 경로(WebDAV 동기화, 책 파일 다시 가져오기), 잃는 항목, 이전 앱 제거 시점을 담는다
-- [ ] T075 [US6] `npm run verify`와 `cd src-tauri && cargo test`가 통과하는지 확인한다. 이어서 `rustup target add x86_64-pc-windows-msvc` 후 `cd src-tauri && cargo check --target x86_64-pc-windows-msvc`로 Windows 경로가 컴파일되는지 로컬에서 확인한다(헌법 제5원칙). 크로스 확인이 툴체인·C 의존성 때문에 실패하면 `BLOCKED`로 기록하고 T084 `windows-compile-test` 결과로 대신한다
+- [X] T075 [US6] `npm run verify`와 `cd src-tauri && cargo test`가 통과하는지 확인한다. 이어서 `rustup target add x86_64-pc-windows-msvc` 후 `cd src-tauri && cargo check --target x86_64-pc-windows-msvc`로 Windows 경로가 컴파일되는지 로컬에서 확인한다(헌법 제5원칙). 크로스 확인이 툴체인·C 의존성 때문에 실패하면 `BLOCKED`로 기록하고 T084 `windows-compile-test` 결과로 대신한다
 - [ ] T076 [US6] (실기기) quickstart §3 시나리오 1–9를 macOS와 Linux에서 실행해 `verification/migration-macos.md`·`verification/migration-linux.md`에 기록한다. 실행하지 못한 시나리오는 `BLOCKED`로 둔다
 - [ ] T077 [US6] (실기기) 스파이크 S3를 진행한다. 새 이름으로 macOS `.app`·Linux deb·AppImage·(정식 버전 빌드로) rpm, Android APK를 만들어 원저작자 최신 앱과 함께 설치하고 quickstart §4 결과를 `verification/coexistence.md`에 기록한다(SC-007)
 
@@ -437,7 +437,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T088 [P] [US7] `specs/001-*/spec.md`와 `specs/002-*/spec.md` 머리말 바로 아래에 안내 한 줄을 추가한다: "식별자·지원 범위는 003에서 변경되었습니다. [003 명세](../003-independent-fork-separation/spec.md) 참고". 본문은 재작성하지 않는다
 - [X] T089 [US7] 버전을 첫 독립 릴리스 후보 `1.0.0-alpha.1`(R9)로 올린다. `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `Cargo.lock`, `tauri.conf.json`, `project.yml`, `Info.plist`를 바꾸고 `npm run check:version`을 통과시킨다. 자동 계산은 프리릴리스를 무시하므로(research F30) `tauri.conf.json`에 `bundle.android.versionCode`를 명시한다. 값은 구 포크 `0.1.6-beta`의 자동값 `1006`보다 크고 이후 릴리스마다 늘어나야 한다(예: `1000001`). `check-release-gate.mjs`(T039·T040)에 `versionCode` 명시·증가 검사를 더한다
 - [ ] T090 [US7] 헌법 "지원 플랫폼 등급"(`.specify/memory/constitution.md`)과 `src/config/supportScope.ts` 원문의 의미가 같은지 사람이 검토하고, 결과를 `specs/003-independent-fork-separation/checklists/requirements.md` Notes에 기록한다
-- [ ] T091 [US7] PR을 하나 만들어 `ci.yml` 6개 작업 결과를 확인하고 `verification/release-gate.md` 항목 4·5 근거로 링크한다. PR 생성은 사용자 승인 후 진행하며, 업스트림에는 PR을 보내지 않는다
+- [X] T091 [US7] PR을 하나 만들어 `ci.yml` 6개 작업 결과를 확인하고 `verification/release-gate.md` 항목 4·5 근거로 링크한다. PR 생성은 사용자 승인 후 진행하며, 업스트림에는 PR을 보내지 않는다
 
 **Checkpoint**: 모든 사용자 스토리 구현 완료
 

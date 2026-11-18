@@ -37,10 +37,12 @@
 
 ## S4 — `android:init`이 Gradle 파일을 덮어쓰는가 (T007)
 
-| 판정 | **BLOCKED** |
+| 판정 | **PASS** |
 |---|---|
-| 사유 | 이 Mac에 Android SDK·NDK가 없다(`ANDROID_HOME` 미설정, `~/Library/Android/sdk` 없음) |
-| 필요한 환경 | Android SDK·NDK가 있는 환경 또는 CI `android-debug` 작업. T057에서 init 후 `git status`로 확인한다 |
+| 날짜 | 2026-11-18 |
+| 환경 | CI `android-debug` 작업(ubuntu-latest, Temurin 21, NDK 27/28 최신) — [실행 44298183848](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44298183848), 커밋 `1aeb5ae`. 1차 실행 44267511701(`cd0915d`)에서도 같은 결과 |
+| 결과 | `npm run android:init` 직후 `git diff --exit-code -- src-tauri/gen/android`가 종료 코드 0. init이 커밋된 식별자·release 서명 설정을 덮어쓰지 않는다. 이어서 `npm run android:build`(debug APK) 성공 |
+| 로컬 | 이 Mac에는 Android SDK·NDK가 없어 로컬 확인은 하지 않았다 |
 | 설계 영향 | T057은 두 경우를 모두 다룬다(덮어쓰면 init 후 주입) |
 
 ## S5 — 서명 없는 iOS 시뮬레이터 빌드 (T008)
@@ -95,12 +97,13 @@
 
 ### Windows 대상 컴파일
 
-| 판정 | **BLOCKED** |
+| 판정 | 로컬 **BLOCKED**, CI **PASS** |
 |---|---|
 | 날짜 | 2026-11-18 |
 | 실행 명령 | `rustup target add x86_64-pc-windows-msvc` 후 `cd src-tauri && cargo check --target x86_64-pc-windows-msvc` |
 | 결과 | 의존성 `aws-lc-sys` 0.47.0의 빌드 스크립트가 C 소스(`jitterentropy-timer.c`)를 Windows 대상으로 컴파일하지 못해 실패. 이 Mac에는 MSVC 헤더·도구가 없음. 이 저장소의 크레이트 코드는 컴파일 단계에 도달하지 못함 |
-| 필요한 환경 | Windows 러너의 CI `windows-compile-test` 작업(T084). 이전 코드는 macOS·Linux 외 플랫폼에서 `MigrationPaths::for_platform`이 `None`을 반환해 `skipped_no_source`만 기록하도록 작성했으나, 실제 Windows 컴파일은 아직 확인하지 않음 |
+| 필요한 환경 | Windows 러너의 CI `windows-compile-test` 작업(T084). 이전 코드는 macOS·Linux 외 플랫폼에서 `MigrationPaths::for_platform`이 `None`을 반환해 `skipped_no_source`만 기록한다 |
+| CI 결과 | [실행 44298183848](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44298183848)의 `windows-compile-test`(windows-latest)에서 `npm test`·`npm run build`·`cargo check`·`cargo test` 모두 통과. 그 전 두 실행의 실패는 테스트 쪽 문제였다: 워크플로 테스트의 CRLF 처리(`4c2dccc`), Unix 절대 경로를 가정한 `path_guard` 테스트(`1aeb5ae`). 제품 코드는 바꾸지 않았다 |
 
 ### 실기기 시나리오
 
