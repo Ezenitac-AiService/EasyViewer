@@ -7391,7 +7391,7 @@ SOFTWARE.
 
 
 === MIT License (MIT) ===
-사용 크레이트: block2@0.6.2, brotli-decompressor@6.3.0, cesu8@1.1.0, dispatch2@0.3.1, dlopen2@0.8.2, dlopen2_derive@0.4.3, dpi@0.1.2, jni-macros@0.22.4, jni-sys-macros@0.4.1, jni@0.22.4, ndk-context@0.1.1, ndk-sys@0.6.0+11769913, ndk@0.9.0, objc2-app-kit@0.3.2, objc2-cloud-kit@0.3.2, objc2-core-data@0.3.2, objc2-core-foundation@0.3.2, objc2-core-graphics@0.3.2, objc2-core-image@0.3.2, objc2-core-location@0.3.2, objc2-core-text@0.3.2, objc2-encode@4.1.0, objc2-exception-helper@0.1.1, objc2-foundation@0.3.2, objc2-quartz-core@0.3.2, objc2-ui-kit@0.3.2, objc2-user-notifications@0.3.2, objc2-web-kit@0.3.2, objc2@0.6.5, rustls-platform-verifier-android@0.2.0, tauri-plugin-dialog@2.8.4, tauri-plugin-fs@2.7.1, tauri-plugin-opener@2.7.3, tauri-plugin-store@2.5.0
+사용 크레이트: block2@0.6.2, brotli-decompressor@6.3.0, cesu8@1.1.0, dispatch2@0.3.1, dlopen2@0.8.2, dlopen2_derive@0.4.3, dpi@0.1.2, jni-macros@0.22.4, jni-sys-macros@0.4.1, jni@0.22.4, ndk-context@0.1.1, ndk-sys@0.6.0+11769913, ndk@0.9.0, objc2-app-kit@0.3.2, objc2-cloud-kit@0.3.2, objc2-core-data@0.3.2, objc2-core-foundation@0.3.2, objc2-core-graphics@0.3.2, objc2-core-image@0.3.2, objc2-core-location@0.3.2, objc2-core-text@0.3.2, objc2-encode@4.1.0, objc2-exception-helper@0.1.1, objc2-foundation@0.3.2, objc2-quartz-core@0.3.2, objc2-ui-kit@0.3.2, objc2-user-notifications@0.3.2, objc2-web-kit@0.3.2, objc2@0.6.5, rustls-platform-verifier-android@0.2.0, tauri-plugin-dialog@2.8.4, tauri-plugin-fs@2.7.1, tauri-plugin-opener@2.7.3, tauri-plugin-single-instance@2.5.5, tauri-plugin-store@2.5.0
 
 MIT License
 

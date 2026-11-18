@@ -203,3 +203,42 @@ jobs:
     expect(checkStatic(repo({ ...GOOD_RECORDS, '.github/workflows/ci.yml': wf })).join('\n')).toMatch(re)
   })
 })
+
+describe('release gate phases (contracts §2: gate before builds, artifacts at publish)', () => {
+  const GOOD_ASSETS = ['Pagelight_1.0.0-alpha.1_universal.dmg', 'Pagelight_1.0.0-alpha.1_amd64.deb']
+  function sums(files: string[]) {
+    return files.map((f) => `${'0'.repeat(64)}  ${f}`).join('\n') + '\n'
+  }
+
+  it('prebuild checks every item except the artifact items 6–7', () => {
+    const r = runGate(repo(GOOD_RECORDS), { mode: 'release', phase: 'prebuild', tag: 'v1.0.0-alpha.1' }, env())
+    expect(r.errors).toEqual([])
+    expect(r.items.map((i: { id: string }) => i.id)).toEqual(['1', '2', '3', '4', '5', '8'])
+  })
+
+  it('prebuild still fails on version, versionCode and maintainer items', () => {
+    const root = repo({
+      ...GOOD_RECORDS,
+      [`${V}/release-gate.md`]: '',
+      'src-tauri/tauri.conf.json': JSON.stringify({ version: '1.0.0-alpha.1' })
+    })
+    const msg = runGate(root, { mode: 'release', phase: 'prebuild', tag: 'v9.9.9' }, env()).errors.join('\n')
+    expect(msg).toMatch(/\[8\]/)
+    expect(msg).toMatch(/매니페스트 버전/)
+    expect(msg).toMatch(/versionCode/)
+  })
+
+  it('publish checks only the artifacts (6–7)', () => {
+    const files = [...GOOD_ASSETS, 'SHA256SUMS.txt']
+    const dir = assets(files)
+    fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), sums(GOOD_ASSETS))
+    const ok = runGate(repo({}), { mode: 'release', phase: 'publish', tag: 'v1.0.0-alpha.1', assetsDir: dir }, env())
+    expect(ok.errors).toEqual([])
+    expect(ok.items.map((i: { id: string }) => i.id)).toEqual(['6', '7'])
+
+    const bad = assets([...GOOD_ASSETS, 'Pagelight_1.0.0_x64-setup.exe'])
+    const res = runGate(repo({}), { mode: 'release', phase: 'publish', tag: 'v1.0.0-alpha.1', assetsDir: bad }, env())
+    expect(res.errors.join('\n')).toMatch(/\[6\]/)
+    expect(res.errors.join('\n')).toMatch(/\[7\]/)
+  })
+})

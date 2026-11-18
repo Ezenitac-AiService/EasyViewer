@@ -204,7 +204,7 @@ description: "독립 포크 분리 작업 목록"
 ### Implementation for User Story 3
 
 - [X] T040 [US3] `scripts/check-release-gate.mjs`를 구현해 T039를 통과시킨다(450줄 이하). 버전 비중복 조회는 `gh api repos/edith2580/EasyViewer/releases`(읽기 전용)를 쓰고, 네트워크가 없으면 `BLOCKED`로 종료 코드 2를 낸다
-- [ ] T041 [US3] `scripts/verify.mjs`에 워크플로 스크립트 참조·동기화 경로 검사(`check-release-gate.mjs --static`)를 추가한다
+- [X] T041 [US3] `scripts/verify.mjs`에 워크플로 스크립트 참조·동기화 경로 검사(`check-release-gate.mjs --static`)를 추가한다
 - [X] T042 [US3] `specs/003-independent-fork-separation/verification/release-gate.md` 양식을 만든다. FR-025 1–8 항목별 체크 칸, 확인자, 날짜, 근거 링크를 두고 항목 1에는 T011 결과를 옮긴다
 - [X] T043 [US3] `docs/maintainer-runbook.md`를 새로 만든다.
   - 분리 요청 절차: **GitHub Support 요청이 기본**이다(확정 결정 1, 이슈·PR 이력 보존). 설정의 "Leave fork network"는 이슈·PR·스타·위키를 잃고 되돌릴 수 없으며 릴리스 보존이 문서화되어 있지 않다(research F33). 그래서 Support가 지연·거절되고, `gh release download`로 모든 릴리스 산출물·노트를 백업하고, 위키를 백업하고, 지원 종료 고지(T097)를 게시한 뒤에만 쓴다. 실행 시점에 공식 문서를 다시 확인한다
@@ -314,7 +314,7 @@ description: "독립 포크 분리 작업 목록"
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T064 [P] [US6] `src-tauri/src/migration/tests.rs`에 `tempfile` 기반 실패하는 테스트를 작성한다(contracts/data-migration.md §1, data-model §1). 필요하면 `tempfile`을 `[dev-dependencies]`에 추가한다.
+- [X] T064 [P] [US6] `src-tauri/src/migration/tests.rs`에 `tempfile` 기반 실패하는 테스트를 작성한다(contracts/data-migration.md §1, data-model §1). 필요하면 `tempfile`을 `[dev-dependencies]`에 추가한다.
   - 상태 5종: `skipped_no_source`, `skipped_target_not_empty`, `migrated`, `partial`, `failed`
   - 기록 파일이 있으면 두 번째 실행에서 아무것도 바꾸지 않음
   - 심볼릭 링크와 루트 밖 경로 건너뛰기(`skippedEntries` 증가)
@@ -332,19 +332,19 @@ description: "독립 포크 분리 작업 목록"
   - 복사 중 원본 SQLite 묶음(`*.db`·`-wal`·`-shm`)의 크기·수정 시각이 바뀌면 `error = "busy"`로 롤백
   - `-wal`·`-shm`이 본 파일과 함께 복사되고, 캐시 폴더는 제외됨
   - "비어 있음" 정의(무시 목록만 있는 새 폴더는 비어 있음)
-- [ ] T065 [P] [US6] `src-tauri/src/migration/credentials.rs` 하단 `#[cfg(test)]`에 실패하는 테스트를 작성한다(data-model §2).
+- [X] T065 [P] [US6] `src-tauri/src/migration/credentials.rs` 하단 `#[cfg(test)]`에 실패하는 테스트를 작성한다(data-model §2).
   - 입력 64개 초과 거부, `^easyviewer:webdav:[A-Za-z0-9_-]{1,128}$` 위반 시 전체 거부
   - 새 서비스에 값이 있으면 덮어쓰지 않음
   - 구 항목 삭제 금지
   - 응답에 비밀값·계정 키 없음
   - 두 번째 호출 무변경
   - 키체인 접근은 trait으로 추상화해 메모리 대역으로 테스트
-- [ ] T066 [P] [US6] `tests/unit/migrationService.spec.ts`에 실패하는 테스트를 작성한다(`mockIPC`).
+- [X] T066 [P] [US6] `tests/unit/migrationService.spec.ts`에 실패하는 테스트를 작성한다(`mockIPC`).
   - `getRecord()`는 웹·모바일에서 `null`, 데스크톱에서 기록 반환
   - `acknowledge()` 호출
   - 자격증명 이전은 WebDAV 연결 목록에서 계정 키를 만들고 1회만 호출
   - 응답을 화면 상태로 변환
-- [ ] T067 [P] [US6] `tests/unit/migrationNotice.spec.ts`에 실패하는 테스트를 작성한다(contracts/data-migration.md §2 안내 표).
+- [X] T067 [P] [US6] `tests/unit/migrationNotice.spec.ts`에 실패하는 테스트를 작성한다(contracts/data-migration.md §2 안내 표).
   - 상태별 안내 문구
   - `migrated`인데 서재가 비어 있거나 `partial`이면 재구성 실행 후 손실 항목 안내
   - `failed`면 원본 보존과 수동 복구 안내
@@ -358,7 +358,7 @@ description: "독립 포크 분리 작업 목록"
 
 ### Implementation for User Story 6
 
-- [ ] T068 [US6] `src-tauri/src/migration/mod.rs`를 구현해 T064를 통과시킨다(450줄 이하, 필요하면 `paths.rs`·`lock.rs`로 분리).
+- [X] T068 [US6] `src-tauri/src/migration/mod.rs`를 구현해 T064를 통과시킨다(450줄 이하, 필요하면 `paths.rs`·`lock.rs`로 분리).
   - contracts/data-migration.md §1 흐름도를 순수 결정 함수 `decide()`와 실행부로 나눠 구현한다. 불변식: 이전 결정이 최종 상태가 되기 전에는 영속 WebView를 만들지 않는다
   - 단일 인스턴스: `tauri-plugin-single-instance`(Tauri 공식)를 추가하고, `deny.toml`·고지 생성(T022·T025) 범위에 반영한다
   - 이전 잠금: OS 런타임·임시 폴더 아래 전용 파일(`$XDG_RUNTIME_DIR/com.ezenitac.easyviewer/migration.lock`, macOS `NSTemporaryDirectory()/com.ezenitac.easyviewer/migration.lock`)
@@ -372,17 +372,17 @@ description: "독립 포크 분리 작업 목록"
   - `migration-v1.json` 기록
   - 오류가 나도 패닉하지 않음
   - Windows·모바일에서는 `skipped_no_source`를 반환하지만 컴파일은 됨
-- [ ] T069 [US6] `src-tauri/src/migration/credentials.rs`에 `migrate_legacy_credentials` 명령과 기록 조회 명령 `get_migration_record`·`acknowledge_migration_notice`를 구현해 T065를 통과시킨다. 실제 저장소는 `tauri_plugin_keyring_store::KeyringStore::new("com.edith.easyviewer")`와 앱에 관리되는 플러그인 저장소를 쓴다
-- [ ] T070 [US6] `src-tauri/tauri.conf.json` `app.windows[0]`에 `"label": "main"`, `"create": false`를 둔다. `src-tauri/src/lib.rs`는 다음처럼 고친다.
+- [X] T069 [US6] `src-tauri/src/migration/credentials.rs`에 `migrate_legacy_credentials` 명령과 기록 조회 명령 `get_migration_record`·`acknowledge_migration_notice`를 구현해 T065를 통과시킨다. 실제 저장소는 `tauri_plugin_keyring_store::KeyringStore::new("com.edith.easyviewer")`와 앱에 관리되는 플러그인 저장소를 쓴다
+- [X] T070 [US6] `src-tauri/tauri.conf.json` `app.windows[0]`에 `"label": "main"`, `"create": false`를 둔다. `src-tauri/src/lib.rs`는 다음처럼 고친다.
   - `.setup()` 훅은 데스크톱에서 `migration::decide()`를 호출하고 **바로 반환**한다(동기로 복사하면 이벤트 루프가 멈춰 진행 창이 그려지지 않음). 결정이 `OpenMainWindow`이면 즉시, `CopyInBackground`이면 복사 스레드가 기록을 마친 뒤 앱 핸들로 `WebviewWindowBuilder::from_config(app.handle(), &app.config().app.windows[0])?.build()?`를 실행해 메인 창을 만든다. `AskUser`·`Exit`면 메인 창을 만들지 않는다
   - 재시작 명령 `request_restart_for_discard`(기록을 `discard_pending`으로 바꾼 뒤 `app.restart()`)를 등록한다
   - 모바일에서도 같은 방식으로 창을 만든다
   - 데스크톱 `invoke_handler`에 새 명령 4개 등록(`get_migration_record`, `acknowledge_migration_notice`, `migrate_legacy_credentials`, `request_restart_for_discard`)
   - `capabilities`의 `windows: ["main"]` 라벨이 유지되는지 확인
-- [ ] T071 [US6] `src/services/platform/migrationService.ts`를 구현해 T066을 통과시키고 `src/services/platform/index.ts`에서 내보낸다. 상위 계층이 `@tauri-apps/api`를 직접 호출하지 않는다(헌법 제5원칙, `check:boundaries`)
-- [ ] T072 [US6] `src/services/platform/libraryReconstruction.ts`를 구현한다. 새 앱 데이터 폴더 `books/`에 이미 있는 파일은 **복사하지 않고 그 자리에서** 서재에 등록한다. 검증은 기존 경계(`read_validated_book_file`·`hash_validated_book_file`·`extract_epub_metadata_from_path`)를 거친다. 해시가 이미 등록된 파일은 건너뛰어(기존 `bookHashDedupe` 규칙) 중복 항목·중복 파일이 0건이어야 한다. `useBookStore.ts`(448줄)에는 코드를 더하지 않고 공개 API만 쓴다
-- [ ] T073 [US6] `src/components/library/MigrationNotice.vue`를 구현해 T067을 통과시키고, `src/views/LibraryView.vue`에 배치한다. 450줄 이하를 유지하고, 접근성 대화상자 또는 알림 영역 규약, `light`·`dark`·`sepia` 테마, 데스크톱·모바일 입력 환경을 모두 지원한다(헌법 품질 게이트)
-- [ ] T074 [P] [US6] `docs/mobile-migration.md`를 작성한다. 새 식별자 앱은 별도 앱으로 설치되고 자동 이전이 없다는 사실, 대체 경로(WebDAV 동기화, 책 파일 다시 가져오기), 잃는 항목, 이전 앱 제거 시점을 담는다
+- [X] T071 [US6] `src/services/platform/migrationService.ts`를 구현해 T066을 통과시키고 `src/services/platform/index.ts`에서 내보낸다. 상위 계층이 `@tauri-apps/api`를 직접 호출하지 않는다(헌법 제5원칙, `check:boundaries`)
+- [X] T072 [US6] `src/services/platform/libraryReconstruction.ts`를 구현한다. 새 앱 데이터 폴더 `books/`에 이미 있는 파일은 **복사하지 않고 그 자리에서** 서재에 등록한다. 검증은 기존 경계(`read_validated_book_file`·`hash_validated_book_file`·`extract_epub_metadata_from_path`)를 거친다. 해시가 이미 등록된 파일은 건너뛰어(기존 `bookHashDedupe` 규칙) 중복 항목·중복 파일이 0건이어야 한다. `useBookStore.ts`(448줄)에는 코드를 더하지 않고 공개 API만 쓴다
+- [X] T073 [US6] `src/components/library/MigrationNotice.vue`를 구현해 T067을 통과시키고, `src/views/LibraryView.vue`에 배치한다. 450줄 이하를 유지하고, 접근성 대화상자 또는 알림 영역 규약, `light`·`dark`·`sepia` 테마, 데스크톱·모바일 입력 환경을 모두 지원한다(헌법 품질 게이트)
+- [X] T074 [P] [US6] `docs/mobile-migration.md`를 작성한다. 새 식별자 앱은 별도 앱으로 설치되고 자동 이전이 없다는 사실, 대체 경로(WebDAV 동기화, 책 파일 다시 가져오기), 잃는 항목, 이전 앱 제거 시점을 담는다
 - [ ] T075 [US6] `npm run verify`와 `cd src-tauri && cargo test`가 통과하는지 확인한다. 이어서 `rustup target add x86_64-pc-windows-msvc` 후 `cd src-tauri && cargo check --target x86_64-pc-windows-msvc`로 Windows 경로가 컴파일되는지 로컬에서 확인한다(헌법 제5원칙). 크로스 확인이 툴체인·C 의존성 때문에 실패하면 `BLOCKED`로 기록하고 T084 `windows-compile-test` 결과로 대신한다
 - [ ] T076 [US6] (실기기) quickstart §3 시나리오 1–9를 macOS와 Linux에서 실행해 `verification/migration-macos.md`·`verification/migration-linux.md`에 기록한다. 실행하지 못한 시나리오는 `BLOCKED`로 둔다
 - [ ] T077 [US6] (실기기) 스파이크 S3를 진행한다. 새 이름으로 macOS `.app`·Linux deb·AppImage·(정식 버전 빌드로) rpm, Android APK를 만들어 원저작자 최신 앱과 함께 설치하고 quickstart §4 결과를 `verification/coexistence.md`에 기록한다(SC-007)
@@ -399,7 +399,7 @@ description: "독립 포크 분리 작업 목록"
 
 ### Tests for User Story 7 ⚠️
 
-- [ ] T078 [P] [US7] `tests/unit/releaseWorkflow.spec.ts`를 실패하도록 고친다(contracts/release-and-ci.md §5).
+- [X] T078 [P] [US7] `tests/unit/releaseWorkflow.spec.ts`를 실패하도록 고친다(contracts/release-and-ci.md §5).
   - `release.yml`: `windows-x64` 매트릭스·`*.exe`·`*.msi`·포터블 ZIP 단계가 없음, `SHA256SUMS.txt` 생성 단계가 있음, `gate` 작업이 `publish`의 `needs`에 있음, 제목이 새 표시명으로 시작, Android 서명 비밀값 환경 변수가 있음
   - `ci.yml`: 작업 6개(`verify`, `licenses`, `windows-compile-test`, `macos-build`, `ios-sim-build`, `android-debug`), `pull_request`와 `push: main` 트리거
   - `ci-build-desktop.mjs`의 `resolveDesktopBuildCommand`에 `windows-x64` 분기가 없고, macOS·Linux 프리릴리스 규칙(`deb,appimage`)은 유지
@@ -415,15 +415,15 @@ description: "독립 포크 분리 작업 목록"
   - 개인 기기 식별자가 git 이력에 남아 있다는 한계(FR-017)
   - 미수정 결함 공개 기준(T014와 같은 값)
 - [X] T082 [P] [US7] `docs/ios-build.md`를 작성한다. 소스 빌드로만 제공한다는 사실과 `APPLE_DEVELOPMENT_TEAM`·`IOS_DEVICE_ID` 환경 변수를 쓰는 빌드·설치 절차를 담는다. 작성 전에 Tauri 2 공식 문서(iOS 코드 서명)로 `APPLE_DEVELOPMENT_TEAM` 지원을 재확인하고 링크한다
-- [ ] T083 [P] [US7] `.github/release-notes.md` 템플릿을 만든다. 지원 범위 원문, macOS 격리 해제는 공증 전 **임시 조치**라는 경고, `shasum -a 256 -c SHA256SUMS.txt` 체크섬 검증 절차, iOS 소스 빌드 안내 링크, 첫 독립 릴리스용 식별자 변경·데이터 이전 안내(`docs/mobile-migration.md`)를 담는다. 같은 경고와 체크섬 절차를 README macOS 설치 절에도 반영한다(FR-020)
-- [ ] T084 [US7] `.github/workflows/ci.yml`을 만든다(contracts/release-and-ci.md §1).
+- [X] T083 [P] [US7] `.github/release-notes.md` 템플릿을 만든다. 지원 범위 원문, macOS 격리 해제는 공증 전 **임시 조치**라는 경고, `shasum -a 256 -c SHA256SUMS.txt` 체크섬 검증 절차, iOS 소스 빌드 안내 링크, 첫 독립 릴리스용 식별자 변경·데이터 이전 안내(`docs/mobile-migration.md`)를 담는다. 같은 경고와 체크섬 절차를 README macOS 설치 절에도 반영한다(FR-020)
+- [X] T084 [US7] `.github/workflows/ci.yml`을 만든다(contracts/release-and-ci.md §1).
   - 작업 6개: `verify`, `licenses`(`cargo deny check` + `node scripts/check-licenses.mjs`), `windows-compile-test`(`npm ci`·`npm test`·`cargo check`·`cargo test`, 번들 생성 없음), `macos-build`, `ios-sim-build`, `android-debug`
   - `ios-sim-build`는 차단 작업이다(FR-021). `continue-on-error`를 쓰지 않는다. T008이 실패했다면 이 작업 안에서 원인을 먼저 고친다. 고칠 수 없으면 구현을 멈추고 스펙 예외 개정을 요청한다
   - 비밀값 참조 없음
   - 최상위 `permissions: contents: read`. JavaScript 액션은 Node 24 대응 최신 메이저(작성 시점 확인값, 예: `actions/checkout` v6)를 쓰고, 서드파티 액션은 커밋 SHA로 고정하며 버전을 주석으로 병기한다(research F34, contracts/release-and-ci.md §1)
   - `licenses` 작업에 `cargo-about` 설치와 `node scripts/check-licenses.mjs`(고지 생성물 일치 검사)를 넣는다
-- [ ] T085 [US7] `.github/workflows/build-apple.yml`을 삭제한다(ci.yml로 흡수)
-- [ ] T086 [US7] `.github/workflows/release.yml`을 고친다.
+- [X] T085 [US7] `.github/workflows/build-apple.yml`을 삭제한다(ci.yml로 흡수)
+- [X] T086 [US7] `.github/workflows/release.yml`을 고친다.
   - `gate` 작업(`node scripts/check-release-gate.mjs --release --tag $TAG`)을 맨 앞에 두고 모든 빌드의 `needs`에 넣는다
   - `build-desktop` 매트릭스에서 `windows-x64`와 "Package Windows portable ZIP" 단계를 지운다
   - `build-android`에서 `ANDROID_KEYSTORE_BASE64`를 `$RUNNER_TEMP`에 풀어 환경 변수 4개를 넘기고, 끝나면 지운다(로그 출력 금지)
@@ -433,9 +433,9 @@ description: "독립 포크 분리 작업 목록"
   - 제목을 `<새 표시명> $TAG`로, 본문은 `.github/release-notes.md`로 한다
   - `workflow_dispatch` 입력 `rehearsal`(boolean, 기본 false)을 추가한다(contracts/release-and-ci.md §2 리허설 모드). `true`이면 `gate`는 `--release --rehearsal`로 수동 항목을 경고로 낮추고, Android는 비밀값이 없을 때 debug 서명과 `-rehearsal` 이름을 쓰며, `publish`는 `[REHEARSAL]` 제목의 초안만 만든다. 태그 푸시 트리거에서는 `rehearsal`을 켤 수 없어야 한다
   - T039·T040에 `--rehearsal` 모드 테스트와 구현을 더한다(수동 항목 경고, 자동 항목은 그대로 실패)
-- [ ] T087 [US7] `scripts/ci-build-desktop.mjs`에서 `windows-x64` 분기를 지워 T078을 통과시킨다
+- [X] T087 [US7] `scripts/ci-build-desktop.mjs`에서 `windows-x64` 분기를 지워 T078을 통과시킨다
 - [X] T088 [P] [US7] `specs/001-*/spec.md`와 `specs/002-*/spec.md` 머리말 바로 아래에 안내 한 줄을 추가한다: "식별자·지원 범위는 003에서 변경되었습니다. [003 명세](../003-independent-fork-separation/spec.md) 참고". 본문은 재작성하지 않는다
-- [ ] T089 [US7] 버전을 첫 독립 릴리스 후보 `1.0.0-alpha.1`(R9)로 올린다. `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `Cargo.lock`, `tauri.conf.json`, `project.yml`, `Info.plist`를 바꾸고 `npm run check:version`을 통과시킨다. 자동 계산은 프리릴리스를 무시하므로(research F30) `tauri.conf.json`에 `bundle.android.versionCode`를 명시한다. 값은 구 포크 `0.1.6-beta`의 자동값 `1006`보다 크고 이후 릴리스마다 늘어나야 한다(예: `1000001`). `check-release-gate.mjs`(T039·T040)에 `versionCode` 명시·증가 검사를 더한다
+- [X] T089 [US7] 버전을 첫 독립 릴리스 후보 `1.0.0-alpha.1`(R9)로 올린다. `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `Cargo.lock`, `tauri.conf.json`, `project.yml`, `Info.plist`를 바꾸고 `npm run check:version`을 통과시킨다. 자동 계산은 프리릴리스를 무시하므로(research F30) `tauri.conf.json`에 `bundle.android.versionCode`를 명시한다. 값은 구 포크 `0.1.6-beta`의 자동값 `1006`보다 크고 이후 릴리스마다 늘어나야 한다(예: `1000001`). `check-release-gate.mjs`(T039·T040)에 `versionCode` 명시·증가 검사를 더한다
 - [ ] T090 [US7] 헌법 "지원 플랫폼 등급"(`.specify/memory/constitution.md`)과 `src/config/supportScope.ts` 원문의 의미가 같은지 사람이 검토하고, 결과를 `specs/003-independent-fork-separation/checklists/requirements.md` Notes에 기록한다
 - [ ] T091 [US7] PR을 하나 만들어 `ci.yml` 6개 작업 결과를 확인하고 `verification/release-gate.md` 항목 4·5 근거로 링크한다. PR 생성은 사용자 승인 후 진행하며, 업스트림에는 PR을 보내지 않는다
 
@@ -542,5 +542,5 @@ Setup → Foundational ─┬─▶ US1 ─┐
 - [X] T103 `README.md` "출처와 라이선스" 절의 라이선스 버전 선택 근거 참조를 `NOTICE` 4절에서 5절로 고친다(NOTICE에 "앱 이름과 아이콘" 절이 4절로 들어가며 번호가 밀림) per FR-003 (contradicts)
 - [X] T104 `docs/ios-build.md`에 저장소에서 지운 개인 기기 UDID와 Apple 팀 ID가 git 이력에는 남아 있고 이력 재작성 금지(헌법 VIII) 때문에 지울 수 없다는 한계를 명시한다 per FR-017 (partial)
 - [X] T105 `CHANGELOG.md` `[미출시]` 항목에 US5 변경(식별자 `com.ezenitac.easyviewer`, 표시명 `Pagelight`, 패키지 이름 `pagelight`, 새 아이콘, Android 고정 서명 키, Apple 팀 정보 환경 변수화, `check-identity` 검사)을 추가한다 per FR-002, FR-023 (partial)
-- [ ] T106 `scripts/check-identity.mjs` 검사 범위에 `.github/workflows/`를 더해 자동화 안의 구 식별자·원저작자 이름 잔존도 막는다. T086(release.yml 이름 전환) 이후 진행하고, `tests/unit/identityCheck.spec.ts`에 실패 케이스를 먼저 추가한다 per SC-002 (partial)
+- [X] T106 `scripts/check-identity.mjs` 검사 범위에 `.github/workflows/`를 더해 자동화 안의 구 식별자·원저작자 이름 잔존도 막는다. T086(release.yml 이름 전환) 이후 진행하고, `tests/unit/identityCheck.spec.ts`에 실패 케이스를 먼저 추가한다 per SC-002 (partial)
 - [X] T107 `npm run test:e2e`를 실행해 샘플 도서 제목 변경(`tests/e2e/reader-epub.spec.ts`)과 정보 대화상자 시나리오(T030)를 포함한 기존 e2e 게이트의 회귀가 0건인지 확인한다 per SC-010 (partial)

@@ -4,9 +4,12 @@ import { pathToFileURL } from 'node:url'
 
 /**
  * Resolves the desktop Tauri bundle command for stable vs SemVer pre-release versions.
- * Windows WiX (.msi) and Linux RPM (rpmbuild) forbid hyphens in version strings,
- * so any hyphenated pre-release version falls back to NSIS on Windows and DEB+AppImage on Linux.
+ * Linux RPM (rpmbuild) forbids hyphens in version strings, so a hyphenated pre-release
+ * builds DEB+AppImage only. Windows is not a release target of this fork (spec 003 FR-008);
+ * its code is still compiled and tested by the CI `windows-compile-test` job.
  */
+const SUPPORTED = new Set(['macos-universal', 'linux-x64'])
+
 export function resolveDesktopBuildCommand(
   matrixName,
   version,
@@ -16,8 +19,8 @@ export function resolveDesktopBuildCommand(
   const ver = String(version || '').trim()
   const isPrerelease = ver.includes('-')
 
-  if (name === 'windows-x64' && isPrerelease) {
-    return 'npx tauri build --bundles nsis'
+  if (!SUPPORTED.has(name)) {
+    throw new Error(`[ci-build-desktop] unsupported release target: ${name || '(empty)'}`)
   }
   if (name === 'linux-x64' && isPrerelease) {
     return 'npx tauri build --bundles deb,appimage'

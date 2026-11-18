@@ -10,7 +10,7 @@
 > Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
 > <!-- support-scope:end -->
 
-심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v0.1.6-beta`) — [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크
+심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v1.0.0-alpha.1`) — [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크
 
 > **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 출처·변경 고지는 [NOTICE](./NOTICE), 서드파티 고지는 [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)를 참고하세요.
 
@@ -144,6 +144,22 @@ rustc --version && cargo --version
 rustup show
 ```
 
+### macOS 설치 (릴리스 산출물)
+
+릴리스 페이지에서 `.dmg`와 `SHA256SUMS.txt`를 같은 폴더에 받아 먼저 체크섬을 확인합니다.
+
+```bash
+shasum -a 256 -c SHA256SUMS.txt --ignore-missing
+```
+
+앱은 아직 Apple 공증을 받지 않았습니다. 처음 실행할 때 "손상되었기 때문에 열 수 없습니다"가 나오면, 체크섬이 일치하는 것을 확인한 뒤 격리 속성을 해제합니다.
+
+```bash
+xattr -cr /Applications/Pagelight.app
+```
+
+> **경고**: 격리 해제는 공증을 받기 전까지 쓰는 **임시 조치**입니다. macOS가 이 앱을 검사하지 않고 실행하게 되므로, 이 저장소의 릴리스 페이지에서 받았고 체크섬이 일치하는 파일에만 쓰세요.
+
 ### Windows 사용자 안내
 
 이 포크는 Windows용 설치 파일을 배포하지 않고 공식 지원하지도 않습니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요. 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)를 쓰던 경우에는 [Windows 전환 안내](./docs/windows-migration.md)를 따르세요.
@@ -181,7 +197,7 @@ npx tauri ios dev --open
 npx tauri ios build --open
 ```
 
-- **배포 및 macOS 서명 참고 (`0.1.6-beta` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(전 플랫폼 앱 식별자 `com.ezenitac.easyviewer` 통일). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/Pagelight.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
+- **배포 및 macOS 서명 참고 (`1.0.0-alpha.1` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(전 플랫폼 앱 식별자 `com.ezenitac.easyviewer` 통일). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/Pagelight.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
 - **macOS 개발/빌드 시 포트·락 정리(필요 시)**:
 
 ```bash

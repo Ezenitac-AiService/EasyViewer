@@ -79,3 +79,36 @@
 | 실행 명령 | `npm run test:e2e`(Playwright, WebKit) |
 | 결과 | 16건 모두 통과. 샘플 도서 제목 변경(`reader-epub.spec.ts`)과 정보 대화상자 시나리오(T030) 포함 |
 | 판정 | **PASS** |
+
+## US6 데이터 이전 구현 검증 (T075)
+
+### 자동 검증
+
+| 필드 | 내용 |
+|---|---|
+| 날짜 | 2026-11-18 |
+| 환경 | macOS (Darwin 27.2), Apple Silicon, rustc 1.100.0, Node 24 |
+| 실행 명령 | `npm run verify`(빌드·`npm test`·경계·버전·라이선스·지원 범위·앱 정체성·`cargo check`·`cargo test`), `cargo deny check licenses bans sources`, `node scripts/check-licenses.mjs --write` |
+| 결과 | 모두 통과. vitest 251건, Rust 45건(이전 엔진·결정 흐름·잠금·자격증명 33건 포함). 초기 번들 `index-*.js` 337.28 kB(한도 480 kB). 새 의존성 `tauri-plugin-single-instance` 2.5.5(`Apache-2.0 OR MIT`)가 감사·고지·`THIRD_PARTY_LICENSES.md`에 반영됨 |
+| 변이 검증 | 원본 재검사(`busy`), 민감 경로 건너뛰기, "비어 있음" 판정의 오류 처리를 일부러 끈 변이 3종을 모두 테스트가 잡음 |
+| 판정 | **PASS** |
+
+### Windows 대상 컴파일
+
+| 판정 | **BLOCKED** |
+|---|---|
+| 날짜 | 2026-11-18 |
+| 실행 명령 | `rustup target add x86_64-pc-windows-msvc` 후 `cd src-tauri && cargo check --target x86_64-pc-windows-msvc` |
+| 결과 | 의존성 `aws-lc-sys` 0.47.0의 빌드 스크립트가 C 소스(`jitterentropy-timer.c`)를 Windows 대상으로 컴파일하지 못해 실패. 이 Mac에는 MSVC 헤더·도구가 없음. 이 저장소의 크레이트 코드는 컴파일 단계에 도달하지 못함 |
+| 필요한 환경 | Windows 러너의 CI `windows-compile-test` 작업(T084). 이전 코드는 macOS·Linux 외 플랫폼에서 `MigrationPaths::for_platform`이 `None`을 반환해 `skipped_no_source`만 기록하도록 작성했으나, 실제 Windows 컴파일은 아직 확인하지 않음 |
+
+### 실기기 시나리오
+
+T076(quickstart §3 시나리오 1–9)과 T077(공존 설치)은 실제 빌드로 실행해야 하며 아직 진행하지 않았다. 이 Mac에는 구 식별자 데이터(`~/Library/Application Support/com.edith.easyviewer`)가 있으므로, 새 빌드를 실행하면 실제 이전이 일어난다(원본은 복사만 함). 실행 전에 메인테이너 확인이 필요하다.
+
+### 계약과 다르게 구현한 점
+
+- **진행률 전달 방식**: 계약서는 진행 창이 진행률을 "이벤트로 받는다"고 적었으나, 진행 창에 IPC 권한(capability)을 하나도 주지 않으려고 Rust가 창 스크립트 함수(`pagelightMigrationProgress`)를 직접 호출하도록 했다. 진행 창은 `public/migration-progress.html`(정적 페이지, `incognito` + 임시 `data_directory`)이다.
+- **명령 2개 추가**: T070이 열거한 4개 외에 `mark_library_reconstructed`(기록의 `reconstructed` 갱신)와 `skip_legacy_credentials`(자격증명 이전 건너뛰기를 `skipped: true`로 기록)를 추가했다. 둘 다 data-model §1의 필드와 contracts §3의 건너뛰기 규칙을 기록하는 데 필요하다.
+- **책 경로 재연결 범위 확장**: 계약서는 사용자 지정 저장 폴더만 다시 연결하라고 적었으나, 서재 기록의 책 경로(`storedPath`)도 구 앱 폴더를 가리키므로 함께 새 폴더로 다시 연결한다(`relinkLegacyLibraryPaths`, `main.ts`에서 서재 로드 전 실행). 그대로 두면 "책 삭제 시 파일도 삭제"가 원본을 지워 US6-1(원본 보존)을 어기기 때문이다.
+- **Linux 캐시 제외 목록**: 현재 `WebKitCache` 하나만 제외한다. 실제 폴더 목록은 Linux 실측(T005·T076)에서 확인해야 한다.

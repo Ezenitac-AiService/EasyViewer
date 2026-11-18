@@ -8,8 +8,10 @@ import { pathToFileURL } from 'node:url'
  * Fork-separation safety gate (spec 003 FR-025, contracts/release-and-ci.md §3).
  *
  *   --separation                 items 1–5 (before asking GitHub Support to detach the fork)
- *   --release --tag <t> --assets <dir> [--rehearsal]
- *                                items 1–8 + version non-overlap + Android versionCode + no leftover draft
+ *   --release --tag <t> --assets <dir> [--rehearsal] [--phase prebuild|publish]
+ *                                items 1–8 + version non-overlap + Android versionCode + no leftover draft.
+ *                                `prebuild` (before any build): everything except the artifact items 6–7.
+ *                                `publish` (on the collected artifacts): items 6–7 only.
  *   --static                     workflow rules: scripts exist, no upstream sync, least privilege, pinned actions
  * Exit codes: 0 pass, 1 fail, 2 BLOCKED (a required lookup could not run).
  */
@@ -20,6 +22,7 @@ const V = 'specs/003-independent-fork-separation/verification'
 const DATE = /\d{4}-\d{2}-\d{2}/
 const WINDOWS_ARTIFACT = /\.(exe|msi)$|windows|_x64_portable\.zip$|portable\.zip$/i
 const MANUAL_ITEMS = new Set(['1', '2', '3', '8'])
+const PHASES = new Set([undefined, 'full', 'prebuild', 'publish'])
 
 function read(root, rel) {
   const p = path.join(root, rel)
@@ -127,8 +130,16 @@ export function runGate(root, opts, env) {
     else errors.push(msg)
   }
 
+  if (!PHASES.has(opts.phase)) errors.push(`알 수 없는 --phase 값: ${opts.phase}`)
   if (opts.rehearsal && !String(opts.tag || '').endsWith('-rehearsal')) {
     errors.push('리허설 태그는 반드시 -rehearsal로 끝나야 합니다')
+  }
+
+  const phase = opts.mode === 'release' ? opts.phase ?? 'full' : 'full'
+  if (phase === 'publish') {
+    record('6', itemChecksums(opts.assetsDir))
+    record('7', itemNoWindows(opts.assetsDir))
+    return { errors, warnings, blocked, items }
   }
 
   record('1', itemBaseline(env))
@@ -138,8 +149,10 @@ export function runGate(root, opts, env) {
   record('5', itemCi(env, 'licenses', '라이선스 감사'))
 
   if (opts.mode === 'release') {
-    record('6', itemChecksums(opts.assetsDir))
-    record('7', itemNoWindows(opts.assetsDir))
+    if (phase !== 'prebuild') {
+      record('6', itemChecksums(opts.assetsDir))
+      record('7', itemNoWindows(opts.assetsDir))
+    }
     record('8', itemKeyBackup(root))
     const v = extraVersion(root, opts.tag, opts.rehearsal, env)
     errors.push(...v.errors)
@@ -265,7 +278,13 @@ function main() {
   const mode = argv.includes('--release') ? 'release' : 'separation'
   const r = runGate(
     root,
-    { mode, tag: arg('--tag'), assetsDir: arg('--assets') ?? 'release-assets', rehearsal: argv.includes('--rehearsal') },
+    {
+      mode,
+      tag: arg('--tag'),
+      assetsDir: arg('--assets') ?? 'release-assets',
+      rehearsal: argv.includes('--rehearsal'),
+      phase: arg('--phase')
+    },
     realEnv(root)
   )
   for (const w of r.warnings) console.warn(`[release-gate] 경고 ${w}`)

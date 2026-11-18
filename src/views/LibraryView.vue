@@ -21,6 +21,8 @@ import NetworkDownloadModal from '@/components/library/NetworkDownloadModal.vue'
 import StorageFolderMenu from '@/components/library/StorageFolderMenu.vue'
 import SyncModal from '@/components/library/SyncModal.vue'
 const AboutDialog = defineAsyncComponent(() => import('@/components/common/AboutDialog.vue'))
+// One-time notice after the desktop migration (spec 003 US6); renders nothing elsewhere.
+const MigrationNotice = defineAsyncComponent(() => import('@/components/library/MigrationNotice.vue'))
 import {
   BookOpen,
   Info,
@@ -379,5 +381,6 @@ const formatFileSize = (bytes: number): string =>
     <AboutDialog v-if="aboutMounted" :open="showAbout" @close="showAbout = false" />
     <NetworkDownloadModal :open="showDownloadModal" @close="showDownloadModal = false" @downloaded="(b) => showToast(`'${b.title}' 다운로드 및 오프라인 저장 완료!`)" />
     <SyncModal :open="showSyncModal" @close="showSyncModal = false" />
+    <MigrationNotice />
   </div>
 </template>

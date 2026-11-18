@@ -2,7 +2,7 @@
 
 **Project**: EasyViewer 독립 포크 (`0.1.6-beta`)  
 **Project License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE) — 버전 선택의 근거는 [NOTICE](./NOTICE) 4절  
-**Updated**: `2026-11-17`
+**Updated**: `2026-11-18`
 
 > **전체 고지**: 이 문서는 직접 의존성 요약 표다. 전이 의존성을 포함해 배포물에 들어가는 모든 서드파티 구성요소의 저작권 고지와 라이선스 전문은 [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt)(앱 정보 화면에서 열람)에 있으며, `node scripts/check-licenses.mjs --write`로 생성한다.
 
@@ -64,6 +64,7 @@
 | `tauri-plugin-dialog` | `"2"` | `2.8.4` | `Apache-2.0 OR MIT` |
 | `tauri-plugin-opener` | `"2"` | `2.7.3` | `Apache-2.0 OR MIT` |
 | `tauri-plugin-keyring-store` | `"0.3.2"` | `0.3.2` | `MIT OR Apache-2.0` |
+| `tauri-plugin-single-instance` *(데스크톱)* | `"2"` | `2.5.5` | `Apache-2.0 OR MIT` |
 | `reqwest` | `"0.13"` (`rustls`, `http2`, `stream`) | `0.13.5` | `MIT OR Apache-2.0` |
 | `tokio` | `"1"` (`fs`, `io-util`, `time`) | `1.54.1` | `MIT` |
 | `futures-util` | `"0.3"` | `0.3.34` | `MIT OR Apache-2.0` |

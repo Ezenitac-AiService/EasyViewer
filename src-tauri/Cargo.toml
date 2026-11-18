@@ -1,6 +1,6 @@
 [package]
 name = "pagelight"
-version = "0.1.6-beta"
+version = "1.0.0-alpha.1"
 description = "심플한 Text, EPUB 범용 문서 뷰어"
 authors = ["Pagelight contributors"]
 license = "GPL-3.0-only"
@@ -33,4 +33,10 @@ url = "2"
 base64 = "0.22"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-single-instance = "2"
+
+[dev-dependencies]
+tempfile = "3"
 

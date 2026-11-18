@@ -63,6 +63,8 @@ const SCAN_ROOTS = [
   'scripts',
   'docs',
   '.github/ISSUE_TEMPLATE',
+  '.github/workflows',
+  '.github/release-notes.md',
   'src-tauri/src',
   'src-tauri/capabilities',
   'src-tauri/Cargo.toml',
