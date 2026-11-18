@@ -26,9 +26,9 @@
 		19F959B1F4A896E5BB329132 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		2858FD09E1506A7F2EC864F3 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		2F43249978211323309DFAB4 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		3D7EA1DE3348FC19FF309BAF /* easy-viewer_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "easy-viewer_iOS.entitlements"; sourceTree = "<group>"; };
+		3D7EA1DE3348FC19FF309BAF /* pagelight_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "pagelight_iOS.entitlements"; sourceTree = "<group>"; };
 		516B41B987A853727E5D7ED4 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		76259BCEB56584F3C7DBAFCD /* EasyViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		76259BCEB56584F3C7DBAFCD /* Pagelight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pagelight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DB21EDE9D8AECB0491C9BEB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8088DD103D6B2C8314C85DD2 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		816E494B5684CBD48112BA3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -61,13 +61,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		208CE9864714713AEB0CBF8F /* easy-viewer */ = {
+		208CE9864714713AEB0CBF8F /* pagelight */ = {
 			isa = PBXGroup;
 			children = (
 				A6E1BE2365B9DEF4321E2DB2 /* main.mm */,
 				7BC6A3A45AD4DCE1357BFDD5 /* bindings */,
 			);
-			path = "easy-viewer";
+			path = "pagelight";
 			sourceTree = "<group>";
 		};
 		38373F11BF5093EA702AA24B /* Frameworks */ = {
@@ -96,18 +96,18 @@
 		8EA65DCCFBBF4C3F41EA0C47 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				76259BCEB56584F3C7DBAFCD /* EasyViewer.app */,
+				76259BCEB56584F3C7DBAFCD /* Pagelight.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		9A63CBA74556B752573A7149 /* easy-viewer_iOS */ = {
+		9A63CBA74556B752573A7149 /* pagelight_iOS */ = {
 			isa = PBXGroup;
 			children = (
-				3D7EA1DE3348FC19FF309BAF /* easy-viewer_iOS.entitlements */,
+				3D7EA1DE3348FC19FF309BAF /* pagelight_iOS.entitlements */,
 				816E494B5684CBD48112BA3A /* Info.plist */,
 			);
-			path = "easy-viewer_iOS";
+			path = "pagelight_iOS";
 			sourceTree = "<group>";
 		};
 		AD00FCE422094093D11D35F3 /* src */ = {
@@ -123,7 +123,7 @@
 		B95CE018632DF0B5820E62F1 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				208CE9864714713AEB0CBF8F /* easy-viewer */,
+				208CE9864714713AEB0CBF8F /* pagelight */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -134,7 +134,7 @@
 				D886B6721AF60B2E3C546B3C /* assets */,
 				9047108436FF1ADDD7C1AB8E /* Assets.xcassets */,
 				2F43249978211323309DFAB4 /* LaunchScreen.storyboard */,
-				9A63CBA74556B752573A7149 /* easy-viewer_iOS */,
+				9A63CBA74556B752573A7149 /* pagelight_iOS */,
 				F2F17E5A2B7CFBE755090F54 /* Externals */,
 				B95CE018632DF0B5820E62F1 /* Sources */,
 				AD00FCE422094093D11D35F3 /* src */,
@@ -153,9 +153,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A28382FFD699558D12908196 /* easy-viewer_iOS */ = {
+		A28382FFD699558D12908196 /* pagelight_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 80BFE98F6C76FE4B5C9D3ADA /* Build configuration list for PBXNativeTarget "easy-viewer_iOS" */;
+			buildConfigurationList = 80BFE98F6C76FE4B5C9D3ADA /* Build configuration list for PBXNativeTarget "pagelight_iOS" */;
 			buildPhases = (
 				F00BCFF6C3CCDD2AB5114C4C /* Build Rust Code */,
 				51F1808E724926C6DA5F249D /* Sources */,
@@ -166,11 +166,11 @@
 			);
 			dependencies = (
 			);
-			name = "easy-viewer_iOS";
+			name = "pagelight_iOS";
 			packageProductDependencies = (
 			);
-			productName = "easy-viewer_iOS";
-			productReference = 76259BCEB56584F3C7DBAFCD /* EasyViewer.app */;
+			productName = "pagelight_iOS";
+			productReference = 76259BCEB56584F3C7DBAFCD /* Pagelight.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -182,7 +182,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 			};
-			buildConfigurationList = 3528DECF68B5A9C97DDC13BB /* Build configuration list for PBXProject "easy-viewer" */;
+			buildConfigurationList = 3528DECF68B5A9C97DDC13BB /* Build configuration list for PBXProject "pagelight" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -196,7 +196,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A28382FFD699558D12908196 /* easy-viewer_iOS */,
+				A28382FFD699558D12908196 /* pagelight_iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -312,10 +312,9 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "easy-viewer_iOS/easy-viewer_iOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "pagelight_iOS/pagelight_iOS.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "GMXNVH8YU9";
 				ENABLE_BITCODE = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
@@ -323,7 +322,7 @@
 					"$(inherited)",
 					"\".\"",
 				);
-				INFOPLIST_FILE = "easy-viewer_iOS/Info.plist";
+				INFOPLIST_FILE = "pagelight_iOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -342,8 +341,8 @@
 					"$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME)",
 					"$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.edith.easyviewer;
-				PRODUCT_NAME = "EasyViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ezenitac.easyviewer;
+				PRODUCT_NAME = "Pagelight";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -357,10 +356,9 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "easy-viewer_iOS/easy-viewer_iOS.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "pagelight_iOS/pagelight_iOS.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "GMXNVH8YU9";
 				ENABLE_BITCODE = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
@@ -368,7 +366,7 @@
 					"$(inherited)",
 					"\".\"",
 				);
-				INFOPLIST_FILE = "easy-viewer_iOS/Info.plist";
+				INFOPLIST_FILE = "pagelight_iOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -387,8 +385,8 @@
 					"$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME)",
 					"$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.edith.easyviewer;
-				PRODUCT_NAME = "EasyViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ezenitac.easyviewer;
+				PRODUCT_NAME = "Pagelight";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -462,7 +460,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3528DECF68B5A9C97DDC13BB /* Build configuration list for PBXProject "easy-viewer" */ = {
+		3528DECF68B5A9C97DDC13BB /* Build configuration list for PBXProject "pagelight" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B6778FC1D093F45966AEEFE3 /* debug */,
@@ -471,7 +469,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = debug;
 		};
-		80BFE98F6C76FE4B5C9D3ADA /* Build configuration list for PBXNativeTarget "easy-viewer_iOS" */ = {
+		80BFE98F6C76FE4B5C9D3ADA /* Build configuration list for PBXNativeTarget "pagelight_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A865C78178E1C474DD214F05 /* debug */,

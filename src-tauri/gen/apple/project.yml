@@ -1,6 +1,6 @@
-name: easy-viewer
+name: pagelight
 options:
-  bundleIdPrefix: com.edith.easyviewer
+  bundleIdPrefix: com.ezenitac.easyviewer
   deploymentTarget:
     iOS: 15.0
 fileGroups: [../../src]
@@ -10,8 +10,8 @@ configs:
 settingGroups:
   app:
     base:
-      PRODUCT_NAME: EasyViewer
-      PRODUCT_BUNDLE_IDENTIFIER: com.edith.easyviewer
+      PRODUCT_NAME: Pagelight
+      PRODUCT_BUNDLE_IDENTIFIER: com.ezenitac.easyviewer
 targetTemplates:
   app:
     type: application
@@ -24,7 +24,7 @@ targetTemplates:
     settings:
       groups: [app]
 targets:
-  easy-viewer_iOS:
+  pagelight_iOS:
     type: application
     platform: iOS
     sources:
@@ -36,13 +36,13 @@ targets:
       # via LIBRARY_SEARCH_PATHS, never bundled as resources.
       - path: Externals
         excludes: ["**/*.a"]
-      - path: easy-viewer_iOS
+      - path: pagelight_iOS
       - path: assets
         buildPhase: resources
         type: folder
       - path: LaunchScreen.storyboard
     info:
-      path: easy-viewer_iOS/Info.plist
+      path: pagelight_iOS/Info.plist
       properties:
         LSRequiresIPhoneOS: true
         UILaunchStoryboardName: LaunchScreen
@@ -63,14 +63,13 @@ targets:
           NSAllowsLocalNetworking: true
         NSLocalNetworkUsageDescription: "개발 서버(Vite)와 통신하기 위해 로컬 네트워크 권한이 필요합니다."
     entitlements:
-      path: easy-viewer_iOS/easy-viewer_iOS.entitlements
+      path: pagelight_iOS/pagelight_iOS.entitlements
     scheme:
       environmentVariables:
         RUST_BACKTRACE: full
         RUST_LOG: info
     settings:
       base:
-        DEVELOPMENT_TEAM: GMXNVH8YU9
         ENABLE_BITCODE: false
         ENABLE_USER_SCRIPT_SANDBOXING: false
         ARCHS: [arm64]

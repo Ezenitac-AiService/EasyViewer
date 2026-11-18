@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBookStore } from '@/stores/useBookStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
@@ -20,8 +20,10 @@ import InAppConfirmModal from '@/components/common/InAppConfirmModal.vue'
 import NetworkDownloadModal from '@/components/library/NetworkDownloadModal.vue'
 import StorageFolderMenu from '@/components/library/StorageFolderMenu.vue'
 import SyncModal from '@/components/library/SyncModal.vue'
+const AboutDialog = defineAsyncComponent(() => import('@/components/common/AboutDialog.vue'))
 import {
   BookOpen,
+  Info,
   FileText,
   Upload,
   Download,
@@ -45,6 +47,13 @@ let unlistenDragDrop: (() => void) | null = null
 const filterFormat = ref<'all' | BookFormat>('all')
 const searchQuery = ref('')
 const showDownloadModal = ref(false)
+const showAbout = ref(false)
+// Load the About dialog chunk on first use, then keep it mounted so focus restoration works on close.
+const aboutMounted = ref(false)
+function openAbout() {
+  aboutMounted.value = true
+  showAbout.value = true
+}
 const showSyncModal = ref(false)
 const { toastMessage, showToast } = useToast(3000)
 
@@ -218,7 +227,7 @@ const formatFileSize = (bytes: number): string =>
           <BookOpen class="w-5 h-5" />
         </div>
         <h1 class="text-lg font-extrabold tracking-tight flex items-center gap-2">
-          <span>EasyViewer</span>
+          <span>Pagelight</span>
           <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">TXT · EPUB</span>
         </h1>
       </div>
@@ -258,6 +267,9 @@ const formatFileSize = (bytes: number): string =>
           <Sun v-if="settingsStore.settings.theme === 'light'" class="w-4 h-4 text-amber-500" />
           <Coffee v-else-if="settingsStore.settings.theme === 'sepia'" class="w-4 h-4 text-amber-800" />
           <Moon v-else class="w-4 h-4 text-indigo-400" />
+        </button>
+        <button type="button" class="p-2 rounded-xl border hover:border-indigo-500 transition-all" :style="{ borderColor: 'var(--ev-border)' }" title="앱 정보" aria-label="앱 정보" data-testid="open-about" @click="openAbout">
+          <Info class="w-4 h-4" />
         </button>
       </div>
     </header>
@@ -364,6 +376,7 @@ const formatFileSize = (bytes: number): string =>
       @secondary="finishRecovery('choose')"
       @cancel="finishRecovery('cancel')"
     />
+    <AboutDialog v-if="aboutMounted" :open="showAbout" @close="showAbout = false" />
     <NetworkDownloadModal :open="showDownloadModal" @close="showDownloadModal = false" @downloaded="(b) => showToast(`'${b.title}' 다운로드 및 오프라인 저장 완료!`)" />
     <SyncModal :open="showSyncModal" @close="showSyncModal = false" />
   </div>

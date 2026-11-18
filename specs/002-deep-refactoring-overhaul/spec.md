@@ -1,5 +1,7 @@
 # Feature Specification: 공격적 비판 분석 기반 아키텍처·성능·보안·접근성 심층 리팩토링
 
+> **003 이후 변경 안내**: 앱 식별자와 지원 범위는 [003 독립 포크 분리](../003-independent-fork-separation/spec.md)에서 바뀌었습니다(식별자 `com.ezenitac.easyviewer`, 중점 지원 macOS·iOS·Linux, Windows 배포 중단). 이 문서는 작성 당시의 기록으로 보존합니다.
+
 **Feature Branch**: `002-deep-refactoring-overhaul`
 
 **Created**: 2026-11-16

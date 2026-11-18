@@ -1,0 +1,7 @@
+{{#each licenses}}
+=== {{name}} ({{id}}) ===
+사용 크레이트: {{#each used_by}}{{crate.name}}@{{crate.version}}{{#unless @last}}, {{/unless}}{{/each}}
+
+{{text}}
+
+{{/each}}

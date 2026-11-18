@@ -39,3 +39,9 @@ playwright/.cache
 # Build outputs
 build/*
 
+
+# Signing keys (never commit)
+*.jks
+*.keystore
+*.p12
+keystore.properties

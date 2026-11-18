@@ -1,8 +1,18 @@
-# EasyViewer
+# Pagelight
 
-심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v0.1.6-beta`)
+> This is an independent fork. It supports macOS, iOS (source build only) and Linux; Android is maintained. For Windows, please use the original EasyViewer by edith2580.
+>
+> <!-- support-scope:start -->
+> 이 포크는 **macOS · iOS · Linux**를 중점 지원합니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
+> Android는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.
+> **Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
+> 웹 브라우저 실행은 개발 보조용입니다.
+> Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
+> <!-- support-scope:end -->
 
-> **라이선스**: 본 프로젝트는 [GNU General Public License v3.0 (GPL-3.0)](./LICENSE) 하에 배포됩니다. 서드파티 오픈소스 라이선스 상세 목록은 [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)를 참고하세요.
+심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v0.1.6-beta`) — [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크
+
+> **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 출처·변경 고지는 [NOTICE](./NOTICE), 서드파티 고지는 [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)를 참고하세요.
 
 ---
 
@@ -32,12 +42,12 @@
 - **상태 / 라우팅 / UI**: Pinia `^2.3.0`, Vue Router `^4.5.0`, Tailwind CSS `^3.4.17`, Lucide Vue Next `^0.468.0`
 - **문서 엔진**: `epubjs ^0.3.93` + `jszip ^3.10.1` + `css-tree ^3.2.1`, Custom TXT Engine(`txtEngine.ts`, `txtMeasuredPagination.ts`)
 - **네이티브 백엔드**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls` + `stream`), `dunce`, `sha2`, `zip 9.x`
-- **지원 플랫폼**: Windows, macOS, Android, iOS, Web Fallback (`IndexedDB` / 프록시)
+- **지원 플랫폼**: macOS · iOS(소스 빌드) · Linux 중점, Android 유지, Web(개발 보조, `IndexedDB` / 프록시). Windows는 지원하지 않습니다(위 지원 범위 참고)
 
 ### 디렉토리 구조
 
 ```text
-EasyViewer/
+./
 ├── src/
 │   ├── assets/                 # 글로벌 스타일 및 로컬 폰트 스택 (main.css)
 │   ├── components/
@@ -60,7 +70,7 @@ EasyViewer/
 ├── src-tauri/
 │   ├── capabilities/           # 최소 권한 분리 (default.json, desktop.json)
 │   └── src/                    # Rust 보안/SSRF/경로 가드(security/) + 파일·스트리밍·EPUB 메타 커맨드(commands/)
-├── scripts/                    # 450줄/계층 경계, 전 플랫폼(`com.edith.easyviewer`) 버전 일치, 프록시 가드, verify 스크립트
+├── scripts/                    # 450줄/계층 경계, 전 플랫폼(`com.ezenitac.easyviewer`) 버전 일치, 앱 정체성(`check-identity`), 프록시 가드, verify 스크립트
 ├── tests/                      # 1계층 Vitest 단위/계약 + 2계층 Playwright E2E/성능 기준선 테스트
 └── specs/                      # Spec Kit 기능 명세, 아키텍처 계획, 보안 계약 및 검증 체크리스트
 ```
@@ -127,7 +137,6 @@ npm run test:perf
 ### Rust 툴체인 사전 요구사항
 
 - 권장 버전: `rustc >= 1.90.0` (최신 Tauri v2 공식 플러그인 및 `reqwest 0.13` `rustls` MSRV 충족)
-- Windows 빌드 시 Visual Studio C++ 빌드 도구(`MSVC x64/x86`, Windows 10/11 SDK) 필요
 
 ```bash
 node -v && npm -v
@@ -135,23 +144,11 @@ rustc --version && cargo --version
 rustup show
 ```
 
-### Windows 빌드
+### Windows 사용자 안내
 
-```bash
-# 단독 실행 파일만 빌드 (--no-bundle)
-npm run tauri build -- --no-bundle
+이 포크는 Windows용 설치 파일을 배포하지 않고 공식 지원하지도 않습니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요. 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)를 쓰던 경우에는 [Windows 전환 안내](./docs/windows-migration.md)를 따르세요.
 
-# NSIS 설치 프로그램 빌드
-npm run tauri build -- --bundles nsis
-
-# MSI 설치 패키지 (정식 숫자 버전 전용; `-alpha` 등 비숫자 프리릴리즈는 NSIS 사용)
-npm run tauri build -- --bundles msi
-```
-
-생성 경로 (`<version>` 예: `0.1.6`):
-- 포터블 실행 파일: `src-tauri/target/release/easy-viewer.exe`
-- NSIS 설치 프로그램: `src-tauri/target/release/bundle/nsis/EasyViewer_<version>_x64-setup.exe`
-- MSI 설치 패키지 (정식 버전): `src-tauri/target/release/bundle/msi/EasyViewer_<version>_x64_en-US.msi`
+Windows를 대상으로 하는 코드는 검증되지 않는 보안 코드가 남지 않도록 CI에서 컴파일과 자동 테스트만 계속합니다.
 
 ### Linux 빌드
 
@@ -184,7 +181,7 @@ npx tauri ios dev --open
 npx tauri ios build --open
 ```
 
-- **배포 및 macOS 서명 참고 (`0.1.6-beta` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(전 플랫폼 앱 식별자 `com.edith.easyviewer` 통일). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/EasyViewer.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
+- **배포 및 macOS 서명 참고 (`0.1.6-beta` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: "-"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(전 플랫폼 앱 식별자 `com.ezenitac.easyviewer` 통일). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/Pagelight.app`로 Gatekeeper 격리 속성을 해제해야 "손상되었기 때문에 열 수 없습니다" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다.
 - **macOS 개발/빌드 시 포트·락 정리(필요 시)**:
 
 ```bash
@@ -211,7 +208,7 @@ npm run android:release:all # 전체 ABI release APK
 
 일반 소스 수정 후 `main` 브랜치에 커밋·푸시하는 것만으로는 릴리즈 빌드가 실행되지 않으며, 아래 순서로 **`v*` 태그를 푸시**하거나 **수동 워크플로우를 실행**하면 자동 빌드 및 GitHub Release 배포가 진행됩니다.
 
-1. **버전 동기화 및 검증** (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, `src-tauri/gen/apple/project.yml`, `Info.plist` 버전 및 Android/iOS 식별자 `com.edith.easyviewer` 일치 검증):
+1. **버전 동기화 및 검증** (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, `src-tauri/gen/apple/project.yml`, `Info.plist` 버전 및 Android/iOS 식별자 `com.ezenitac.easyviewer` 일치 검증):
    ```bash
    # 매니페스트 및 락파일 버전 일치 여부 확인
    npm run check:version
@@ -244,7 +241,9 @@ npm run android:release:all # 전체 ABI release APK
 
 ---
 
-## 라이선스 (License)
+## 출처와 라이선스 (Attribution & License)
 
-- 주 라이선스: **GNU General Public License v3.0 (GPL-3.0)** — 자세한 내용은 [`LICENSE`](./LICENSE)를 확인하세요.
-- 서드파티 의존성 라이선스: 프론트엔드(npm) 및 Rust 백엔드(Cargo) 오픈소스 고지 목록은 [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md)를 참고하세요.
+- **원저작물**: 이 저장소는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)를 바탕으로 한 파생 저작물입니다. Copyright (C) 2026 edith2580.
+- **이 포크의 변경분**: Copyright (C) 2026 M5. 이 포크는 원작 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었습니다. 원작의 이후 릴리스(`v0.2.0`·`v0.2.1`)는 병합하지 않았습니다. 주요 변경 요약은 [NOTICE](./NOTICE) 3절과 [CHANGELOG](./CHANGELOG.md)에 있습니다.
+- **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 라이선스 전문은 바꾸지 않았습니다. "only"는 이 포크의 선택이며, 그 근거와 재검토 조건은 [NOTICE](./NOTICE) 4절에 있습니다.
+- **서드파티 구성요소**: 직접 의존성 요약은 [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md), 전이 의존성을 포함한 전체 고지와 라이선스 전문은 [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt)(앱 정보 화면에서도 열람 가능)에 있습니다.

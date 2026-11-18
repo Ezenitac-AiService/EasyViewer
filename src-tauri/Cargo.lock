@@ -1156,30 +1156,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 
 [[package]]
-name = "easy-viewer"
-version = "0.1.6-beta"
-dependencies = [
- "base64 0.22.1",
- "dunce",
- "futures-util",
- "hex",
- "reqwest",
- "serde",
- "serde_json",
- "sha2 0.11.1",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-keyring-store",
- "tauri-plugin-opener",
- "tauri-plugin-store",
- "tokio",
- "url",
- "zip",
-]
-
-[[package]]
 name = "ed25519"
 version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2990,6 +2966,30 @@ checksum = "9aa2b01e1d916879f73a53d01d1d6cee68adbb31d6d9177a8cfce093cced1d50"
 dependencies = [
  "futures-core",
  "pin-project-lite",
+]
+
+[[package]]
+name = "pagelight"
+version = "0.1.6-beta"
+dependencies = [
+ "base64 0.22.1",
+ "dunce",
+ "futures-util",
+ "hex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.11.1",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-keyring-store",
+ "tauri-plugin-opener",
+ "tauri-plugin-store",
+ "tokio",
+ "url",
+ "zip",
 ]
 
 [[package]]

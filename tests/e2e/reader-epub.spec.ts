@@ -13,7 +13,7 @@ test.describe('EPUB reader rendering & script isolation characterization (Tier 2
     })
 
     await page.goto('/')
-    await expect(page.getByText('EasyViewer 완벽 가이드 및 샘플 북')).toBeVisible()
+    await expect(page.getByText('Pagelight 완벽 가이드 및 샘플 북')).toBeVisible()
 
     // 1. Import clean multi-chapter EPUB
     const cleanBuf = await createCleanEpubBuffer({ title: '다중 챕터 깨끗한 책', author: '저자' })

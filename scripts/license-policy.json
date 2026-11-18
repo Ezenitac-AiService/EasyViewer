@@ -1,0 +1,27 @@
+{
+  "$comment": "Third-party license policy (spec 003 FR-005, research R5). Only licenses actually used by runtime dependencies are allowed. Keep in sync with src-tauri/deny.toml.",
+  "projectLicense": "GPL-3.0-only",
+  "licenseSha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+  "allow": [
+    "MIT",
+    "Apache-2.0",
+    "ISC",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "CC0-1.0",
+    "Zlib"
+  ],
+  "preference": [
+    "MIT",
+    "Apache-2.0",
+    "ISC",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Zlib",
+    "CC0-1.0"
+  ],
+  "choices": {
+    "jszip": "MIT"
+  },
+  "noLicenseFile": {}
+}

@@ -82,7 +82,7 @@ export function checkVersionSync(rootDir = process.cwd()) {
   const cargoLockPath = path.join(rootDir, 'src-tauri/Cargo.lock')
   if (fs.existsSync(cargoLockPath)) {
     const cargoLock = fs.readFileSync(cargoLockPath, 'utf-8')
-    const cargoPkgName = extractCargoPackageField(cargoToml, 'name') || 'easy-viewer'
+    const cargoPkgName = extractCargoPackageField(cargoToml, 'name') || 'pagelight'
     const cargoLockVersion = extractCargoLockPackageVersion(cargoLock, cargoPkgName)
     versions.cargoLock = cargoLockVersion
     if (!cargoLockVersion || cargoLockVersion !== versions.cargoToml) {
@@ -94,7 +94,8 @@ export function checkVersionSync(rootDir = process.cwd()) {
     }
   }
 
-  const EXPECTED_APP_ID = 'com.edith.easyviewer'
+  const EXPECTED_APP_ID = 'com.ezenitac.easyviewer'
+  const EXPECTED_APP_PATH = EXPECTED_APP_ID.replace(/\./g, '/')
 
   const androidConfPath = path.join(rootDir, 'src-tauri/tauri.android.conf.json')
   if (fs.existsSync(androidConfPath)) {
@@ -122,23 +123,26 @@ export function checkVersionSync(rootDir = process.cwd()) {
     }
   }
 
+  // Pre-002 tree (com/easyviewer) and the upstream tree (com/edith, spec 003) must both be gone.
   const legacyAndroidDirs = [
-    'src-tauri/gen/android/app/src/main/java/com/easyviewer',
-    'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer'
+    ['com/easyviewer', 'src-tauri/gen/android/app/src/main/java/com/easyviewer'],
+    ['com/easyviewer', 'src-tauri/gen/android/buildSrc/src/main/java/com/easyviewer'],
+    ['com/edith', 'src-tauri/gen/android/app/src/main/java/com/edith'],
+    ['com/edith', 'src-tauri/gen/android/buildSrc/src/main/java/com/edith']
   ]
-  for (const relLegacy of legacyAndroidDirs) {
+  for (const [label, relLegacy] of legacyAndroidDirs) {
     if (fs.existsSync(path.join(rootDir, relLegacy))) {
       return {
         ok: false,
         versions,
-        error: `Android 레거시 패키지 디렉터리 잔존 발견(com/easyviewer): ${relLegacy}`
+        error: `Android 이전 패키지 디렉터리 잔존 발견(${label}): ${relLegacy}`
       }
     }
   }
 
   const mainActivityPath = path.join(
     rootDir,
-    'src-tauri/gen/android/app/src/main/java/com/edith/easyviewer/MainActivity.kt'
+    `src-tauri/gen/android/app/src/main/java/${EXPECTED_APP_PATH}/MainActivity.kt`
   )
   if (fs.existsSync(mainActivityPath)) {
     const kt = fs.readFileSync(mainActivityPath, 'utf-8')
@@ -154,7 +158,7 @@ export function checkVersionSync(rootDir = process.cwd()) {
 
   const buildSrcDir = path.join(
     rootDir,
-    'src-tauri/gen/android/buildSrc/src/main/java/com/edith/easyviewer/kotlin'
+    `src-tauri/gen/android/buildSrc/src/main/java/${EXPECTED_APP_PATH}/kotlin`
   )
   if (
     fs.existsSync(path.join(rootDir, 'src-tauri/gen/android/buildSrc')) &&
@@ -163,7 +167,7 @@ export function checkVersionSync(rootDir = process.cwd()) {
     return {
       ok: false,
       versions,
-      error: 'Android buildSrc 패키지 경로 불일치: com/edith/easyviewer/kotlin/RustPlugin.kt 누락'
+      error: `Android buildSrc 패키지 경로 불일치: ${EXPECTED_APP_PATH}/kotlin/RustPlugin.kt 누락`
     }
   }
 
@@ -190,7 +194,7 @@ export function checkVersionSync(rootDir = process.cwd()) {
     }
   }
 
-  const plistPath = path.join(rootDir, 'src-tauri/gen/apple/easy-viewer_iOS/Info.plist')
+  const plistPath = path.join(rootDir, 'src-tauri/gen/apple/pagelight_iOS/Info.plist')
   if (fs.existsSync(plistPath)) {
     const plist = fs.readFileSync(plistPath, 'utf-8')
     const shortVer = /<key>CFBundleShortVersionString<\/key>\s*<string>([^<]+)<\/string>/.exec(plist)?.[1]

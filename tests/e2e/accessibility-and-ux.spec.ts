@@ -72,4 +72,33 @@ test.describe('Accessibility & UX Gates (T039)', () => {
     const elapsedMs = Date.now() - t0
     expect(elapsedMs).toBeLessThanOrEqual(3000)
   })
+
+  test('About dialog follows the dialog contract and lists support scope and notices (spec 003 FR-004)', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForSelector('header h1')
+
+    const aboutBtn = page.getByRole('button', { name: '앱 정보' })
+    await aboutBtn.focus()
+    await aboutBtn.press('Enter')
+
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    await expect(dialog).toHaveAttribute('aria-modal', 'true')
+    await expect(dialog).toContainText('GPL-3.0-only')
+    await expect(dialog).toContainText('macOS · iOS · Linux')
+    await expect(dialog).not.toContainText('법적 의무')
+
+    for (let i = 0; i < 12; i++) {
+      await page.keyboard.press('Tab')
+      const insideDialog = await page.evaluate(() => Boolean(document.activeElement?.closest('[role="dialog"]')))
+      expect(insideDialog).toBe(true)
+    }
+
+    await dialog.getByTestId('show-notices').click()
+    await expect(dialog.getByTestId('third-party-notices')).toContainText('서드파티 구성요소 고지')
+
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(aboutBtn).toBeFocused()
+  })
 })

@@ -1,4 +1,4 @@
-package com.edith.easyviewer
+package com.ezenitac.easyviewer
 
 import android.content.res.Configuration
 import android.graphics.Color

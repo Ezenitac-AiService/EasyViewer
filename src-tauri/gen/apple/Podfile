@@ -1,13 +1,13 @@
 # Uncomment the next line to define a global platform for your project
 
-target 'easy-viewer_iOS' do
+target 'pagelight_iOS' do
 platform :ios, '15.0'
-  # Pods for easy-viewer_iOS
+  # Pods for pagelight_iOS
 end
 
-target 'easy-viewer_macOS' do
+target 'pagelight_macOS' do
 platform :osx, '11.0'
-  # Pods for easy-viewer_macOS
+  # Pods for pagelight_macOS
 end
 
 # Delete the deployment target for iOS and macOS, causing it to be inherited from the Podfile

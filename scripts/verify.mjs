@@ -21,7 +21,10 @@ const frontendSteps = [
   ['TypeScript + Vite Build', 'npm', ['run', 'build']],
   ['Tier-1 Unit & Boundary Tests', 'npm', ['test']],
   ['Static Architectural Boundaries', 'npm', ['run', 'check:boundaries']],
-  ['Version Sync Check', 'npm', ['run', 'check:version']]
+  ['Version Sync Check', 'npm', ['run', 'check:version']],
+  ['License Audit (policy, no notices)', 'node', ['scripts/check-licenses.mjs', '--no-notices']],
+  ['Support Scope & Public Wording', 'node', ['scripts/check-support-scope.mjs']],
+  ['App Identity (Pagelight)', 'npm', ['run', 'check:identity']]
 ]
 
 for (const [label, cmd, args] of frontendSteps) {

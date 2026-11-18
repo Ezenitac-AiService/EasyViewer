@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A28382FFD699558D12908196"
-               BuildableName = "EasyViewer.app"
-               BlueprintName = "easy-viewer_iOS"
-               ReferencedContainer = "container:easy-viewer.xcodeproj">
+               BuildableName = "Pagelight.app"
+               BlueprintName = "pagelight_iOS"
+               ReferencedContainer = "container:pagelight.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -31,9 +31,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A28382FFD699558D12908196"
-            BuildableName = "EasyViewer.app"
-            BlueprintName = "easy-viewer_iOS"
-            ReferencedContainer = "container:easy-viewer.xcodeproj">
+            BuildableName = "Pagelight.app"
+            BlueprintName = "pagelight_iOS"
+            ReferencedContainer = "container:pagelight.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -66,9 +66,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A28382FFD699558D12908196"
-            BuildableName = "EasyViewer.app"
-            BlueprintName = "easy-viewer_iOS"
-            ReferencedContainer = "container:easy-viewer.xcodeproj">
+            BuildableName = "Pagelight.app"
+            BlueprintName = "pagelight_iOS"
+            ReferencedContainer = "container:pagelight.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -95,9 +95,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A28382FFD699558D12908196"
-            BuildableName = "EasyViewer.app"
-            BlueprintName = "easy-viewer_iOS"
-            ReferencedContainer = "container:easy-viewer.xcodeproj">
+            BuildableName = "Pagelight.app"
+            BlueprintName = "pagelight_iOS"
+            ReferencedContainer = "container:pagelight.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>

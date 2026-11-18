@@ -1,12 +1,15 @@
 [package]
-name = "easy-viewer"
+name = "pagelight"
 version = "0.1.6-beta"
 description = "심플한 Text, EPUB 범용 문서 뷰어"
-authors = ["EasyViewer Team"]
+authors = ["Pagelight contributors"]
+license = "GPL-3.0-only"
+repository = "https://github.com/Ezenitac-AiService/EasyViewer"
 edition = "2021"
+publish = false
 
 [lib]
-name = "easy_viewer_lib"
+name = "pagelight_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

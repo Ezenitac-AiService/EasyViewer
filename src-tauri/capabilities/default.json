@@ -2,28 +2,63 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Default minimal capabilities shared across desktop and mobile",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "fs:default",
     {
       "identifier": "fs:allow-exists",
-      "allow": [{ "path": "$APPDATA/books/**" }]
+      "allow": [
+        {
+          "path": "$APPDATA/books/**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-write-file",
-      "allow": [{ "path": "$APPDATA/books/**" }]
+      "allow": [
+        {
+          "path": "$APPDATA/books/**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "$APPDATA/books/**" }]
+      "allow": [
+        {
+          "path": "$APPDATA/books/**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-remove",
-      "allow": [{ "path": "$APPDATA/books/**" }]
+      "allow": [
+        {
+          "path": "$APPDATA/books/**"
+        }
+      ]
     },
     "store:default",
     "dialog:default",
-    "keyring-store:default"
+    "keyring-store:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/Ezenitac-AiService/EasyViewer"
+        },
+        {
+          "url": "https://github.com/Ezenitac-AiService/EasyViewer/*"
+        },
+        {
+          "url": "https://github.com/edith2580/EasyViewer"
+        },
+        {
+          "url": "https://github.com/edith2580/EasyViewer/*"
+        }
+      ]
+    }
   ]
 }

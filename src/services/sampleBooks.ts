@@ -44,8 +44,8 @@ export async function createSampleEpubBook(): Promise<ArrayBuffer> {
     `<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="2.0">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:title>EasyViewer 완벽 가이드 및 샘플 북</dc:title>
-    <dc:creator>EasyViewer Team</dc:creator>
+    <dc:title>Pagelight 완벽 가이드 및 샘플 북</dc:title>
+    <dc:creator>Pagelight contributors</dc:creator>
     <dc:language>ko</dc:language>
     <dc:identifier id="BookId">urn:uuid:easyviewer-sample-epub-001</dc:identifier>
   </metadata>
@@ -70,10 +70,10 @@ export async function createSampleEpubBook(): Promise<ArrayBuffer> {
   <head>
     <meta name="dtb:uid" content="urn:uuid:easyviewer-sample-epub-001"/>
   </head>
-  <docTitle><text>EasyViewer 완벽 가이드 및 샘플 북</text></docTitle>
+  <docTitle><text>Pagelight 완벽 가이드 및 샘플 북</text></docTitle>
   <navMap>
     <navPoint id="navPoint-1" playOrder="1">
-      <navLabel><text>1장. EasyViewer 소개 및 핵심 기능</text></navLabel>
+      <navLabel><text>1장. Pagelight 소개 및 핵심 기능</text></navLabel>
       <content src="chapter1.xhtml"/>
     </navPoint>
     <navPoint id="navPoint-2" playOrder="2">
@@ -93,10 +93,10 @@ export async function createSampleEpubBook(): Promise<ArrayBuffer> {
     `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko">
-<head><title>1장. EasyViewer 소개 및 핵심 기능</title></head>
+<head><title>1장. Pagelight 소개 및 핵심 기능</title></head>
 <body>
-  <h1>1장. EasyViewer 소개 및 핵심 기능</h1>
-  <p><strong>EasyViewer</strong>는 텍스트(TXT)와 전자책(EPUB)을 모든 플랫폼(Windows, macOS, Android, iOS, Web)에서 쾌적하게 읽을 수 있도록 설계된 범용 문서 뷰어입니다.</p>
+  <h1>1장. Pagelight 소개 및 핵심 기능</h1>
+  <p><strong>Pagelight</strong>는 텍스트(TXT)와 전자책(EPUB)을 macOS, iOS, Linux, Android에서 쾌적하게 읽을 수 있도록 설계된 범용 문서 뷰어입니다.</p>
   <p>상단 툴바의 <strong>목차</strong> 버튼을 눌러 원하는 챕터로 즉시 이동할 수 있으며, <strong>통합 검색</strong> 기능을 사용해 문서 전체에서 원하는 키워드를 빠르게 찾고 하이라이트된 위치로 이동할 수 있습니다.</p>
   <p>또한 읽던 위치는 실시간으로 저장되며, 원격 동기화 기능을 통해 다른 기기에서도 마지막으로 읽던 페이지부터 이어서 독서를 즐길 수 있습니다.</p>
 </body>
