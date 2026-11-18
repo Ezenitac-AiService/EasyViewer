@@ -260,10 +260,16 @@ mod tests {
 
     #[test]
     fn validates_storage_dir_paths() {
+        // Build absolute paths for the running platform ("/tmp/books" has no drive on Windows).
+        let books = std::env::temp_dir().join("books");
+        let books_str = books.to_str().unwrap();
+        let escape = format!("{books_str}{}..{}escape", std::path::MAIN_SEPARATOR, std::path::MAIN_SEPARATOR);
         assert!(validate_storage_dir_path("").is_err());
         assert!(validate_storage_dir_path("relative/folder").is_err());
-        assert!(validate_storage_dir_path("/tmp/books/../escape").is_err());
-        assert!(validate_storage_dir_path("/tmp/books").is_ok());
+        assert!(validate_storage_dir_path(&escape).is_err());
+        assert!(validate_storage_dir_path(books_str).is_ok());
+        // A rooted path without a drive is not absolute on Windows and must be refused there.
+        assert_eq!(validate_storage_dir_path("/tmp/books").is_ok(), cfg!(unix));
     }
 
     #[test]
