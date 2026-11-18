@@ -7,7 +7,8 @@ import { checkStatic } from '../../scripts/check-release-gate.mjs'
 /** spec 003 US7 / T078 (contracts/release-and-ci.md §1, §2, §5). */
 
 const ROOT_DIR = path.resolve(__dirname, '../..')
-const read = (rel: string) => fs.readFileSync(path.join(ROOT_DIR, rel), 'utf-8')
+// Windows checkouts use CRLF (core.autocrlf); compare workflow text with LF line endings.
+const read = (rel: string) => fs.readFileSync(path.join(ROOT_DIR, rel), 'utf-8').replace(/\r\n/g, '\n')
 
 /** Returns the block of one top-level job (`  name:` … next `  name:`). */
 function jobBlock(text: string, job: string): string {
