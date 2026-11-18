@@ -243,11 +243,55 @@ export function checkIcons(root, legacyIconHashes = LEGACY_ICON_HASHES) {
   return errors
 }
 
+function checkGradleSigning(root) {
+  const text = read(root, 'src-tauri/gen/android/app/build.gradle.kts')
+  return text === null ? [] : checkAndroidReleaseSigning(text)
+}
+
+export const ANDROID_SIGNING_ENV = Object.freeze([
+  'ANDROID_KEYSTORE_PATH',
+  'ANDROID_KEYSTORE_PASSWORD',
+  'ANDROID_KEY_ALIAS',
+  'ANDROID_KEY_PASSWORD'
+])
+
+/**
+ * FR-017 / T057: release APKs are signed only with the fork-owned key supplied through the
+ * environment, never with the debug key, and a missing key must stop the build.
+ */
+export function checkAndroidReleaseSigning(gradleText) {
+  const errors = []
+  const label = 'build.gradle.kts'
+  const release = /getByName\("release"\)\s*\{([\s\S]*?)\n\s{8}\}/.exec(gradleText)?.[1] ?? ''
+  if (!/signingConfig\s*=\s*signingConfigs\.getByName\("release"\)/.test(release)) {
+    errors.push(`${label}: release 빌드는 signingConfigs.getByName("release")로 서명해야 합니다(debug 키 대체 금지)`)
+  }
+  if (/signingConfigs\.getByName\("debug"\)/.test(release)) {
+    errors.push(`${label}: release 빌드가 debug 키로 서명합니다`)
+  }
+  if (!/create\("release"\)/.test(gradleText)) errors.push(`${label}: release 서명 설정(create("release"))이 없습니다`)
+  for (const name of ANDROID_SIGNING_ENV) {
+    if (!gradleText.includes(`System.getenv("${name}")`)) {
+      errors.push(`${label}: 서명 환경 변수 ${name}을 읽지 않습니다`)
+    }
+  }
+  for (const field of ['storePassword', 'keyPassword', 'keyAlias']) {
+    if (new RegExp(`${field}\\s*=\\s*"`).test(gradleText)) {
+      errors.push(`${label}: ${field} 값을 저장소에 고정하지 마세요`)
+    }
+  }
+  if (!/GradleException/.test(gradleText)) {
+    errors.push(`${label}: 서명 환경 변수가 없을 때 GradleException으로 release 빌드를 멈춰야 합니다`)
+  }
+  return errors
+}
+
 export function checkIdentity(root = process.cwd(), { legacyIconHashes = LEGACY_ICON_HASHES } = {}) {
   const errors = [
     ...checkManifests(root),
     ...checkStorageKeys(root),
     ...checkIcons(root, legacyIconHashes),
+    ...checkGradleSigning(root),
     ...checkLegacyTokens(root)
   ]
   return { ok: errors.length === 0, errors }

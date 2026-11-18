@@ -534,3 +534,13 @@ Setup → Foundational ─┬─▶ US1 ─┐
 - `(메인테이너)` 작업과 원격 푸시·PR·릴리스·외부 연락은 사용자 승인 없이 실행하지 않는다
 - 업스트림 저장소에는 PR·이슈를 만들지 않는다(보안 통지는 T013의 비공개 경로만)
 - 실행하지 못한 검증은 통과로 기록하지 않는다(`BLOCKED`)
+
+## Phase 11: Convergence
+
+- [X] T101 이름을 바꾼 Apple 프로젝트(`src-tauri/gen/apple/pagelight.xcodeproj`, `pagelight_iOS/`, `Sources/pagelight/`)를 Tauri CLI가 그대로 쓰는지 iOS 시뮬레이터 빌드(`APPLE_DEVELOPMENT_TEAM` 지정 후 `npm run tauri ios build -- --target aarch64-sim`)로 확인한다. 실패하면 `xcodegen` 설치 후 `npm run ios:init`으로 재생성해 diff를 검토하고 `project.yml` 수동 변경(팀 ID 제거, 식별자·`PRODUCT_NAME`)을 다시 적용한다. 결과를 `verification/spikes.md`에 기록한다 per FR-015, FR-021, T058 (partial)
+- [ ] T102 Android 패키지 이동(`com/ezenitac/easyviewer`)과 release 서명 설정 후 `npm run android:build`(debug APK)가 성공하는지, 서명 환경 변수 없이 `npm run android:release`를 실행하면 `GradleException`으로 실패하는지 로컬에서 확인하고 `verification/spikes.md`에 기록한다 per FR-015, FR-017, T056, T057 (partial)
+- [X] T103 `README.md` "출처와 라이선스" 절의 라이선스 버전 선택 근거 참조를 `NOTICE` 4절에서 5절로 고친다(NOTICE에 "앱 이름과 아이콘" 절이 4절로 들어가며 번호가 밀림) per FR-003 (contradicts)
+- [X] T104 `docs/ios-build.md`에 저장소에서 지운 개인 기기 UDID와 Apple 팀 ID가 git 이력에는 남아 있고 이력 재작성 금지(헌법 VIII) 때문에 지울 수 없다는 한계를 명시한다 per FR-017 (partial)
+- [X] T105 `CHANGELOG.md` `[미출시]` 항목에 US5 변경(식별자 `com.ezenitac.easyviewer`, 표시명 `Pagelight`, 패키지 이름 `pagelight`, 새 아이콘, Android 고정 서명 키, Apple 팀 정보 환경 변수화, `check-identity` 검사)을 추가한다 per FR-002, FR-023 (partial)
+- [ ] T106 `scripts/check-identity.mjs` 검사 범위에 `.github/workflows/`를 더해 자동화 안의 구 식별자·원저작자 이름 잔존도 막는다. T086(release.yml 이름 전환) 이후 진행하고, `tests/unit/identityCheck.spec.ts`에 실패 케이스를 먼저 추가한다 per SC-002 (partial)
+- [X] T107 `npm run test:e2e`를 실행해 샘플 도서 제목 변경(`tests/e2e/reader-epub.spec.ts`)과 정보 대화상자 시나리오(T030)를 포함한 기존 e2e 게이트의 회귀가 0건인지 확인한다 per SC-010 (partial)

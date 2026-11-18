@@ -49,3 +49,33 @@
 |---|---|
 | 사유 | Xcode는 있으나 설치된 iOS 시뮬레이터 런타임이 없다(`xcrun simctl list runtimes`에 iOS 없음) |
 | 필요한 환경 | iOS 시뮬레이터 런타임이 있는 macOS 또는 CI `ios-sim-build` 작업. T084에서 확인하고, 실패하면 원인을 먼저 고친다(FR-021) |
+
+## 수렴 검증 — US5 이름 변경 후 빌드·회귀 실측 (T101, T102, T107)
+
+### T101 — 이름을 바꾼 Apple 프로젝트로 iOS 시뮬레이터 빌드
+
+| 필드 | 내용 |
+|---|---|
+| 날짜 | 2026-11-18 |
+| 환경 | macOS (Darwin 27.2), Apple Silicon, Xcode 27.2(iPhoneSimulator SDK 27.2), tauri-cli 2.12.4, Rust 타깃 `aarch64-apple-ios-sim` |
+| 실행 명령 | `rustup target add aarch64-apple-ios-sim` 후 `npx tauri ios build --target aarch64-sim --debug`(`APPLE_DEVELOPMENT_TEAM` 미지정) |
+| 결과 | 종료 코드 0. `src-tauri/gen/apple/build/arm64-sim/Pagelight.app` 생성. 번들 `CFBundleIdentifier` = `com.ezenitac.easyviewer`, `CFBundleName` = `Pagelight`. Tauri CLI가 `pagelight.xcodeproj`·스킴 `pagelight_iOS`를 그대로 썼고 `xcodegen`·`ios:init` 재생성은 필요 없었다. 경고는 `main.mm`의 기존 `UIApplication.windows` 사용 중단 경고 1건뿐(이번 변경과 무관) |
+| 부수 효과 | 빌드가 `pagelight_iOS/Info.plist`의 `CFBundleShortVersionString`·`CFBundleVersion`을 `0.1.6-beta` → `0.1.6`으로 덮어썼다(프리릴리스 접미사 제거, 이름 변경 전부터 있던 Tauri 동작). `check:version`을 깨므로 되돌렸다. T089 버전 상향 때 같은 동작을 고려한다 |
+| 판정 | **PASS**(서명 없는 시뮬레이터 빌드). S5(T008)의 "서명 없는 iOS 시뮬레이터 빌드"도 이 결과로 확인된다. 기기 빌드·서명은 확인하지 않았다 |
+
+### T102 — Android debug APK 빌드와 release 서명 강제
+
+| 판정 | **BLOCKED** |
+|---|---|
+| 날짜 | 2026-11-18 |
+| 사유 | 이 Mac에 Android SDK·NDK가 없다(`ANDROID_HOME`·`NDK_HOME`·`JAVA_HOME` 미설정, `~/Library/Android/sdk` 없음) |
+| 필요한 환경 | Android SDK·NDK가 있는 환경 또는 CI `android-debug` 작업(T084). 확인 항목: `npm run android:build` 성공, 서명 환경 변수 없이 `npm run android:release` 시 `GradleException`, `android:init` 후 `git status`로 Gradle 덮어쓰기 여부(S4) |
+
+### T107 — e2e 회귀
+
+| 필드 | 내용 |
+|---|---|
+| 날짜 | 2026-11-18 |
+| 실행 명령 | `npm run test:e2e`(Playwright, WebKit) |
+| 결과 | 16건 모두 통과. 샘플 도서 제목 변경(`reader-epub.spec.ts`)과 정보 대화상자 시나리오(T030) 포함 |
+| 판정 | **PASS** |

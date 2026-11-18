@@ -46,6 +46,10 @@ npm run ios:build
 IOS_DEVICE_ID=<기기 식별자> npm run ios:install
 ```
 
+### 이미 지운 값과 git 이력의 한계
+
+이전 버전의 저장소에는 Apple 개발 팀 ID(`tauri.conf.json`, `project.yml`)와 메인테이너 개인 기기 UDID(`package.json`의 `ios:install` 스크립트)가 고정값으로 들어 있었습니다. 현재 파일에서는 모두 지웠지만, **과거 커밋에는 그대로 남아 있습니다.** 이력 재작성(강제 푸시 등)은 헌법 제8원칙에 따라 금지되므로 git 이력에서는 지울 수 없습니다. 이 값들은 비밀값이 아니지만, 새로 기여할 때 개인 식별자를 커밋하지 않도록 주의하세요. `npm run check:identity`가 `package.json` 스크립트의 UDID 패턴과 저장소에 고정된 팀 ID를 막습니다.
+
 ## 데이터
 
 새 식별자(`com.ezenitac.easyviewer`)로 빌드한 앱은 이전 앱과 별개의 앱으로 설치되며, 자동 데이터 이전은 없습니다. 자세한 내용은 [모바일 이전 안내](mobile-migration.md)를 참고하세요.

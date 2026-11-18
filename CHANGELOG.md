@@ -26,6 +26,14 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 ### 변경
 
 - 지원 범위를 macOS·iOS·Linux 중점으로 전환했습니다. Android는 유지 플랫폼입니다.
+- 앱 정체성을 원저작자 앱과 구분되도록 바꿨습니다. 원저작자 앱과 같은 기기에 함께 설치하기 위한 변경입니다.
+  - 앱 식별자: `com.edith.easyviewer` → `com.ezenitac.easyviewer`(전 플랫폼)
+  - 표시명: `Pagelight`, 패키지 이름: `pagelight`(Rust 라이브러리 `pagelight_lib`)
+  - 앱 아이콘: 이 포크에서 새로 만든 원본(`src-tauri/icons/source/pagelight.svg`)으로 교체
+  - Android 패키지 경로를 `com/ezenitac/easyviewer`로 옮기고, release 빌드는 포크 소유 고정 서명 키(환경 변수)로만 서명합니다([Android 서명 안내](docs/android-signing.md))
+  - Apple 개발 팀 ID와 개인 기기 UDID를 저장소에서 지우고 환경 변수(`APPLE_DEVELOPMENT_TEAM`, `IOS_DEVICE_ID`)로 옮겼습니다([iOS 빌드 안내](docs/ios-build.md))
+  - 구 식별자·원저작자 이름 잔존, 내부 저장 키 변경, 고정 팀 ID·UDID, 원저작자 아이콘 재사용을 막는 검사(`scripts/check-identity.mjs`)를 `npm run verify`에 추가했습니다
+  - 내부 저장 키(`EasyViewerDB`, `easyviewer:` 등)는 기존 데이터를 이어 쓰기 위해 바꾸지 않았습니다
 
 ### 지원 종료
 

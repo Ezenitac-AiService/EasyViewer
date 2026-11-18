@@ -245,5 +245,5 @@ npm run android:release:all # 전체 ABI release APK
 
 - **원저작물**: 이 저장소는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)를 바탕으로 한 파생 저작물입니다. Copyright (C) 2026 edith2580.
 - **이 포크의 변경분**: Copyright (C) 2026 M5. 이 포크는 원작 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었습니다. 원작의 이후 릴리스(`v0.2.0`·`v0.2.1`)는 병합하지 않았습니다. 주요 변경 요약은 [NOTICE](./NOTICE) 3절과 [CHANGELOG](./CHANGELOG.md)에 있습니다.
-- **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 라이선스 전문은 바꾸지 않았습니다. "only"는 이 포크의 선택이며, 그 근거와 재검토 조건은 [NOTICE](./NOTICE) 4절에 있습니다.
+- **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 라이선스 전문은 바꾸지 않았습니다. "only"는 이 포크의 선택이며, 그 근거와 재검토 조건은 [NOTICE](./NOTICE) 5절에 있습니다.
 - **서드파티 구성요소**: 직접 의존성 요약은 [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md), 전이 의존성을 포함한 전체 고지와 라이선스 전문은 [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt)(앱 정보 화면에서도 열람 가능)에 있습니다.

@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { checkIdentity, NEW_IDENTITY, STORAGE_KEYS } from '../../scripts/check-identity.mjs'
+import { checkAndroidReleaseSigning, checkIdentity, NEW_IDENTITY, STORAGE_KEYS } from '../../scripts/check-identity.mjs'
 
 /**
  * spec 003 US5 / data-model §4: the fork's own identity (Pagelight, com.ezenitac.easyviewer)
@@ -182,5 +182,57 @@ describe('check-identity (spec 003 US5, data-model §4)', () => {
     const bad = run(root, { legacyIconHashes: { 'src-tauri/icons/icon.png': same } })
     expect(bad.ok).toBe(false)
     expect(bad.errors.join('\n')).toMatch(/icon\.png/)
+  })
+})
+
+describe('Android release signing contract (spec 003 FR-017, T057)', () => {
+  const GOOD = [
+    'android {',
+    '    signingConfigs {',
+    '        create("release") {',
+    '            val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")',
+    '            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")',
+    '            keyAlias = System.getenv("ANDROID_KEY_ALIAS")',
+    '            keyPassword = System.getenv("ANDROID_KEY_PASSWORD")',
+    '        }',
+    '    }',
+    '    buildTypes {',
+    '        getByName("release") {',
+    '            signingConfig = signingConfigs.getByName("release")',
+    '        }',
+    '    }',
+    '}',
+    'gradle.taskGraph.whenReady { throw GradleException("missing") }'
+  ].join('\n')
+
+  it('accepts a release build that signs only with the environment-provided fork key', () => {
+    expect(checkAndroidReleaseSigning(GOOD)).toEqual([])
+  })
+
+  it('passes the real build.gradle.kts', () => {
+    const text = fs.readFileSync(path.resolve('src-tauri/gen/android/app/build.gradle.kts'), 'utf-8')
+    expect(checkAndroidReleaseSigning(text)).toEqual([])
+  })
+
+  it('fails when the release build falls back to the debug key', () => {
+    const bad = GOOD.replace('signingConfigs.getByName("release")', 'signingConfigs.getByName("debug")')
+    expect(checkAndroidReleaseSigning(bad).join('\n')).toMatch(/debug/)
+  })
+
+  it.each(['ANDROID_KEYSTORE_PATH', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD'])(
+    'fails when %s is not read from the environment',
+    (name) => {
+      const bad = GOOD.split('\n').filter((l) => !l.includes(name)).join('\n')
+      expect(checkAndroidReleaseSigning(bad).join('\n')).toContain(name)
+    }
+  )
+
+  it('fails when a missing signing environment does not stop the build', () => {
+    expect(checkAndroidReleaseSigning(GOOD.replace('GradleException', 'println')).join('\n')).toMatch(/GradleException/)
+  })
+
+  it('fails when a keystore password is hardcoded', () => {
+    const bad = GOOD.replace('storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")', 'storePassword = "hunter2"')
+    expect(checkAndroidReleaseSigning(bad).join('\n')).toMatch(/storePassword/)
   })
 })
