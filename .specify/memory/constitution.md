@@ -114,8 +114,9 @@ Linux)과 유지 플랫폼(Android), 그리고 개발 보조 웹 폴백(`Indexed
 권한 상승, 자격증명 유출 등 치명적 침해가 발생하므로 모든 신뢰 경계를 코드와 정책으로 강제한다.
 
 ### VIII. 독립 포크 운영 원칙 (Independent Fork Governance)
-EasyViewer(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6`(`44c4d37`, 불변 주석
-태그 `upstream-base-v0.1.6`)에서 갈라진 **독립 포크**이며, 다음을 지켜야 한다.
+EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6`(`44c4d37`, 불변
+주석 태그 `upstream-base-v0.1.6`)에서 갈라진 **독립 포크**이며, 이 저장소가 배포하는 앱의 제품 표시명은
+**`Pagelight`**이다. 다음을 지켜야 한다.
 - **업스트림 병합·동기화 금지**: 업스트림 변경을 병합·체리픽·동기화해서는 안 된다(MUST NOT). 업스트림
   아이디어가 필요하면 별도 명세로 재구현한다(MUST). 단, 포크가 찾은 보안 결함이 원저작자 최신 릴리스에도
   남아 있으면 공개 비교나 공지 전에 원저작자에게 비공개로 알리거나 수정을 제안하고 그 기록을 남겨야
@@ -127,10 +128,12 @@ EasyViewer(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6
 - **라이선스와 귀속**: 라이선스는 `GPL-3.0-only`로 선언하고 모든 패키지·설치 메타데이터에서 일치시켜야
   한다(MUST). 라이선스 전문을 바꾸지 않으며(MUST NOT), 원저작자 귀속 표기와 GPLv3 §5(a) 변경 사실·날짜
   고지를 유지해야 한다(MUST). 원래 없던 고지를 "보존된 원문"처럼 표현해서는 안 된다(MUST NOT).
-- **구분되는 정체성**: 포크 앱은 원저작자 앱과 구분되는 제품 표시명·설치 이름·패키지 이름과 고유 앱
-  식별자를 써야 하며(MUST), 원저작자 앱과 같은 기기에 함께 설치되어도 서로 덮어쓰거나 데이터·자격증명을
-  공유해서는 안 된다(MUST NOT). 버전 번호만으로 포크를 구분해서는 안 되며, 릴리스 제목과 산출물 이름에
-  포크 정체성이 드러나야 한다(MUST).
+- **구분되는 정체성**: 포크 앱은 원저작자 앱과 구분되는 제품 표시명(`Pagelight`)·설치 이름·패키지
+  이름(`pagelight`, Rust 라이브러리 `pagelight_lib`)·앱 아이콘과 고유 앱 식별자를 써야 하며(MUST),
+  원저작자 앱과 같은 기기에 함께 설치되어도 서로 덮어쓰거나 데이터·자격증명을 공유해서는 안
+  된다(MUST NOT). 버전 번호만으로 포크를 구분해서는 안 되며, 릴리스 제목과 산출물 이름에 포크 정체성이
+  드러나야 한다(MUST). 저장소 이름(`EasyViewer`)은 URL·이력 보존을 위해 유지하지만, 앱 안과 공개
+  문서에서 원저작자 앱 이름은 출처 표기와 Windows 사용자 안내 목적으로만 써야 한다(MUST).
 - **이력 보존**: 공유 브랜치의 이력 재작성(강제 푸시 등)과 저작권·출처 고지 삭제는 금지한다(MUST NOT).
   원저작자 유래 코드의 일반적인 수정·삭제는 허용한다.
 
@@ -152,9 +155,12 @@ EasyViewer(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6
   `rustls` + `stream`, `tokio`, `futures-util`, `dunce`, `sha2`, `hex`, `zip` `9.x`, `serde`,
   `serde_json`), 웹 브라우저 `IndexedDB v2`(`book_files`, `book_covers`, `location_indexes`,
   `key_value`) 및 소형 설정 전용 `localStorage` 폴백. 전 플랫폼 앱 식별자는
-  `com.ezenitac.easyviewer` 단일 기준으로 통일해야 하며(MUST), 구 식별자 `com.edith.easyviewer`는
-  기존 사용자 데이터 마이그레이션, 구 구조 재발 차단 검증, 출처 고지, 과거 명세 이력에서만 남길 수
-  있다(MUST NOT 그 밖의 사용).
+  `com.ezenitac.easyviewer` 단일 기준으로 통일해야 하며(MUST), 구 식별자 `com.edith.easyviewer`와
+  원저작자 앱 이름(`EasyViewer`, `easy-viewer`)은 기존 사용자 데이터 마이그레이션, 구 구조 재발 차단
+  검증, 출처 고지, 지원 범위 원문과 Windows 안내, 과거 명세 이력에서만 남길 수 있다(MUST NOT 그 밖의
+  사용). 단, 기존 사용자 데이터 연속성을 위해 내부 저장 키(IndexedDB 이름 `EasyViewerDB`,
+  `localStorage` 접두사 `easyviewer:`, 자격증명 계정 키 접두사 `easyviewer:webdav:`, 웹 자격증명 키
+  `webdav_credentials_web_consent_v2`)는 별도 명세와 이전 경로 없이 바꿔서는 안 된다(MUST NOT).
 - **지원 플랫폼 등급 (단일 원문)**: 공개 문서·이슈 양식·앱 정보 화면의 지원 범위 문구는 이 항목과
   같은 의미여야 한다(MUST).
   - **중점**: macOS(`11.0+`), iOS(`15.0+`), Linux — 설계·검증·품질 투자의 기준. iOS는 공개 배포
@@ -174,11 +180,16 @@ EasyViewer(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6
   (`css-tree` 허용 목록 — 정규식 단독 CSS 치환 금지), 플랫폼별 최소 권한 Capabilities(`desktop` vs
   `mobile` 분리, `fs:allow-read-file` 제거 및 단일 `read_validated_book_file` 경계 일원화), `dunce`
   기반 경로 정규화(`allow_storage_dir`), SSOT SSRF/TLS 검증 및 안전 자격증명 격리를 반드시 적용해야
-  한다(MUST).
+  한다(MUST). Android 서명 키·비밀번호, Apple 개발 팀 ID, 개인 기기 식별자(UDID)는 저장소에 고정하지
+  않고 빌드 환경 변수(`ANDROID_KEYSTORE_*`·`ANDROID_KEY_*`, `APPLE_DEVELOPMENT_TEAM`,
+  `IOS_DEVICE_ID`)로만 전달해야 하며(MUST), release 빌드는 서명 정보가 없을 때 debug 키로 대체 서명하지
+  않고 실패해야 한다(MUST).
 - **버전·식별자 동기화**: 애플리케이션 버전 및 식별자 변경 시 `package.json`, `src-tauri/Cargo.toml`,
   `src-tauri/tauri.conf.json`, `package-lock.json`, `src-tauri/Cargo.lock`, Android
   (`tauri.android.conf.json`, `build.gradle.kts`, `MainActivity.kt`) 및 Apple (`project.yml`,
-  `Info.plist`) 메타데이터를 `npm run check:version`으로 검증해 반드시 동일하게 유지해야 한다(MUST).
+  `Info.plist`) 메타데이터를 `npm run check:version`으로 검증해 반드시 동일하게 유지해야 하며(MUST),
+  제품 표시명·패키지 이름·내부 저장 키·원저작자 이름 잔존·아이콘 재사용은 `npm run check:identity`로
+  검증해야 한다(MUST).
 
 ## 개발 워크플로우 및 품질 게이트 (Development Workflow & Quality Gates)
 
@@ -218,7 +229,7 @@ EasyViewer(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6
 
 ## Governance
 
-본 헌법(Constitution)은 EasyViewer 프로젝트의 모든 설계, 계획, 구현, 리뷰 및 커밋 작업에서 최우선
+본 헌법(Constitution)은 EasyViewer 저장소(제품 Pagelight)의 모든 설계, 계획, 구현, 리뷰 및 커밋 작업에서 최우선
 규범으로 적용된다(MUST). 규범 키워드(`MUST`, `MUST NOT`, `SHOULD`)는 RFC 2119 / RFC 8174 정의를
 따른다.
 
@@ -237,4 +248,4 @@ EasyViewer(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`의 `v0.1.6
   지속적 의심·다층 검증, Zero Trust 보안, 독립 포크 운영)과 문서 분리 게이트 준수 여부를 반드시 검증해야
   한다(MUST).
 
-**Version**: 4.0.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-17
+**Version**: 4.1.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-18
