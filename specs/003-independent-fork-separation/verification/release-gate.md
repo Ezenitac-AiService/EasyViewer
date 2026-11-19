@@ -31,7 +31,8 @@ origin	https://github.com/Ezenitac-AiService/EasyViewer.git (push)
 
 ## 분리 요청·결과 기록 (T097, T098)
 
-- 지원 종료 고지 게시:
-- 릴리스 산출물·노트 백업 위치:
+- 분리 게이트 확인(T096): 2026-11-19, 최신 `main`(`95f087d`, CI 실행 44488872183 6개 작업 통과)에서 `node scripts/check-release-gate.mjs --separation` → `분리 게이트 통과`(종료 코드 0)
+- 지원 종료 고지 게시: 2026-11-19, `docs/windows-eol-notice.md` 문안을 `v0.1.6-alpha`·`v0.1.6-beta` 릴리스 노트 맨 위에 추가(`gh release edit`). 기존 노트는 고지 아래에 그대로 두었고, 산출물은 두 릴리스 모두 6개로 변화 없음
+- 릴리스 산출물·노트 백업 위치: 메인테이너 로컬 `~/easyviewer-release-backup/`(2026-11-19). 두 릴리스 산출물 12개와 수정 전 노트(`NOTES.md`). 파일 크기를 GitHub 값과 대조해 12개 모두 일치, SHA-256 목록은 `SHA256SUMS-backup.txt`. 저장소 밖 두 번째 보관처로의 복사는 메인테이너 확인 항목
 - GitHub Support 요청일:
 - 분리 완료 확인(`.fork == false`, 릴리스·고지 보존, PR 기본 대상, 코드 검색):
