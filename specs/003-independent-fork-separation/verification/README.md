@@ -27,4 +27,5 @@
 | `migration-linux.md` | Linux 데이터 이전 실측(quickstart §3) | T076 |
 | `coexistence.md` | 원저작자 앱과 공존 설치 실측(quickstart §4) | T077 |
 | `windows-migration.md` | Windows 전환 절차 실측(quickstart §7) | T048 |
+| `quickstart-run.md` | quickstart §1–§6, §9 실행 결과 | T092 |
 | `release-gate.md` | FR-025 안전 게이트 체크 기록 | T011, T042, T062, T091–T099 |

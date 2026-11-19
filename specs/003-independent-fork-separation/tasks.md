@@ -447,7 +447,7 @@ description: "독립 포크 분리 작업 목록"
 
 **Purpose**: 전체 검증, 원격 정리, 원저작자 고지, 안전 게이트, 분리 요청, 첫 독립 릴리스, 기존 릴리스 고지. plan.md 단계 10–14 순서를 지킨다.
 
-- [ ] T092 quickstart §1–§6, §9를 실행해 결과를 `verification/`에 기록한다. `BLOCKED` 항목은 사유와 필요한 환경을 적는다
+- [X] T092 quickstart §1–§6, §9를 실행해 결과를 `verification/`에 기록한다. `BLOCKED` 항목은 사유와 필요한 환경을 적는다
 - [ ] T093 (사용자 승인 후) `gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal`로 리허설을 실행한다(quickstart §8). 실제 태그 이름은 쓰지 않는다. 그래야 남은 초안에 실제 릴리스가 업로드되는 일이 없다. `rehearsal=true`일 때 `tag_name`이 `-rehearsal`로 끝나지 않으면 워크플로가 실패해야 하고, `--release` 게이트는 같은 태그의 초안 릴리스가 남아 있으면 실패해야 한다(T086·T040에 반영). 태그는 만들지 않는다. `gate` 경고 목록, 산출물 구성(Windows 0개)·체크섬·이름을 확인해 `verification/release-gate.md`에 기록하고, `[REHEARSAL]` 초안 릴리스를 지운다
 - [ ] T094 (메인테이너) 로컬에서 `git remote remove upstream`을 실행하고 `git remote -v` 결과를 `verification/release-gate.md`에 기록한다
 - [X] T095 (메인테이너) 원저작자에게 분리 사실, 식별자 변경, 새 표시명, 지원 범위, Windows 사용자 안내 방침을 정중히 알리고 `verification/upstream-notice.md`에 기록한다(data-model §7). 이의가 있으면 이름을 바꾸거나(T050부터 반복) `supportScope.ts`의 `windowsWording: 'unsupported-only'`로 문구를 줄인 뒤 T033 검사를 다시 통과시킨다
