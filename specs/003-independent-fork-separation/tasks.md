@@ -65,7 +65,7 @@ description: "독립 포크 분리 작업 목록"
   - 기존 lightweight 태그 `v0.1.6`과 같은 커밋이라는 사실
   - 업스트림 `v0.2.0`(`eaf6471`)·`v0.2.1`(`40c4605`) 미병합 사실
   - 생성 일자
-- [ ] T011 (메인테이너) `git push origin upstream-base-v0.1.6`으로 태그를 게시하고, `git ls-remote --tags origin upstream-base-v0.1.6` 결과를 `verification/release-gate.md` 항목 1에 기록한다
+- [X] T011 (메인테이너) `git push origin upstream-base-v0.1.6`으로 태그를 게시하고, `git ls-remote --tags origin upstream-base-v0.1.6` 결과를 `verification/release-gate.md` 항목 1에 기록한다
 
 ### 업스트림 보안 조율 (FR-013, R11)
 

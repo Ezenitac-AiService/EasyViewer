@@ -4,7 +4,7 @@
 
 | 항목 | 내용 | 판정 | 확인자 | 날짜 | 근거 |
 |---|---|---|---|---|---|
-| 1 | 기준선 태그 `upstream-base-v0.1.6`이 원격에서 `44c4d37`을 가리킴 | 로컬 생성(2026-11-17), **원격 게시 전** | — | — | `git ls-remote --tags origin upstream-base-v0.1.6` 결과를 여기에 붙인다(T011) |
+| 1 | 기준선 태그 `upstream-base-v0.1.6`이 원격에서 `44c4d37`을 가리킴 | **통과** | Claude Code(메인테이너 승인) | 2026-11-19 | `git ls-remote --tags origin upstream-base-v0.1.6` → `d6a56ab4…`(주석 태그), `^{}` → `44c4d37749d29bd070e7a07aea4622eef0b97306` |
 | 2 | 보안 조율 완료 | 미완 | — | — | `security-coordination.md` |
 | 3 | 원저작자 사전 고지 완료 | 미완 | — | — | `upstream-notice.md` |
 | 4 | `main` 전체 CI 통과 | **통과**(6/6) | Claude Code | 2026-11-19 | [`main` ci.yml 실행 44335120998](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44335120998) (병합 커밋 `83b1825`). `ios-sim-build`는 macOS arm64 러너 부족으로 취소된 뒤 재실행에서 통과. 병합 전 PR 실행: [44298183848](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44298183848). 이 기록은 시점 근거이며, 게이트는 릴리스 때 `main` 최신 결과를 다시 조회한다 |
