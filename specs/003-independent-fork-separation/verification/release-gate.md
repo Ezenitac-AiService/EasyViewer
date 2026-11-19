@@ -22,7 +22,12 @@
 
 ## 업스트림 원격 제거 기록 (T094)
 
-`git remote -v` 결과:
+`git remote -v` 결과 (2026-11-19, 메인테이너가 `git remote remove upstream` 실행 후):
+
+```text
+origin	https://github.com/Ezenitac-AiService/EasyViewer.git (fetch)
+origin	https://github.com/Ezenitac-AiService/EasyViewer.git (push)
+```
 
 ## 분리 요청·결과 기록 (T097, T098)
 

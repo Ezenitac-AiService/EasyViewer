@@ -449,7 +449,7 @@ description: "독립 포크 분리 작업 목록"
 
 - [X] T092 quickstart §1–§6, §9를 실행해 결과를 `verification/`에 기록한다. `BLOCKED` 항목은 사유와 필요한 환경을 적는다
 - [ ] T093 (사용자 승인 후) `gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal`로 리허설을 실행한다(quickstart §8). 실제 태그 이름은 쓰지 않는다. 그래야 남은 초안에 실제 릴리스가 업로드되는 일이 없다. `rehearsal=true`일 때 `tag_name`이 `-rehearsal`로 끝나지 않으면 워크플로가 실패해야 하고, `--release` 게이트는 같은 태그의 초안 릴리스가 남아 있으면 실패해야 한다(T086·T040에 반영). 태그는 만들지 않는다. `gate` 경고 목록, 산출물 구성(Windows 0개)·체크섬·이름을 확인해 `verification/release-gate.md`에 기록하고, `[REHEARSAL]` 초안 릴리스를 지운다
-- [ ] T094 (메인테이너) 로컬에서 `git remote remove upstream`을 실행하고 `git remote -v` 결과를 `verification/release-gate.md`에 기록한다
+- [X] T094 (메인테이너) 로컬에서 `git remote remove upstream`을 실행하고 `git remote -v` 결과를 `verification/release-gate.md`에 기록한다
 - [X] T095 (메인테이너) 원저작자에게 분리 사실, 식별자 변경, 새 표시명, 지원 범위, Windows 사용자 안내 방침을 정중히 알리고 `verification/upstream-notice.md`에 기록한다(data-model §7). 이의가 있으면 이름을 바꾸거나(T050부터 반복) `supportScope.ts`의 `windowsWording: 'unsupported-only'`로 문구를 줄인 뒤 T033 검사를 다시 통과시킨다
 - [ ] T096 `node scripts/check-release-gate.mjs --separation`이 통과하는지 확인한다(FR-025 1–5)
 - [ ] T097 (메인테이너) `docs/windows-eol-notice.md` 문안을 기존 `v0.1.6-alpha`·`v0.1.6-beta` 릴리스 노트 맨 위에 추가한다(`gh release edit`, 산출물 삭제 금지). 분리 방식에 따라 릴리스가 사라질 수 있으므로 **분리 요청 전에** 게시하고, `gh release download`로 모든 릴리스 산출물·노트를 백업한다(research R10)
