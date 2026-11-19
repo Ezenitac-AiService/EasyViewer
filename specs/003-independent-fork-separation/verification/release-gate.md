@@ -7,8 +7,8 @@
 | 1 | 기준선 태그 `upstream-base-v0.1.6`이 원격에서 `44c4d37`을 가리킴 | 로컬 생성(2026-11-17), **원격 게시 전** | — | — | `git ls-remote --tags origin upstream-base-v0.1.6` 결과를 여기에 붙인다(T011) |
 | 2 | 보안 조율 완료 | 미완 | — | — | `security-coordination.md` |
 | 3 | 원저작자 사전 고지 완료 | 미완 | — | — | `upstream-notice.md` |
-| 4 | `main` 전체 CI 통과 | PR #1 통과(6/6), **`main` 병합 후 확정** | Claude Code | 2026-11-18 | [ci.yml 실행 44298183848](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44298183848) (`1aeb5ae`). 게이트는 릴리스 때 `main` 결과를 다시 조회한다 |
-| 5 | 라이선스 감사 통과 | PR #1 통과, **`main` 병합 후 확정** | Claude Code | 2026-11-18 | [같은 실행의 `licenses` 작업](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44298183848) (`cargo deny check`, `check-licenses.mjs`) |
+| 4 | `main` 전체 CI 통과 | **통과**(6/6) | Claude Code | 2026-11-19 | [`main` ci.yml 실행 44335120998](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44335120998) (병합 커밋 `83b1825`). `ios-sim-build`는 macOS arm64 러너 부족으로 취소된 뒤 재실행에서 통과. 병합 전 PR 실행: [44298183848](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44298183848). 이 기록은 시점 근거이며, 게이트는 릴리스 때 `main` 최신 결과를 다시 조회한다 |
+| 5 | 라이선스 감사 통과 | **통과** | Claude Code | 2026-11-19 | [같은 `main` 실행의 `licenses` 작업](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/44335120998) (`cargo deny check`, `check-licenses.mjs`) |
 | 6 | 체크섬 생성 | 미완 | — | — | 릴리스 `SHA256SUMS.txt` |
 | 7 | Windows 산출물 부재 | 미완 | — | — | 릴리스 산출물 목록 |
 | 8 | Android 서명 키 백업 확인 | 미완 | — | — | 아래 체크와 지문 |
