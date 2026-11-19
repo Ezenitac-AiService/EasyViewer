@@ -16,6 +16,7 @@
    mkdir -p ~/easyviewer-release-backup && cd ~/easyviewer-release-backup && gh release list -R Ezenitac-AiService/EasyViewer --limit 100 --json tagName --jq '.[].tagName' | while read -r t; do gh release download "$t" -R Ezenitac-AiService/EasyViewer -D "$t"; gh release view "$t" -R Ezenitac-AiService/EasyViewer --json body --jq .body > "$t/NOTES.md"; done
    ```
 4. GitHub Support에 포크 네트워크 분리를 요청합니다. 요청 전에 실행 시점의 공식 문서 "[Detaching a fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/detaching-a-fork)"를 다시 확인합니다.
+   - GitHub Support 사이트의 가상 상담사(virtual agent)로도 요청할 수 있습니다. 형제 프로젝트 `Ezenitac-AiService/ImageViewer`가 이 경로로 분리되었고, 분리 뒤에도 릴리스를 게시할 수 있었습니다. 경로와 관계없이 1–3단계를 먼저 끝냅니다.
 5. 완료되면 다음을 확인해 `specs/003-independent-fork-separation/verification/release-gate.md`에 기록합니다: `gh api repos/Ezenitac-AiService/EasyViewer --jq .fork`가 `false`, 릴리스와 지원 종료 고지 보존, 새 PR의 기본 대상, 코드 검색.
 
 **설정의 "Leave fork network"(자체 분리)는 예외로만 씁니다.** 이 방식은 이슈·PR·스타·위키·감시자를 잃고 되돌릴 수 없으며, 릴리스 보존 여부가 문서에 없습니다. Support 요청이 지연·거절되었고, 위 2·3단계와 위키 백업을 마친 경우에만 씁니다.
