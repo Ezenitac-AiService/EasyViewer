@@ -177,7 +177,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T035 [P] [US2] `CONTRIBUTING.md`를 새로 만든다. 이 단계에서는 지원 범위 블록과 "Windows 관련 이슈 처리 방침"(포크 저장소 접수 → 전환 안내로 종결, 원저작자 저장소에 올리지 말 것)만 쓰고, 나머지 절은 T079에서 채운다
 - [X] T036 [P] [US2] `CHANGELOG.md`를 새로 만든다. 이 단계에서는 "독립 분리" 항목 머리(분리 일자, 지원 범위 블록)만 쓰고, 과거 이력은 T080에서 채운다
 - [X] T037 [P] [US2] `.github/ISSUE_TEMPLATE/bug_report.yml`(플랫폼 드롭다운 `macOS`, `iOS`, `Linux`, `Android`, 앱 버전, 재현 절차), `.github/ISSUE_TEMPLATE/feature_request.yml`, `.github/ISSUE_TEMPLATE/config.yml`을 만든다. `config.yml`은 `blank_issues_enabled: false`이고 `contact_links`에 "Windows 사용자: 원저작자 EasyViewer" → `https://github.com/edith2580/EasyViewer`를 둔다
-- [ ] T038 [US2] (T014 이후) README에 "원저작자 앱과의 차이" 절을 추가한다. 검증 가능한 사실만 쓴다: 지원 플랫폼, 식별자, 데이터 형식 버전, 이름. 원저작자 앱 평가 문구와 보안 결함 비교는 쓰지 않는다. 쓴 뒤 `check-support-scope.mjs`를 통과시킨다
+- [X] T038 [US2] (T014 이후) README에 "원저작자 앱과의 차이" 절을 추가한다. 검증 가능한 사실만 쓴다: 지원 플랫폼, 식별자, 데이터 형식 버전, 이름. 원저작자 앱 평가 문구와 보안 결함 비교는 쓰지 않는다. 쓴 뒤 `check-support-scope.mjs`를 통과시킨다
 
 **Checkpoint**: US1·US2 완료 = 법적 준수와 사용자 안내 MVP
 
@@ -408,7 +408,7 @@ description: "독립 포크 분리 작업 목록"
 
 - [X] T079 [US7] `CONTRIBUTING.md`를 완성한다. 독립 운영 원칙(헌법 제8원칙 요약), 명세 절차(`/speckit-*` 흐름), 품질 게이트(`npm run verify`, `cargo deny check`), 한국어 커밋 규칙(헌법 제1원칙), 지원 플랫폼 등급별 기여 기대치를 담는다. 의존성 갱신으로 라이선스 감사가 실패할 때의 절차도 넣는다: 새 라이선스의 GPLv3 호환성 검토 → 근거와 함께 `scripts/license-policy.json`·`src-tauri/deny.toml` 허용 목록 갱신 또는 의존성 교체. 감사 우회·비활성화는 금지한다
 - [X] T080 [US7] `CHANGELOG.md` 과거 이력을 채운다. 업스트림 `v0.1.0`–`v0.1.6` 요약(태그 메시지 기준), 포크 프리릴리스 `v0.1.6-alpha`·`v0.1.6-beta`, 001·002 리팩토링, PR #2 기여, 분리 일자, 업스트림 `v0.2.0`·`v0.2.1` 미병합, Windows 지원 종료를 쓴다
-- [ ] T081 [P] [US7] (T014 이후) `SECURITY.md`를 새로 만든다. "원저작자 앱 취약점은 원저작자에게 신고" 문장은 T032(f) 금지어 검사의 예외로 `scripts/wording-exceptions.json`에 등록한다(결함 내용 언급이 아니라 신고 경로 안내이므로).
+- [X] T081 [P] [US7] (T014 이후) `SECURITY.md`를 새로 만든다. "원저작자 앱 취약점은 원저작자에게 신고" 문장은 T032(f) 금지어 검사의 예외로 `scripts/wording-exceptions.json`에 등록한다(결함 내용 언급이 아니라 신고 경로 안내이므로).
   - 지원 버전(첫 독립 릴리스 이후 최신만)
   - 비공개 취약점 신고 채널(GitHub Private vulnerability reporting)
   - 원저작자 앱 취약점은 원저작자에게 신고하라는 안내
