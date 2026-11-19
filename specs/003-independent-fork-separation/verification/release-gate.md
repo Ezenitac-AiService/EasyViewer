@@ -35,5 +35,5 @@ origin	https://github.com/Ezenitac-AiService/EasyViewer.git (push)
 - 지원 종료 고지 게시: 2026-11-19, `docs/windows-eol-notice.md` 문안을 `v0.1.6-alpha`·`v0.1.6-beta` 릴리스 노트 맨 위에 추가(`gh release edit`). 기존 노트는 고지 아래에 그대로 두었고, 산출물은 두 릴리스 모두 6개로 변화 없음
 - 릴리스 산출물·노트 백업 위치: 메인테이너 로컬 `~/easyviewer-release-backup/`(2026-11-19). 두 릴리스 산출물 12개와 수정 전 노트(`NOTES.md`). 파일 크기를 GitHub 값과 대조해 12개 모두 일치, SHA-256 목록은 `SHA256SUMS-backup.txt`. 저장소 밖 두 번째 보관처로의 복사는 메인테이너 확인 항목
 - 비공개 취약점 신고: 2026-11-19 켬(메인테이너 승인, `gh api -X PUT repos/Ezenitac-AiService/EasyViewer/private-vulnerability-reporting`). 확인 결과 `enabled: true`
-- GitHub Support 요청일:
+- GitHub Support 요청일: 2026-11-19, help.github.com 가상 도우미(Detaching/unforking a repository)로 요청. 선택: "GitHub Support가 detach/extract를 도움" → Detach, 대상 `Ezenitac-AiService/EasyViewer`, 포크에 커밋 있음, 사유 "부모 저장소와 크게 갈라짐". 이슈·PR·릴리스 보존을 요청 본문에 적음. 도우미가 지원 티켓을 자동 생성(처리 후 통지 예정). 요청 직후 `.fork`는 아직 `true`
 - 분리 완료 확인(`.fork == false`, 릴리스·고지 보존, PR 기본 대상, 코드 검색):
