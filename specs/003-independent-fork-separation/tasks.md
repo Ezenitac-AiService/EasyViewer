@@ -69,17 +69,17 @@ description: "독립 포크 분리 작업 목록"
 
 ### 업스트림 보안 조율 (FR-013, R11)
 
-- [ ] T012 보안 영향 목록 초안을 **저장소 밖**(메인테이너 비공개 위치)에 만든다.
+- [X] T012 보안 영향 목록 초안을 **저장소 밖**(메인테이너 비공개 위치)에 만든다.
   - `git diff 44c4d37 8248627 -- src src-tauri scripts`에서 보안 수정(경로 검증, SSRF, CSP, 자격증명, 콘텐츠 정화)을 추린다.
   - 각 항목이 업스트림 최신 릴리스(조회 시점 최신, 현재 `v0.2.1`) 소스에 남아 있는지 대조한다.
   - 001 수정(PR #2)은 회귀 여부만 확인한다.
   - 초안은 커밋하지 않는다
-- [ ] T013 (메인테이너) T012 목록을 원저작자에게 비공개 경로로 전달하거나 수정을 제안한다.
+- [X] T013 (메인테이너) T012 목록을 원저작자에게 비공개 경로로 전달하거나 수정을 제안한다.
   - 원저작자 저장소는 비공개 취약점 신고가 **꺼져 있다**(research F31). 공개 이슈·PR·토론에 결함 내용을 쓰는 것은 금지한다.
   - 먼저 비공개 연락 경로를 확보한다. 방법: 공개 채널에 "보안 관련 비공개 연락을 원한다"는 내용만 남기기, 또는 비공개 취약점 신고 기능을 켜 달라고 요청하기.
   - 경로를 확보하기 전에는 T014·T038·T095를 진행하지 않는다
   - 공개 채널에 연락을 요청한 날부터 30일 동안 응답이 없으면(research R11), T014에 "통지 시도 기록"(요청 날짜, 채널, 결함 내용을 쓰지 않았다는 사실)을 남기고 다음 단계로 간다. 이 경우에도 T038의 원저작자 앱 비교와 결함 언급은 쓰지 않는다
-- [ ] T014 통지가 끝나면 `specs/003-independent-fork-separation/verification/security-coordination.md`에 다음 요약만 기록한다(data-model §6): 통지 날짜, 경로 종류, 항목 범주와 개수, 원저작자 응답, 미수정 결함 공개 기준(통지 후 90일). 결함 세부와 재현 방법은 쓰지 않는다
+- [X] T014 통지가 끝나면 `specs/003-independent-fork-separation/verification/security-coordination.md`에 다음 요약만 기록한다(data-model §6): 통지 날짜, 경로 종류, 항목 범주와 개수, 원저작자 응답, 미수정 결함 공개 기준(통지 후 90일). 결함 세부와 재현 방법은 쓰지 않는다
 
 ### 지원 범위 원문 (FR-006, R15)
 
@@ -177,7 +177,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T035 [P] [US2] `CONTRIBUTING.md`를 새로 만든다. 이 단계에서는 지원 범위 블록과 "Windows 관련 이슈 처리 방침"(포크 저장소 접수 → 전환 안내로 종결, 원저작자 저장소에 올리지 말 것)만 쓰고, 나머지 절은 T079에서 채운다
 - [X] T036 [P] [US2] `CHANGELOG.md`를 새로 만든다. 이 단계에서는 "독립 분리" 항목 머리(분리 일자, 지원 범위 블록)만 쓰고, 과거 이력은 T080에서 채운다
 - [X] T037 [P] [US2] `.github/ISSUE_TEMPLATE/bug_report.yml`(플랫폼 드롭다운 `macOS`, `iOS`, `Linux`, `Android`, 앱 버전, 재현 절차), `.github/ISSUE_TEMPLATE/feature_request.yml`, `.github/ISSUE_TEMPLATE/config.yml`을 만든다. `config.yml`은 `blank_issues_enabled: false`이고 `contact_links`에 "Windows 사용자: 원저작자 EasyViewer" → `https://github.com/edith2580/EasyViewer`를 둔다
-- [ ] T038 [US2] (T014 이후) README에 "원저작자 앱과의 차이" 절을 추가한다. 검증 가능한 사실만 쓴다: 지원 플랫폼, 식별자, 데이터 형식 버전, 이름. 원저작자 앱 평가 문구와 보안 결함 비교는 쓰지 않는다. 쓴 뒤 `check-support-scope.mjs`를 통과시킨다
+- [X] T038 [US2] (T014 이후) README에 "원저작자 앱과의 차이" 절을 추가한다. 검증 가능한 사실만 쓴다: 지원 플랫폼, 식별자, 데이터 형식 버전, 이름. 원저작자 앱 평가 문구와 보안 결함 비교는 쓰지 않는다. 쓴 뒤 `check-support-scope.mjs`를 통과시킨다
 
 **Checkpoint**: US1·US2 완료 = 법적 준수와 사용자 안내 MVP
 
@@ -408,7 +408,7 @@ description: "독립 포크 분리 작업 목록"
 
 - [X] T079 [US7] `CONTRIBUTING.md`를 완성한다. 독립 운영 원칙(헌법 제8원칙 요약), 명세 절차(`/speckit-*` 흐름), 품질 게이트(`npm run verify`, `cargo deny check`), 한국어 커밋 규칙(헌법 제1원칙), 지원 플랫폼 등급별 기여 기대치를 담는다. 의존성 갱신으로 라이선스 감사가 실패할 때의 절차도 넣는다: 새 라이선스의 GPLv3 호환성 검토 → 근거와 함께 `scripts/license-policy.json`·`src-tauri/deny.toml` 허용 목록 갱신 또는 의존성 교체. 감사 우회·비활성화는 금지한다
 - [X] T080 [US7] `CHANGELOG.md` 과거 이력을 채운다. 업스트림 `v0.1.0`–`v0.1.6` 요약(태그 메시지 기준), 포크 프리릴리스 `v0.1.6-alpha`·`v0.1.6-beta`, 001·002 리팩토링, PR #2 기여, 분리 일자, 업스트림 `v0.2.0`·`v0.2.1` 미병합, Windows 지원 종료를 쓴다
-- [ ] T081 [P] [US7] (T014 이후) `SECURITY.md`를 새로 만든다. "원저작자 앱 취약점은 원저작자에게 신고" 문장은 T032(f) 금지어 검사의 예외로 `scripts/wording-exceptions.json`에 등록한다(결함 내용 언급이 아니라 신고 경로 안내이므로).
+- [X] T081 [P] [US7] (T014 이후) `SECURITY.md`를 새로 만든다. "원저작자 앱 취약점은 원저작자에게 신고" 문장은 T032(f) 금지어 검사의 예외로 `scripts/wording-exceptions.json`에 등록한다(결함 내용 언급이 아니라 신고 경로 안내이므로).
   - 지원 버전(첫 독립 릴리스 이후 최신만)
   - 비공개 취약점 신고 채널(GitHub Private vulnerability reporting)
   - 원저작자 앱 취약점은 원저작자에게 신고하라는 안내
@@ -447,10 +447,10 @@ description: "독립 포크 분리 작업 목록"
 
 **Purpose**: 전체 검증, 원격 정리, 원저작자 고지, 안전 게이트, 분리 요청, 첫 독립 릴리스, 기존 릴리스 고지. plan.md 단계 10–14 순서를 지킨다.
 
-- [ ] T092 quickstart §1–§6, §9를 실행해 결과를 `verification/`에 기록한다. `BLOCKED` 항목은 사유와 필요한 환경을 적는다
+- [X] T092 quickstart §1–§6, §9를 실행해 결과를 `verification/`에 기록한다. `BLOCKED` 항목은 사유와 필요한 환경을 적는다
 - [ ] T093 (사용자 승인 후) `gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal`로 리허설을 실행한다(quickstart §8). 실제 태그 이름은 쓰지 않는다. 그래야 남은 초안에 실제 릴리스가 업로드되는 일이 없다. `rehearsal=true`일 때 `tag_name`이 `-rehearsal`로 끝나지 않으면 워크플로가 실패해야 하고, `--release` 게이트는 같은 태그의 초안 릴리스가 남아 있으면 실패해야 한다(T086·T040에 반영). 태그는 만들지 않는다. `gate` 경고 목록, 산출물 구성(Windows 0개)·체크섬·이름을 확인해 `verification/release-gate.md`에 기록하고, `[REHEARSAL]` 초안 릴리스를 지운다
 - [ ] T094 (메인테이너) 로컬에서 `git remote remove upstream`을 실행하고 `git remote -v` 결과를 `verification/release-gate.md`에 기록한다
-- [ ] T095 (메인테이너) 원저작자에게 분리 사실, 식별자 변경, 새 표시명, 지원 범위, Windows 사용자 안내 방침을 정중히 알리고 `verification/upstream-notice.md`에 기록한다(data-model §7). 이의가 있으면 이름을 바꾸거나(T050부터 반복) `supportScope.ts`의 `windowsWording: 'unsupported-only'`로 문구를 줄인 뒤 T033 검사를 다시 통과시킨다
+- [X] T095 (메인테이너) 원저작자에게 분리 사실, 식별자 변경, 새 표시명, 지원 범위, Windows 사용자 안내 방침을 정중히 알리고 `verification/upstream-notice.md`에 기록한다(data-model §7). 이의가 있으면 이름을 바꾸거나(T050부터 반복) `supportScope.ts`의 `windowsWording: 'unsupported-only'`로 문구를 줄인 뒤 T033 검사를 다시 통과시킨다
 - [ ] T096 `node scripts/check-release-gate.mjs --separation`이 통과하는지 확인한다(FR-025 1–5)
 - [ ] T097 (메인테이너) `docs/windows-eol-notice.md` 문안을 기존 `v0.1.6-alpha`·`v0.1.6-beta` 릴리스 노트 맨 위에 추가한다(`gh release edit`, 산출물 삭제 금지). 분리 방식에 따라 릴리스가 사라질 수 있으므로 **분리 요청 전에** 게시하고, `gh release download`로 모든 릴리스 산출물·노트를 백업한다(research R10)
 - [ ] T098 (메인테이너) `docs/maintainer-runbook.md`대로 GitHub 저장소 설정에서 비공개 취약점 신고를 켜고 **GitHub Support에** 포크 네트워크 분리를 요청한다. 완료 후 `gh api repos/Ezenitac-AiService/EasyViewer --jq .fork`가 `false`인지, 릴리스와 지원 종료 고지가 남아 있는지, 새 PR 기본 대상과 코드 검색을 확인해 기록한다(SC-003)

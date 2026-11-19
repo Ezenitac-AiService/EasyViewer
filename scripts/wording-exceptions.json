@@ -1,4 +1,9 @@
 {
   "$comment": "Explicit exceptions to scripts/check-support-scope.mjs wording rules. Each entry: file -> phrases. Security-paragraph exceptions are only for process guidance (reporting channels), never for describing upstream defects.",
-  "docs/maintainer-runbook.md": ["비공개 취약점 신고"]
+  "docs/maintainer-runbook.md": [
+    "비공개 취약점 신고"
+  ],
+  "SECURITY.md": [
+    "취약점은 원저작자에게 신고하세요"
+  ]
 }

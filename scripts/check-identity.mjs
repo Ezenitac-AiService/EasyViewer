@@ -112,6 +112,8 @@ const blank = (m) => m.replace(/[^\n]/g, ' ')
 /** Removes the parts of a text where the upstream name may legitimately appear. */
 export function maskAllowed(text) {
   let out = text.replace(/<!-- support-scope:start -->[\s\S]*?<!-- support-scope:end -->/g, blank)
+  // README "원저작자 앱과의 차이" table compares both identities by design (spec 003 T038)
+  out = out.replace(/<!-- upstream-diff:start -->[\s\S]*?<!-- upstream-diff:end -->/g, blank)
   // Repository slugs and URLs (the fork repository keeps the EasyViewer slug), also regex-escaped
   out = out.replace(/[\w.-]+\\?\/EasyViewer\b/g, blank)
   // Attribution to the original work

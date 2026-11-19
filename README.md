@@ -257,6 +257,24 @@ npm run android:release:all # 전체 ABI release APK
 
 ---
 
+## 원저작자 앱과의 차이
+
+<!-- upstream-diff:start -->
+이 포크(Pagelight)와 원저작자 앱([EasyViewer](https://github.com/edith2580/EasyViewer))의 차이 중 확인할 수 있는 사실만 적습니다. 원저작자 쪽 값은 이 포크가 갈라진 `v0.1.6`과 2026-11-19에 확인한 최신 릴리스 `v0.2.2` 기준입니다.
+
+| 항목 | Pagelight (이 포크) | EasyViewer (원저작자) |
+|---|---|---|
+| 표시 이름 | Pagelight | EasyViewer |
+| 앱 식별자 | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |
+| 배포 플랫폼 | macOS, Linux, Android (iOS는 소스 빌드만) | `v0.2.2` 기준 Windows, macOS, Linux, Android |
+| Windows | 배포·지원하지 않음 | 원저작자가 배포 |
+| 앱 내부 데이터 형식 버전 | 2 | 1 |
+
+- 식별자가 달라서 두 앱을 한 기기에 함께 설치할 수 있고, 서로의 데이터를 공유하지 않습니다.
+- 원저작자 앱은 이 포크가 만든 데이터(데이터 형식 2)를 열 수 없습니다. Windows로 옮기는 방법은 [Windows 전환 안내](./docs/windows-migration.md)를 참고하세요.
+- 원저작자 앱의 이후 버전에서 위 값이 바뀔 수 있습니다.
+<!-- upstream-diff:end -->
+
 ## 출처와 라이선스 (Attribution & License)
 
 - **원저작물**: 이 저장소는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)를 바탕으로 한 파생 저작물입니다. Copyright (C) 2026 edith2580.

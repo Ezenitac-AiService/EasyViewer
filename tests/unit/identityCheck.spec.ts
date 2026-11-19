@@ -106,6 +106,15 @@ describe('check-identity (spec 003 US5, data-model §4)', () => {
     expect(res.errors.join('\n')).toMatch(/README\.md/)
   })
 
+  it('allows upstream identity only inside the README comparison block (T038)', () => {
+    const table = '| 표시 이름 | Pagelight | EasyViewer |\n| 앱 식별자 | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |\n'
+    const inside = `# Pagelight\n\n${SCOPE}\n\n<!-- upstream-diff:start -->\n${table}<!-- upstream-diff:end -->\n`
+    expect(run(repo({ 'README.md': inside })).ok).toBe(true)
+    const outside = run(repo({ 'README.md': `# Pagelight\n\n${SCOPE}\n\n${table}` }))
+    expect(outside.ok).toBe(false)
+    expect(outside.errors.join('\n')).toMatch(/com\.edith\.easyviewer/)
+  })
+
   it('accepts allow-listed files wholesale (support-scope source, Windows docs, EPUB fixture)', () => {
     const res = run(
       repo({
