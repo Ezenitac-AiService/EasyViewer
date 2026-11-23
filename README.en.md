@@ -62,6 +62,19 @@ The Korean [README.md](README.md) is the authoritative version. This page is kep
 - **Native backend**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls`, `stream`), `dunce`, `sha2`, `zip 9.x`
 - **Platforms**: see [Supported platforms](#supported-platforms).
 
+### Minimum requirements
+
+The app runs in each OS's built-in WebView, so the minimum versions come from what the framework (Tauri 2) and build tool (Vite 6) require and the WebView features the app uses.
+
+| Platform | Minimum | Basis |
+|---|---|---|
+| macOS | 11.0 Big Sur | Tauri 2 defaults to 10.13, but the Vite 6 output uses Safari 14 syntax and the accessible dialogs' `inert` works from Safari 15.5. Big Sur can update to Safari 16.6 |
+| iOS | 15.0 | Tauri 2 default. The iOS WebView follows the OS version and runs the Vite 6 output (Safari 14 syntax) |
+| Android | 7.0 (API 24) | Tauri 2 default. Needs an updatable Android System WebView (Chrome 87 or later) |
+| Linux | Ubuntu 22.04 or later (WebKitGTK 4.1) | Support-scope baseline. 22.04 receives WebKitGTK 2.50 through security updates |
+
+`AbortSignal.any` (which needs Safari/iOS 17.4 or later), used to cancel opening an EPUB, was replaced with an equivalent fallback so EPUBs open on the minimum versions above.
+
 ### Directory layout
 
 ```text

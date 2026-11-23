@@ -60,6 +60,19 @@
 - **네이티브 백엔드**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls` + `stream`), `dunce`, `sha2`, `zip 9.x`
 - **지원 플랫폼**: macOS · iOS(소스 빌드) · Linux 중점, Android 유지, Web(개발 보조, `IndexedDB` / 프록시). Windows는 지원하지 않습니다(위 지원 범위 참고)
 
+### 최소 요구 사양
+
+앱은 각 OS의 내장 WebView에서 실행되므로, 최소 버전은 프레임워크(Tauri 2)·빌드 도구(Vite 6)가 요구하는 값과 앱이 쓰는 WebView 기능으로 정했습니다.
+
+| 플랫폼 | 최소 버전 | 근거 |
+|---|---|---|
+| macOS | 11.0 Big Sur | Tauri 2 기본값은 10.13이지만, Vite 6 빌드 결과물이 Safari 14 문법을 쓰고 접근성 대화상자의 `inert`가 Safari 15.5 이상에서 동작합니다. Big Sur는 Safari 16.6까지 받을 수 있습니다 |
+| iOS | 15.0 | Tauri 2 기본값. iOS의 WebView는 OS 버전을 따르며 Vite 6 결과물(Safari 14 문법)을 실행할 수 있습니다 |
+| Android | 7.0 (API 24) | Tauri 2 기본값. 업데이트 가능한 Android System WebView(Chrome 87 이상)가 필요합니다 |
+| Linux | Ubuntu 22.04 이상(WebKitGTK 4.1) | 지원 범위 기준. 22.04도 보안 업데이트로 WebKitGTK 2.50대를 받습니다 |
+
+EPUB 열기 취소 처리에 쓰던 `AbortSignal.any`(Safari·iOS 17.4 이상 필요)는 같은 동작의 대체 구현으로 바꿔, 위 최소 버전에서도 EPUB을 열 수 있게 했습니다.
+
 ### 디렉토리 구조
 
 ```text
