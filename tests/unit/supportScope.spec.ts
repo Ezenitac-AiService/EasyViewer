@@ -8,8 +8,8 @@ import {
 } from '@/config/supportScope'
 
 const CANONICAL_KO = [
-  '이 포크는 **macOS · iOS · Linux**를 중점 지원합니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.',
-  'Android는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.',
+  '이 포크는 **macOS**를 중점 지원합니다.',
+  'iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.',
   '**Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**',
   '웹 브라우저 실행은 개발 보조용입니다.',
   'Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.'
@@ -17,8 +17,8 @@ const CANONICAL_KO = [
 
 describe('Support scope single source (FR-006)', () => {
   it('defines the platform tiers exactly as decided in spec 003', () => {
-    expect(SUPPORT_SCOPE.focus).toEqual(['macOS', 'iOS', 'Linux'])
-    expect(SUPPORT_SCOPE.maintained).toEqual(['Android'])
+    expect(SUPPORT_SCOPE.focus).toEqual(['macOS'])
+    expect(SUPPORT_SCOPE.maintained).toEqual(['iOS', 'Linux', 'Android'])
     expect(SUPPORT_SCOPE.unsupported).toEqual([
       { platform: 'Windows', recommend: 'https://github.com/edith2580/EasyViewer' }
     ])
@@ -41,7 +41,8 @@ describe('Support scope single source (FR-006)', () => {
   it('provides a single-line English banner', () => {
     const banner = supportScopeBannerEn()
     expect(banner).not.toContain('\n')
-    expect(banner).toContain('macOS')
+    expect(banner).toContain('focuses on macOS')
+    expect(banner).toMatch(/iOS \(source build only\), Linux and Android are maintained with lower priority/)
     expect(banner).toContain('Windows')
   })
 

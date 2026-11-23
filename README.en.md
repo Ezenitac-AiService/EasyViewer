@@ -2,7 +2,7 @@
 
 **언어 / Language**: [한국어](README.md) | **[English](README.en.md)**
 
-> This is an independent fork. It supports macOS, iOS (source build only) and Linux; Android is maintained. For Windows, please use the original EasyViewer by edith2580.
+> This is an independent fork. It focuses on macOS; iOS (source build only), Linux and Android are maintained with lower priority. For Windows, please use the original EasyViewer by edith2580.
 
 A simple viewer for plain text (TXT) and EPUB documents (`v1.0.0-alpha.1`), an independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6` by edith2580.
 
@@ -28,9 +28,9 @@ The Korean [README.md](README.md) is the authoritative version. This page is kep
 
 ## Supported platforms
 
-- **Focus**: macOS, iOS (source build only, no public distribution channel), Linux.
-- **Maintained**: Android, with lower priority.
-- **Not supported**: Windows. This fork does not distribute or support Windows builds. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).
+- **Focus**: macOS — the only core build.
+- **Maintained, lower priority**: iOS (source build only, no public distribution channel), Linux and Android. They are still built and distributed, but their CI results only report and do not block merges or releases.
+- **Not supported**: Windows is not considered. This fork does not distribute, support or test Windows builds. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).
 - Running in a web browser is a development aid only.
 - Linux is verified on Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland). Other distributions may work but are not verified.
 
@@ -196,7 +196,7 @@ xattr -cr /Applications/Pagelight.app
 
 This fork does not distribute or officially support Windows installers. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer). If you used this fork's Windows pre-releases (`v0.1.6-alpha`, `v0.1.6-beta`), follow the [Windows migration guide](./docs/windows-migration.md) (Korean).
 
-The Windows code paths are still compiled and tested in CI so that no unverified security code is left behind.
+Windows is not considered by this fork, so its code paths are no longer compiled or tested in CI. They will be removed in a later change.
 
 ### Linux build
 
@@ -249,7 +249,7 @@ npm run android:release:all # release APKs for all ABIs
 
 ### GitHub Actions CI and releases
 
-- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs six jobs on every pull request and every push to `main`: `verify` (full verification gate), `licenses` (cargo-deny and notice consistency), `windows-compile-test` (compile and test the undistributed Windows code), `macos-build` (universal build and signature check), `ios-sim-build` (unsigned simulator build) and `android-debug` (debug APK). It uses no secrets, and `main` only accepts merges that pass the five jobs other than `ios-sim-build` (repository admins can bypass this in an emergency). `ios-sim-build` is report-only because it is often queued or cancelled for lack of GitHub macOS arm64 runners; a failure is still looked into and fixed.
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs five jobs on every pull request and every push to `main`: `verify` (full verification gate), `licenses` (cargo-deny and notice consistency), `macos-build` (universal build and signature check), `ios-sim-build` (unsigned simulator build) and `android-debug` (debug APK). It uses no secrets, and merges to `main` and the release gate require only the core jobs `verify`, `licenses` and `macos-build` (repository admins can bypass this in an emergency). The lower-priority platform jobs (`ios-sim-build`, `android-debug`) only report; a failure is still looked into and fixed.
 - [`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag push or `workflow_dispatch`. A release gate (`scripts/check-release-gate.mjs`) must pass before any build, and it builds only the **macOS universal `.dmg`**, **Linux x64 `.deb` and `.AppImage`** (plus `.rpm` for stable versions) and the **Android arm64 `.apk`** signed with the fork key. If the signing-key secrets are not registered, Android is left out of the release and the release notes say so (a debug-signed APK is never published). Before publishing it writes `SHA256SUMS.txt` and checks again that no Windows files are present.
 
 #### Release procedure

@@ -6,9 +6,9 @@ This repository is an **independent fork** of the original [EasyViewer](https://
 
 ## Support scope
 
-- **Focus**: macOS, iOS (source build only, no public distribution channel), Linux.
-- **Maintained**: Android, with lower priority.
-- **Not supported**: Windows. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).
+- **Focus**: macOS — the only core build.
+- **Maintained, lower priority**: iOS (source build only, no public distribution channel), Linux and Android. They are still built and distributed, but their CI results only report and do not block merges or releases.
+- **Not supported**: Windows is not considered. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).
 - Running in a web browser is a development aid only.
 - Linux is verified on Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland).
 
@@ -18,7 +18,7 @@ The source of the support-scope wording is `src/config/supportScope.ts`. To chan
 
 - Issues about the Windows pre-releases this fork published (`v0.1.6-alpha`, `v0.1.6-beta`) are handled **in this repository**. Support has ended, so we point to the [Windows migration guide](docs/windows-migration.md) (Korean) and close the issue.
 - Do not file this fork's Windows build problems in the original author's repository. It is a separate build with a different data format.
-- The Windows code paths are only compiled and tested in CI. Changes that break that check are not accepted.
+- Windows is not considered. CI does not compile or test Windows code, and changes that add Windows-only code are not accepted.
 
 ## Relationship with the upstream
 
@@ -59,9 +59,9 @@ This fork follows the [project constitution](.specify/memory/constitution.md) (v
 
 | Tier | Platforms | Expectation |
 |---|---|---|
-| Focus | macOS, iOS, Linux | Consider these platforms for every change and verify on real environments where possible |
-| Maintained | Android | Do not break the build or existing behavior. Android-specific tuning of new features is not required |
-| Not supported | Windows | Compile and automated tests must pass. Windows-only features are not accepted |
+| Focus | macOS | The only core build. Check macOS behavior for every change; the core CI including `macos-build` must pass |
+| Maintained (lower priority) | iOS, Linux, Android | Try not to break the build or existing behavior. CI results only report and do not block merges, but failures are looked into and fixed |
+| Not supported | Windows | Not considered. Windows-only features or code are not accepted |
 | Development aid | Web | Kept only as a fallback for development and testing |
 
 ## Spec process

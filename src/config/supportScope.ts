@@ -26,8 +26,8 @@ export interface SupportScope {
 }
 
 export const SUPPORT_SCOPE: SupportScope = Object.freeze({
-  focus: Object.freeze(['macOS', 'iOS', 'Linux']),
-  maintained: Object.freeze(['Android']),
+  focus: Object.freeze(['macOS']),
+  maintained: Object.freeze(['iOS', 'Linux', 'Android']),
   unsupported: Object.freeze([Object.freeze({ platform: 'Windows', recommend: UPSTREAM_REPO_URL })]),
   devOnly: Object.freeze(['Web']),
   iosDelivery: 'source-build-only',
@@ -54,8 +54,8 @@ export function renderSupportScopeKo(options: RenderOptions = {}): string {
       : '**이 포크는 Windows를 지원하지 않습니다.**'
 
   return [
-    `이 포크는 **${s.focus.join(' · ')}**를 중점 지원합니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.`,
-    `${s.maintained.join('·')}는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.`,
+    `이 포크는 **${s.focus.join(' · ')}**를 중점 지원합니다.`,
+    `${s.maintained.join('·')}는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.`,
     windowsLine,
     '웹 브라우저 실행은 개발 보조용입니다.',
     `Linux는 ${lb.distro}(${lb.formats.join('·')}, ${lb.webkit}, ${lb.displayServers.join('·')})에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.`
@@ -69,5 +69,5 @@ export function supportScopeBannerEn(options: RenderOptions = {}): string {
     windowsWording === 'recommend'
       ? 'For Windows, please use the original EasyViewer by edith2580.'
       : 'This fork does not support Windows.'
-  return `This is an independent fork. It supports macOS, iOS (source build only) and Linux; Android is maintained. ${windowsPart}`
+  return `This is an independent fork. It focuses on macOS; iOS (source build only), Linux and Android are maintained with lower priority. ${windowsPart}`
 }

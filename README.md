@@ -2,11 +2,11 @@
 
 **언어 / Language**: **[한국어](README.md)** | [English](README.en.md)
 
-> This is an independent fork. It supports macOS, iOS (source build only) and Linux; Android is maintained. For Windows, please use the original EasyViewer by edith2580.
+> This is an independent fork. It focuses on macOS; iOS (source build only), Linux and Android are maintained with lower priority. For Windows, please use the original EasyViewer by edith2580.
 >
 > <!-- support-scope:start -->
-> 이 포크는 **macOS · iOS · Linux**를 중점 지원합니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-> Android는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.
+> 이 포크는 **macOS**를 중점 지원합니다.
+> iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
 > **Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 > 웹 브라우저 실행은 개발 보조용입니다.
 > Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
@@ -58,7 +58,7 @@
 - **상태 / 라우팅 / UI**: Pinia `^2.3.0`, Vue Router `^4.5.0`, Tailwind CSS `^3.4.17`, Lucide Vue Next `^0.468.0`
 - **문서 엔진**: `epubjs ^0.3.93` + `jszip ^3.10.1` + `css-tree ^3.2.1`, Custom TXT Engine(`txtEngine.ts`, `txtMeasuredPagination.ts`)
 - **네이티브 백엔드**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls` + `stream`), `dunce`, `sha2`, `zip 9.x`
-- **지원 플랫폼**: macOS · iOS(소스 빌드) · Linux 중점, Android 유지, Web(개발 보조, `IndexedDB` / 프록시). Windows는 지원하지 않습니다(위 지원 범위 참고)
+- **지원 플랫폼**: macOS 중점(유일한 핵심 빌드), iOS(소스 빌드)·Linux·Android는 후순위 유지, Web(개발 보조, `IndexedDB` / 프록시). Windows는 고려 대상이 아닙니다(위 지원 범위 참고)
 
 ### 최소 요구 사양
 
@@ -193,7 +193,7 @@ xattr -cr /Applications/Pagelight.app
 
 이 포크는 Windows용 설치 파일을 배포하지 않고 공식 지원하지도 않습니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요. 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)를 쓰던 경우에는 [Windows 전환 안내](./docs/windows-migration.md)를 따르세요.
 
-Windows를 대상으로 하는 코드는 검증되지 않는 보안 코드가 남지 않도록 CI에서 컴파일과 자동 테스트만 계속합니다.
+Windows는 이 포크의 고려 대상이 아니어서 Windows 코드 경로를 CI에서 더 이상 컴파일·테스트하지 않습니다. 남은 경로는 이후 변경에서 제거합니다.
 
 ### Linux 빌드
 
@@ -246,7 +246,7 @@ npm run android:release:all # 전체 ABI release APK
 
 ### GitHub Actions CI·릴리스
 
-- [`.github/workflows/ci.yml`](.github/workflows/ci.yml): 모든 PR과 `main` 푸시에서 6개 작업을 실행합니다. `verify`(전체 검증 게이트), `licenses`(cargo-deny·고지 일치), `windows-compile-test`(배포하지 않는 Windows 코드의 컴파일·테스트), `macos-build`(유니버설 빌드·서명 검증), `ios-sim-build`(서명 없는 시뮬레이터 빌드), `android-debug`(debug APK). 비밀값을 쓰지 않으며, `main`은 `ios-sim-build`를 뺀 5개 작업이 통과해야 병합됩니다(저장소 관리자는 긴급 시 우회 가능). `ios-sim-build`는 GitHub macOS arm64 러너 부족으로 자주 대기·취소되어 결과만 보고하며, 실패하면 따로 확인해 고칩니다.
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml): 모든 PR과 `main` 푸시에서 5개 작업을 실행합니다. `verify`(전체 검증 게이트), `licenses`(cargo-deny·고지 일치), `macos-build`(유니버설 빌드·서명 검증), `ios-sim-build`(서명 없는 시뮬레이터 빌드), `android-debug`(debug APK). 비밀값을 쓰지 않으며, `main` 병합과 릴리스 게이트는 핵심 작업 `verify`·`licenses`·`macos-build`만 요구합니다(저장소 관리자는 긴급 시 우회 가능). 후순위 플랫폼 작업(`ios-sim-build`·`android-debug`)은 결과만 보고하며, 실패하면 따로 확인해 고칩니다.
 - [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**, **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. 서명 키 비밀값이 등록되지 않았으면 Android는 빌드하지 않고 빼고 게시하며, 릴리스 노트에 그 사실을 덧붙입니다(debug 서명 APK는 게시하지 않음). 게시 전에 `SHA256SUMS.txt`를 만들고 Windows 산출물이 없는지 다시 확인합니다.
 
 #### 릴리스 절차

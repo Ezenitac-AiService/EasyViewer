@@ -26,7 +26,7 @@ describe('AboutDialog (FR-004, contracts/about-screen.md)', () => {
     expect(text).toContain('edith2580')
     expect(text).toContain('v0.1.6')
     expect(text).toContain(about.separatedAt)
-    expect(text).toContain('macOS · iOS · Linux')
+    expect(text).toContain('macOS를 중점 지원')
     for (const dep of about.thirdParty) expect(text).toContain(dep.name)
     wrapper.unmount()
   })
