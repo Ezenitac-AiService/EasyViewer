@@ -75,11 +75,11 @@ IPC `mockIPC`, 파일 시스템, 네트워크, `IndexedDB`/`localStorage`, 브�
 파일 시스템 접근, 영속 데이터 저장, 네트워크/WebDAV/동기화 원격 통신, 시스템 다이얼로그, 경로
 처리, 네이티브 드래그앤드롭 등 플랫폼 분기가 필요한 기능은 통합 플랫폼 추상화 계층
 (`src/services/platform/`, `src/services/storage/`, `src/services/network/`)을 경유해야 하며(MUST),
-지원 플랫폼 등급(기술 스택 및 플랫폼 제약사항의 "지원 플랫폼 등급")에 따라 중점 플랫폼(macOS, iOS,
-Linux)과 유지 플랫폼(Android), 그리고 개발 보조 웹 폴백(`IndexedDB`, `localStorage`, `File API`)에서
-일관되게 동작해야 한다(MUST). 비지원 플랫폼(Windows)을 대상으로 하는 코드 경로는 별도 명세로 제거하기
-전까지 추상화 계층 안에 유지하고, 컴파일과 자동 테스트를 계속 통과해야 한다(MUST). 검증되지 않는
-플랫폼 코드를 방치해서는 안 된다(MUST NOT). 기존 뷰·스토어·동기화 서비스(`LibraryView.vue`,
+지원 플랫폼 등급(기술 스택 및 플랫폼 제약사항의 "지원 플랫폼 등급")에 따라 중점 플랫폼(macOS)과
+유지 플랫폼(iOS, Linux, Android), 그리고 개발 보조 웹 폴백(`IndexedDB`, `localStorage`, `File API`)에서
+일관되게 동작해야 한다(MUST). 비지원 플랫폼(Windows)은 고려 대상이 아니다. Windows 전용 코드 경로는
+검증하지 않으므로 새로 추가해서는 안 되며(MUST NOT), 남아 있는 경로는 별도 명세로 제거한다. 그 전까지
+추상화 계층 밖으로 새어 나가게 해서는 안 된다(MUST NOT). 기존 뷰·스토어·동기화 서비스(`LibraryView.vue`,
 `useBookStore.ts`, `syncService.ts` 등)에 남아 있는 직접 `@tauri-apps/*` 및 외부 `fetch` 호출부는
 신규 기능 추가나 해당 모듈 수정 시 추상화 계층으로 점진 이관해야 하며(MUST), 신규 코드에서 상위 계층이
 플랫폼 플러그인이나 환경 분기 API를 직접 호출하는 것은 금지한다(MUST NOT). 데스크톱 전용 사용자 저장
@@ -90,8 +90,8 @@ Linux)과 유지 플랫폼(Android), 그리고 개발 보조 웹 폴백(`Indexed
 보기 모드(`scroll` ↔ `paginated`)나 테마·글꼴 변경 시 사용자의 독서 위치를 정확히 보존해야 한다(MUST).
 
 근거(Rationale): 지원 등급별 플랫폼과 다중 문서 포맷 간 호환성을 유지하면서도, 현행 코드베이스의 직접
-호출부를 무리 없이 어댑터 계층으로 수렴시킬 수 있는 현실적 아키텍처 경계를 정의한다. 배포하지 않는
-플랫폼 코드도 검증을 유지해야 보안 결함이 숨지 않는다.
+호출부를 무리 없이 어댑터 계층으로 수렴시킬 수 있는 현실적 아키텍처 경계를 정의한다. 검증하지 않는
+플랫폼 코드는 보안 결함을 숨기므로, 고려 대상이 아닌 Windows 코드는 늘리지 않고 제거 대상으로 둔다.
 
 ### VI. 지속적 의심과 다층 검증 원칙 (Skeptical Verification & Non-Complacency)
 어떠한 명세, 설계, 코드, 설정, 외부 응답 또는 테스트 결과도 **완벽하거나 오류가 없다고 가정해서는
@@ -179,16 +179,19 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   `webdav_credentials_web_consent_v2`)는 별도 명세와 이전 경로 없이 바꿔서는 안 된다(MUST NOT).
 - **지원 플랫폼 등급 (단일 원문)**: 공개 문서·이슈 양식·앱 정보 화면의 지원 범위 문구는 이 항목과
   같은 의미여야 한다(MUST).
-  - **중점**: macOS(`11.0+`), iOS(`15.0+`), Linux — 설계·검증·품질 투자의 기준. iOS는 공개 배포
-    채널 없이 **소스 빌드로만 제공**한다.
-  - **유지(우선순위 낮음)**: Android(`scripts/android.mjs`) — 릴리스 산출물, 포크 소유 고정 서명 키,
+  - **중점**: macOS(`11.0+`) — 설계·검증·품질 투자의 기준이며 유일한 핵심 빌드다. 릴리스 게이트와
+    `main` 병합 필수 검사는 macOS 빌드와 공통 검증(전체 검증 게이트, 라이선스 감사)만 요구한다(MUST).
+  - **유지(우선순위 낮음)**: iOS(`15.0+`), Linux, Android. 빌드·배포는 계속하지만 CI 결과는 보고만
+    하며 병합과 릴리스를 막지 않는다. 실패는 확인해 고친다.
+    - iOS는 공개 배포 채널 없이 **소스 빌드로만 제공**한다.
+    - Linux는 Ubuntu 22.04 이상(WebKitGTK 4.1)을 검증 기준으로 한다.
+  - **Android 서명**: Android(`scripts/android.mjs`) — 릴리스 산출물, 포크 소유 고정 서명 키,
     업데이트 연속성을 유지한다. Android 산출물은 포크 소유 고정 서명 키로 서명할 수 있는 릴리스에서만
     게시해야 하며(MUST), 키가 아직 없으면 그 릴리스에서 Android 산출물을 빼고 게시할 수 있다. 이때
     debug 서명이나 임시 키로 서명한 APK를 대신 게시해서는 안 된다(MUST NOT). 첫 APK의 서명 키가
     이후 모든 업데이트의 서명 키가 되기 때문이다.
-  - **비지원**: Windows — 배포·공식 지원을 하지 않으며 Windows 사용자에게는 원저작자
-    (`edith2580/EasyViewer`) 애플리케이션 사용을 권장한다. 해당 코드는 유지하고 CI에서 컴파일·자동
-    테스트를 계속 수행한다(MUST).
+  - **비지원**: Windows — 고려 대상이 아니다. 배포·공식 지원·CI 검증을 하지 않으며 Windows 사용자에게는
+    원저작자(`edith2580/EasyViewer`) 애플리케이션 사용을 권장한다.
   - **개발 보조**: 웹 브라우저 폴백.
 - **표준 테스트 스택**: 프론트엔드 단위·통합 테스트는 Vitest(`vite ^6.0` 호환 버전) +
   `@vue/test-utils` + `jsdom` + `@tauri-apps/api/mocks`(`mockIPC`, `clearMocks`), 실제 브라우저
@@ -269,4 +272,4 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   지속적 의심·다층 검증, Zero Trust 보안, 독립 포크 운영)과 문서 분리 게이트 준수 여부를 반드시 검증해야
   한다(MUST).
 
-**Version**: 4.3.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-23
+**Version**: 5.0.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-24
