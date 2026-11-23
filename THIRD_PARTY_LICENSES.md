@@ -1,8 +1,10 @@
 # 서드파티 오픈소스 라이선스 고지 (Third-Party Licenses)
 
-**Project**: EasyViewer 독립 포크 (`0.1.6-beta`)  
-**Project License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE) — 버전 선택의 근거는 [NOTICE](./NOTICE) 4절  
-**Updated**: `2026-11-18`
+**언어 / Language**: **[한국어](THIRD_PARTY_LICENSES.md)** | [English](THIRD_PARTY_LICENSES.en.md)
+
+**Project**: Pagelight (EasyViewer 독립 포크, `1.0.0-alpha.1`)  
+**Project License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE) — 버전 선택의 근거는 [NOTICE](./NOTICE) 5절  
+**Updated**: `2026-11-23`
 
 > **전체 고지**: 이 문서는 직접 의존성 요약 표다. 전이 의존성을 포함해 배포물에 들어가는 모든 서드파티 구성요소의 저작권 고지와 라이선스 전문은 [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt)(앱 정보 화면에서 열람)에 있으며, `node scripts/check-licenses.mjs --write`로 생성한다.
 
@@ -72,7 +74,7 @@
 | `sha2` | `"0.11"` | `0.11.1` | `MIT OR Apache-2.0` |
 | `hex` | `"0.4"` | `0.4.3` | `MIT OR Apache-2.0` |
 | `zip` | `"9"` (`deflate`) | `9.6.0` | `MIT` |
-| `url` | `"2"` | `2.5.8` | `MIT OR Apache-2.0` |
+| `url` | `"2"` | `2.5.9` | `MIT OR Apache-2.0` |
 | `base64` | `"0.22"` | `0.22.1` | `MIT OR Apache-2.0` |
 | `serde` | `"1"` (`derive`) | `1.0.229` | `MIT OR Apache-2.0` |
 | `serde_json` | `"1"` | `1.0.154` | `MIT OR Apache-2.0` |

@@ -1,17 +1,27 @@
-name: 버그 신고
-description: 이 포크(macOS·iOS·Linux·Android)에서 발견한 문제를 알려 주세요.
+name: 버그 신고 / Bug report
+description: Pagelight(macOS·iOS·Linux·Android)에서 발견한 문제를 알려 주세요. / Report a problem found in Pagelight (macOS, iOS, Linux, Android).
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
         Windows는 이 포크의 지원 대상이 아닙니다. Windows에서는 원저작자의 EasyViewer(https://github.com/edith2580/EasyViewer)를 사용하세요.
+        Windows is not supported by this fork. On Windows, use the original EasyViewer (https://github.com/edith2580/EasyViewer).
 
         보안 취약점은 이 양식이 아니라 SECURITY.md의 비공개 신고 경로를 이용해 주세요.
+        Report security vulnerabilities through the private channel in SECURITY.en.md, not with this form.
+  - type: checkboxes
+    id: fork-confirmation
+    attributes:
+      label: 포크 확인 / Fork confirmation
+      description: 원저작자 앱이 아니라 Pagelight에서 생긴 문제인지 확인해 주세요. / Please confirm the problem happens in Pagelight, not in the original app.
+      options:
+        - label: 이 문제는 Pagelight(이 저장소의 앱)에서 발생합니다. / This problem happens in Pagelight (the app from this repository).
+          required: true
   - type: dropdown
     id: platform
     attributes:
-      label: 플랫폼
+      label: 플랫폼 / Platform
       options:
         - macOS
         - iOS
@@ -22,24 +32,24 @@ body:
   - type: input
     id: version
     attributes:
-      label: 앱 버전
-      description: 앱 정보 화면에 표시된 버전
+      label: 앱 버전 / App version
+      description: 앱 정보 화면에 표시된 버전 / The version shown on the About screen
     validations:
       required: true
   - type: input
     id: os-version
     attributes:
-      label: OS 버전·배포판
+      label: OS 버전·배포판 / OS version or distribution
   - type: textarea
     id: steps
     attributes:
-      label: 재현 절차
+      label: 재현 절차 / Steps to reproduce
       placeholder: "1. ...\n2. ...\n3. ..."
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: 기대한 동작과 실제 동작
+      label: 기대한 동작과 실제 동작 / Expected and actual behavior
     validations:
       required: true

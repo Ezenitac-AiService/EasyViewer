@@ -1,5 +1,7 @@
 # Pagelight
 
+**언어 / Language**: **[한국어](README.md)** | [English](README.en.md)
+
 > This is an independent fork. It supports macOS, iOS (source build only) and Linux; Android is maintained. For Windows, please use the original EasyViewer by edith2580.
 >
 > <!-- support-scope:start -->
@@ -11,6 +13,20 @@
 > <!-- support-scope:end -->
 
 심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v1.0.0-alpha.1`) — [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크
+
+[![CI](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/ci.yml)
+[![Release](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/release.yml/badge.svg)](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Ezenitac-AiService/EasyViewer?include_prereleases&sort=semver&label=release&logo=github)](https://github.com/Ezenitac-AiService/EasyViewer/releases)
+[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](./LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20iOS%20%7C%20Linux%20%7C%20Android-lightgrey.svg)](#지원-기능)
+[![Upstream Origin](https://img.shields.io/badge/upstream%20origin-edith2580%2FEasyViewer%20(v0.1.6)-informational?logo=github)](https://github.com/edith2580/EasyViewer)
+
+> [!NOTE]
+> **독립 포크 안내와 이슈 등록 예절**
+>
+> - 이 저장소([Ezenitac-AiService/EasyViewer](https://github.com/Ezenitac-AiService/EasyViewer))는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라져 Pagelight라는 이름으로 독립 운영되는 프로젝트입니다. 원저작자의 저작권과 `GPL-3.0-only` 라이선스를 그대로 따릅니다.
+> - **Pagelight에서 생긴 문제와 요청은 이 저장소의 [Issues](https://github.com/Ezenitac-AiService/EasyViewer/issues)에 올려 주세요.** 원저작자 저장소에는 올리지 마세요.
+> - 보안 취약점은 공개 이슈 대신 [SECURITY.md](./SECURITY.md)의 비공개 신고 경로를 이용해 주세요.
 
 > **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 출처·변경 고지는 [NOTICE](./NOTICE), 서드파티 고지는 [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)를 참고하세요.
 
@@ -215,45 +231,29 @@ npm run android:release     # arm64 release APK
 npm run android:release:all # 전체 ABI release APK
 ```
 
-### GitHub Actions 멀티 플랫폼 자동 릴리즈
+### GitHub Actions CI·릴리스
 
-- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch` 수동 실행 시 `npm run verify` 게이트 통과 후 **macOS Universal (`.dmg`)**, **Windows x64 (`-setup.exe`, `.msi`, `_portable.zip` 무설치 버전)**, **Linux x64 (`.deb`, `.rpm`, `.AppImage`)**, **Android arm64 (`.apk`)** 설치 패키지를 병렬 빌드하여 GitHub Release에 자동 첨부(`gh release upload --clobber` 또는 신규 릴리즈 생성, `-` 포함 프리릴리즈 태그 자동 감지)합니다.
-- [`.github/workflows/build-apple.yml`](.github/workflows/build-apple.yml): `main` PR 및 수동 실행용 macOS Universal + iOS 시뮬레이터(`--debug --target aarch64-sim`) 빌드 검증 워크플로우입니다.
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml): 모든 PR과 `main` 푸시에서 6개 작업을 실행합니다. `verify`(전체 검증 게이트), `licenses`(cargo-deny·고지 일치), `windows-compile-test`(배포하지 않는 Windows 코드의 컴파일·테스트), `macos-build`(유니버설 빌드·서명 검증), `ios-sim-build`(서명 없는 시뮬레이터 빌드), `android-debug`(debug APK). 비밀값을 쓰지 않으며, `main`은 이 6개 작업이 통과해야 병합됩니다(저장소 관리자는 긴급 시 우회 가능).
+- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**, **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. 게시 전에 `SHA256SUMS.txt`를 만들고 Windows 산출물이 없는지 다시 확인합니다.
 
-#### 새 버전 릴리즈 실행 절차 (수동 명령어)
+#### 릴리스 절차
 
-일반 소스 수정 후 `main` 브랜치에 커밋·푸시하는 것만으로는 릴리즈 빌드가 실행되지 않으며, 아래 순서로 **`v*` 태그를 푸시**하거나 **수동 워크플로우를 실행**하면 자동 빌드 및 GitHub Release 배포가 진행됩니다.
-
-1. **버전 동기화 및 검증** (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, `src-tauri/gen/apple/project.yml`, `Info.plist` 버전 및 Android/iOS 식별자 `com.ezenitac.easyviewer` 일치 검증):
+1. 버전을 맞추고 검증합니다(`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, Apple 프로젝트 설정, Android `versionCode`).
    ```bash
-   # 매니페스트 및 락파일 버전 일치 여부 확인
    npm run check:version
-
-   # 전체 통합 검증 (선택)
    npm run verify
    ```
-
-2. **변경사항 커밋·푸시 및 버전 태그(`v*`) 푸시로 릴리즈 트리거**:
+2. 리허설로 전체 흐름을 먼저 확인합니다. 리허설은 `-rehearsal` 태그 이름을 쓰고 초안 릴리스만 만듭니다.
    ```bash
-   git add -A
-   git commit -m "chore(release): 0.1.7 버전 업데이트 및 릴리즈 준비" -m "- 변경 이유 및 주요 수정 내역 요약 (20자 이상 한국어 본문)"
-   git push origin main
-
-   # v* 태그 생성 및 원격 푸시 (푸시 즉시 GitHub Actions release.yml 자동 실행)
-   git tag v0.1.7
-   git push origin v0.1.7
+   gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal
+   ```
+3. 태그를 푸시해 실제 릴리스를 게시합니다.
+   ```bash
+   git tag v1.0.0-alpha.1
+   git push origin v1.0.0-alpha.1
    ```
 
-3. **태그 푸시 없이 수동으로 워크플로우 실행하는 방법 (`workflow_dispatch`)**:
-   - **GitHub 웹 UI**: 저장소 **Actions** 탭 → **Release Multi-Platform** 선택 → **Run workflow** 클릭 (필요 시 대상 태그명 `tag_name` 입력)
-   - **GitHub CLI (`gh`) 명령어**:
-     ```bash
-     # package.json 버전 기준(기본값 v<version>)으로 즉시 빌드 및 릴리즈 실행
-     gh workflow run release.yml
-
-     # 특정 태그명을 지정하여 실행
-     gh workflow run release.yml -f tag_name=v0.1.7 -f publish_release=true
-     ```
+자세한 운영 절차는 [메인테이너 운영 절차](./docs/maintainer-runbook.md)와 [Android 서명 키 관리](./docs/android-signing.md)를 참고하세요.
 
 ---
 
