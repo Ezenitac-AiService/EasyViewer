@@ -418,7 +418,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T083 [P] [US7] `.github/release-notes.md` 템플릿을 만든다. 지원 범위 원문, macOS 격리 해제는 공증 전 **임시 조치**라는 경고, `shasum -a 256 -c SHA256SUMS.txt` 체크섬 검증 절차, iOS 소스 빌드 안내 링크, 첫 독립 릴리스용 식별자 변경·데이터 이전 안내(`docs/mobile-migration.md`)를 담는다. 같은 경고와 체크섬 절차를 README macOS 설치 절에도 반영한다(FR-020)
 - [X] T084 [US7] `.github/workflows/ci.yml`을 만든다(contracts/release-and-ci.md §1).
   - 작업 6개: `verify`, `licenses`(`cargo deny check` + `node scripts/check-licenses.mjs`), `windows-compile-test`(`npm ci`·`npm test`·`cargo check`·`cargo test`, 번들 생성 없음), `macos-build`, `ios-sim-build`, `android-debug`
-  - `ios-sim-build`는 차단 작업이다(FR-021). `continue-on-error`를 쓰지 않는다. T008이 실패했다면 이 작업 안에서 원인을 먼저 고친다. 고칠 수 없으면 구현을 멈추고 스펙 예외 개정을 요청한다
+  - `ios-sim-build`는 차단 작업이다(FR-021). `continue-on-error`를 쓰지 않는다. (2026-11-24 메인테이너 결정: macOS arm64 러너 부족으로 반복 취소되어 `main` 병합 필수 검사에서는 빼고 결과만 보고한다. 작업은 계속 실행되고 실패는 그대로 표시된다) T008이 실패했다면 이 작업 안에서 원인을 먼저 고친다. 고칠 수 없으면 구현을 멈추고 스펙 예외 개정을 요청한다
   - 비밀값 참조 없음
   - 최상위 `permissions: contents: read`. JavaScript 액션은 Node 24 대응 최신 메이저(작성 시점 확인값, 예: `actions/checkout` v6)를 쓰고, 서드파티 액션은 커밋 SHA로 고정하며 버전을 주석으로 병기한다(research F34, contracts/release-and-ci.md §1)
   - `licenses` 작업에 `cargo-about` 설치와 `node scripts/check-licenses.mjs`(고지 생성물 일치 검사)를 넣는다
