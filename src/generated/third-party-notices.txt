@@ -4979,7 +4979,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 === MIT License (MIT) ===
-사용 크레이트: cookie@0.18.2
+사용 크레이트: cookie@0.18.3
 
 Copyright (c) 2017 Sergio Benitez
 Copyright (c) 2014 Alex Crichton

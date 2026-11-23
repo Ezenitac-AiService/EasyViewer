@@ -44,6 +44,8 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 ### 보안
 
 - 의존성 `url`을 2.5.9로 올려 RUSTSEC-2026-0592(중첩 `blob:` URL 처리 시 스택 오버플로)를 해소했습니다.
+- 의존성 `cookie`를 0.18.3으로 올려 RUSTSEC-2026-0594(fork한 프로세스에서 비공개 쿠키 nonce 반복)를 해소했습니다. 이 앱은 해당 기능을 쓰지 않지만 권고 대상 버전을 없앴습니다.
+- EPUB 엔진이 쓰는 `@xmldom/xmldom`을 0.9.12로 고정해 XML 주입·DoS 권고를 해소했습니다.
 
 ### 지원 종료
 
