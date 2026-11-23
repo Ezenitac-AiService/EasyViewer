@@ -46,3 +46,18 @@ origin	https://github.com/Ezenitac-AiService/EasyViewer.git (push)
   - 코드 검색: 분리 직후 `gh search code`에 결과가 아직 없다(색인 대기). `BLOCKED` — 색인 후 다시 확인한다
   - main 규칙·게이트 변경(2026-11-24, 메인테이너 결정, 헌법 v5.0.0): 핵심 빌드는 macOS 하나다. `main` 필수 검사와 릴리스 게이트 항목 4는 핵심 작업 `verify`·`licenses`·`macos-build`만 요구하고, `ios-sim-build`·`android-debug`는 보고만 한다. `windows-compile-test`는 CI에서 삭제했다
   - 후속 정비(2026-11-23): 이슈 기능 켬, 저장소 설명·토픽을 Pagelight 기준으로 갱신, `main` 규칙(삭제·강제 푸시 금지, CI 6개 작업 필수, 관리자 우회 허용) 적용, 병합된 원격 브랜치 정리. 코드 검색은 이 시점에도 결과 0건으로 `BLOCKED` 유지
+
+## 첫 독립 릴리스 기록 (T099)
+
+- 날짜: 2026-11-24
+- 태그: `v1.0.0-alpha.1`(주석 태그, 커밋 `aa342af`). 태그 전 `main` CI [실행 45204054709](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/45204054709) 6개 작업 모두 통과, 로컬에서 `check-release-gate.mjs --release --tag v1.0.0-alpha.1 --phase prebuild --without-android` 통과
+- 워크플로: [실행 45206035956](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/45206035956) — `gate`·`build-desktop`(macOS·Linux)·`publish` 성공, `build-android` 건너뜀(서명 키 비밀값 없음, 헌법 v4.3.0)
+- 릴리스: [Pagelight v1.0.0-alpha.1](https://github.com/Ezenitac-AiService/EasyViewer/releases/tag/v1.0.0-alpha.1)(공개 프리릴리스)
+- 산출물과 SHA-256:
+  - `Pagelight_1.0.0-alpha.1_universal.dmg` `090cc19142d397351bcb4e39e9684699451f29514bd322929321209d666e15a3`
+  - `Pagelight_1.0.0-alpha.1_amd64.deb` `20230089620738c64516ecb012355da03e6ddae787419317e48e39d0916939ee`
+  - `Pagelight_1.0.0-alpha.1_amd64.AppImage` `b05ae8f5aa623de37362dac026e3aa1d99bdb0b60dfb7bcc3e43d12f52f0a42a`
+  - `SHA256SUMS.txt`
+- 확인: 게시된 파일을 내려받아 `shasum -a 256 -c SHA256SUMS.txt` 3개 모두 OK. dmg `hdiutil verify` VALID, 번들 식별자 `com.ezenitac.easyviewer`, 버전 `1.0.0-alpha.1`, `codesign --verify --deep --strict` 통과. Windows 산출물·APK 0개. 릴리스 노트 끝에 Android 미포함 안내(한·영)가 붙음
+- 서명 인증서 지문: 해당 없음(Android 미포함). Android는 서명 키(T062) 준비 후 릴리스부터 포함한다
+
