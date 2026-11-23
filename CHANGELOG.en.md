@@ -38,6 +38,8 @@ Supported platforms: macOS, iOS (source build only) and Linux are the focus; And
 ### Security
 
 - Updated the `url` dependency to 2.5.9 to resolve RUSTSEC-2026-0592 (stack overflow when handling nested `blob:` URLs).
+- Updated the `cookie` dependency to 0.18.3 to resolve RUSTSEC-2026-0594 (private cookie nonces repeating in forked processes). The app does not use that feature, but the affected version is gone.
+- Pinned `@xmldom/xmldom`, used by the EPUB engine, to 0.9.12 to resolve XML injection and DoS advisories.
 
 ### Removed support
 
