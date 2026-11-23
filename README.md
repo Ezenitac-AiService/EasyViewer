@@ -247,7 +247,7 @@ npm run android:release:all # 전체 ABI release APK
 ### GitHub Actions CI·릴리스
 
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml): 모든 PR과 `main` 푸시에서 6개 작업을 실행합니다. `verify`(전체 검증 게이트), `licenses`(cargo-deny·고지 일치), `windows-compile-test`(배포하지 않는 Windows 코드의 컴파일·테스트), `macos-build`(유니버설 빌드·서명 검증), `ios-sim-build`(서명 없는 시뮬레이터 빌드), `android-debug`(debug APK). 비밀값을 쓰지 않으며, `main`은 이 6개 작업이 통과해야 병합됩니다(저장소 관리자는 긴급 시 우회 가능).
-- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**, **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. 게시 전에 `SHA256SUMS.txt`를 만들고 Windows 산출물이 없는지 다시 확인합니다.
+- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**, **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. 서명 키 비밀값이 등록되지 않았으면 Android는 빌드하지 않고 빼고 게시하며, 릴리스 노트에 그 사실을 덧붙입니다(debug 서명 APK는 게시하지 않음). 게시 전에 `SHA256SUMS.txt`를 만들고 Windows 산출물이 없는지 다시 확인합니다.
 
 #### 릴리스 절차
 

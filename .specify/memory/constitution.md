@@ -182,7 +182,10 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   - **중점**: macOS(`11.0+`), iOS(`15.0+`), Linux — 설계·검증·품질 투자의 기준. iOS는 공개 배포
     채널 없이 **소스 빌드로만 제공**한다.
   - **유지(우선순위 낮음)**: Android(`scripts/android.mjs`) — 릴리스 산출물, 포크 소유 고정 서명 키,
-    업데이트 연속성을 유지한다.
+    업데이트 연속성을 유지한다. Android 산출물은 포크 소유 고정 서명 키로 서명할 수 있는 릴리스에서만
+    게시해야 하며(MUST), 키가 아직 없으면 그 릴리스에서 Android 산출물을 빼고 게시할 수 있다. 이때
+    debug 서명이나 임시 키로 서명한 APK를 대신 게시해서는 안 된다(MUST NOT). 첫 APK의 서명 키가
+    이후 모든 업데이트의 서명 키가 되기 때문이다.
   - **비지원**: Windows — 배포·공식 지원을 하지 않으며 Windows 사용자에게는 원저작자
     (`edith2580/EasyViewer`) 애플리케이션 사용을 권장한다. 해당 코드는 유지하고 CI에서 컴파일·자동
     테스트를 계속 수행한다(MUST).
@@ -266,4 +269,4 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   지속적 의심·다층 검증, Zero Trust 보안, 독립 포크 운영)과 문서 분리 게이트 준수 여부를 반드시 검증해야
   한다(MUST).
 
-**Version**: 4.2.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-23
+**Version**: 4.3.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-23

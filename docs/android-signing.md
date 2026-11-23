@@ -8,7 +8,7 @@ Android는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.
 Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
 <!-- support-scope:end -->
 
-Pagelight의 Android APK(`com.ezenitac.easyviewer`)는 이 포크가 소유한 **release 키 하나**로만 서명합니다. Android는 같은 패키지 이름이라도 서명 인증서가 바뀌면 업데이트 설치를 거부합니다. 그래서 이 키를 잃으면 기존 사용자는 앱을 지우고 다시 설치해야 하고, 그 과정에서 앱 데이터가 사라집니다. 아래 절차는 키를 잃거나 유출하지 않기 위한 것입니다.
+Pagelight의 Android APK(`com.ezenitac.easyviewer`)는 이 포크가 소유한 **release 키 하나**로만 서명합니다. 키를 아직 만들지 않았으면 릴리스 워크플로가 Android를 빼고 게시합니다(헌법 v4.3.0). 첫 APK를 서명한 키가 이후 모든 업데이트의 키가 되므로, debug 키나 임시 키로 서명한 APK는 게시하지 않습니다. Android는 같은 패키지 이름이라도 서명 인증서가 바뀌면 업데이트 설치를 거부합니다. 그래서 이 키를 잃으면 기존 사용자는 앱을 지우고 다시 설치해야 하고, 그 과정에서 앱 데이터가 사라집니다. 아래 절차는 키를 잃거나 유출하지 않기 위한 것입니다.
 
 이 저장소에는 키 파일, 비밀번호, `keystore.properties`를 절대 넣지 않습니다. `.gitignore`가 `*.jks`, `*.keystore`, `*.p12`, `keystore.properties`를 막고 있습니다.
 
