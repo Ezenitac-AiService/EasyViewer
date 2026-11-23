@@ -1,6 +1,6 @@
 # quickstart 실행 기록 (T092)
 
-[quickstart.md](../quickstart.md) §1–§6, §9를 실행한 결과다. §7(Windows 전환)은 T048, §8(릴리스 리허설)은 T093에서 따로 기록한다. 실행하지 못한 단계는 `BLOCKED`로 둔다(헌법 제6원칙).
+[quickstart.md](../quickstart.md) §1–§6, §8, §9를 실행한 결과다. §7(Windows 전환)은 T048에서 따로 기록한다. 실행하지 못한 단계는 `BLOCKED`로 둔다(헌법 제6원칙).
 
 | 필드 | 내용 |
 |---|---|
@@ -72,3 +72,27 @@
 - `upstream-notice.md`에 고지 날짜(2026-11-18)와 이의 대응 결과(이의 없음)가 있다.
 
 판정: **PASS**
+
+## §8 릴리스 리허설 (T093)
+
+| 필드 | 내용 |
+|---|---|
+| 날짜 | 2026-11-23 |
+| 실행 | `gh workflow run release.yml --ref main -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal` → [실행 45187725558](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/45187725558), 대상 커밋 `a724998` |
+| 조건 | Android 서명 비밀값 미등록(T062 전). 리허설 규칙대로 APK는 debug 서명, 파일 이름에 `-rehearsal` |
+
+**결과**
+
+- 작업 5개(`gate`, `build-desktop` macOS·Linux, `build-android`, `publish`) 모두 성공.
+- `gate`: FR-025 항목 1–7·버전 비중복·`versionCode` 통과. 메인테이너 항목 8(서명 키 백업)만 **경고**로 표시(리허설 규칙).
+- `[REHEARSAL] Pagelight v1.0.0-alpha.1-rehearsal` 초안(프리릴리스) 생성. 산출물 5개:
+  - `Pagelight_1.0.0-alpha.1_universal.dmg`(14 MiB), `Pagelight_1.0.0-alpha.1_amd64.deb`(8 MiB), `Pagelight_1.0.0-alpha.1_amd64.AppImage`(82 MiB), `Pagelight_1.0.0-alpha.1_android-arm64-rehearsal.apk`(206 MiB), `SHA256SUMS.txt`
+  - 프리릴리스 버전이라 `.rpm`은 만들지 않음(설계대로)
+- Windows 산출물(`.exe`·`.msi`·Windows `.zip`) 0개. 제목과 파일 이름이 새 표시명으로 시작.
+- 체크섬: 초안 산출물을 내려받아 릴리스 노트 절차(`shasum -a 256 -c SHA256SUMS.txt`)로 4개 모두 `OK`.
+- macOS `.dmg`: `hdiutil verify` VALID. 안의 `Pagelight.app`은 `CFBundleIdentifier` `com.ezenitac.easyviewer`, 버전 `1.0.0-alpha.1`, 최소 macOS 11.0, 유니버설(`x86_64 arm64`), `codesign --verify --deep --strict` 통과. 마운트 시 GPL 라이선스 동의 창이 뜬다(`licenseFile` 설정).
+- Linux `.deb`: 패키지 `pagelight`, 버전 `1.0.0-alpha.1`, `amd64`, 의존 `libwebkit2gtk-4.1-0`, `libgtk-3-0`.
+- Android APK: 매니페스트 패키지 `com.ezenitac.easyviewer`. debug 빌드라 네이티브 라이브러리가 심볼을 포함해 크다(`libpagelight_lib.so` 약 198 MiB). release 빌드에서 다시 확인한다.
+- 확인 후 초안 릴리스를 지웠다. 리허설 태그는 만들어지지 않았다(초안은 태그를 만들지 않음).
+
+판정: **PASS**(서명 키 없는 범위). 실제 서명 APK의 인증서 지문 확인은 T062 후 첫 릴리스(T099)에서 한다.
