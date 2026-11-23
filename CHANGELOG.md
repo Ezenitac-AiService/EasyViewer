@@ -1,5 +1,7 @@
 # 변경 이력 (CHANGELOG)
 
+**언어 / Language**: **[한국어](CHANGELOG.md)** | [English](CHANGELOG.en.md)
+
 이 문서는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)에서 갈라진 독립 포크의 변경 이력입니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따릅니다.
 
 ## [미출시] — 독립 포크 분리 (2026-11-17)
@@ -21,7 +23,11 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 - 직접·전이 의존성 전체의 라이선스 자동 감사(`scripts/check-licenses.mjs`, `cargo deny`)와 서드파티 고지 전문(`src/generated/third-party-notices.txt`)
 - 앱 정보 화면: 버전, 라이선스, 저장소, 원저작자 출처, 지원 범위, 서드파티 고지
 - 지원 범위 원문(`src/config/supportScope.ts`)과 공개 문구 검사(`scripts/check-support-scope.mjs`)
-- 이슈 등록 양식(지원 플랫폼 선택지, Windows 사용자 안내)
+- 이슈 등록 양식(지원 플랫폼 선택지, Windows 사용자 안내, 한·영 병기, 포크 확인 항목)
+- macOS·Linux 기존 사용자 데이터 1회 이전(서재·설정·OS 자격증명, 원본 보존), 모바일 이전 안내
+- 지원 플랫폼만 빌드하는 CI(`ci.yml` 6개 작업)와 릴리스 파이프라인(`release.yml`, 빌드 전·게시 전 안전 게이트, `SHA256SUMS.txt`)
+- 보안 정책(`SECURITY.md`)과 비공개 취약점 신고, README의 원저작자 앱과의 차이 절
+- 저장소 루트 공개 문서의 영문판(`*.en.md`)과 국문·영문 쌍 검사(`scripts/check-doc-pairs.mjs`)
 
 ### 변경
 
@@ -34,6 +40,10 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
   - Apple 개발 팀 ID와 개인 기기 UDID를 저장소에서 지우고 환경 변수(`APPLE_DEVELOPMENT_TEAM`, `IOS_DEVICE_ID`)로 옮겼습니다([iOS 빌드 안내](docs/ios-build.md))
   - 구 식별자·원저작자 이름 잔존, 내부 저장 키 변경, 고정 팀 ID·UDID, 원저작자 아이콘 재사용을 막는 검사(`scripts/check-identity.mjs`)를 `npm run verify`에 추가했습니다
   - 내부 저장 키(`EasyViewerDB`, `easyviewer:` 등)는 기존 데이터를 이어 쓰기 위해 바꾸지 않았습니다
+
+### 보안
+
+- 의존성 `url`을 2.5.9로 올려 RUSTSEC-2026-0592(중첩 `blob:` URL 처리 시 스택 오버플로)를 해소했습니다.
 
 ### 지원 종료
 
@@ -65,4 +75,4 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 - **0.1.1** (2026-11-08): TXT 스크롤 시 화면이 튀는 문제 수정.
 - **0.1.0** (2026-11-07): 최초 릴리스, macOS 패키지 추가.
 
-분기 이후 원작은 0.2.0(2026-11-17, Windows 네트워크 폴더 수정)과 0.2.1(2026-11-17, Android WebDAV 접속 수정)을 릴리스했습니다. 이 포크는 두 릴리스를 병합하지 않았습니다.
+분기 이후 원작은 0.2.0(2026-11-17, Windows 네트워크 폴더 수정), 0.2.1(2026-11-17, Android WebDAV 접속 수정), 0.2.2(2026-11-18, macOS 서명·공증 적용)를 릴리스했습니다. 이 포크는 세 릴리스를 병합하지 않았습니다.

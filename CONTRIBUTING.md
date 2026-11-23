@@ -1,5 +1,7 @@
 # 기여 가이드
 
+**언어 / Language**: **[한국어](CONTRIBUTING.md)** | [English](CONTRIBUTING.en.md)
+
 이 저장소는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)에서 갈라진 **독립 포크**입니다. 기여하기 전에 아래 원칙을 확인해 주세요.
 
 ## 지원 범위
@@ -48,11 +50,12 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 
 ## 운영 원칙
 
-이 포크는 [프로젝트 헌법](.specify/memory/constitution.md)(v4.0.0)을 따릅니다. 특히 제8원칙(독립 포크 운영)에 따라 다음을 지킵니다.
+이 포크는 [프로젝트 헌법](.specify/memory/constitution.md)(v4.2.0)을 따릅니다. 특히 제8원칙(독립 포크 운영)에 따라 다음을 지킵니다.
 
 - 공개 문구는 이 포크의 범위만 말합니다. 원저작자 프로젝트의 역할·의도를 대신 규정하거나 원저작자 앱을 낮추어 평가하지 않습니다. `node scripts/check-support-scope.mjs`가 금지 표현을 검사합니다.
 - 라이선스는 `GPL-3.0-only`입니다. 라이선스 전문(`LICENSE`)을 바꾸지 않고, 원저작자 귀속과 변경 고지(`NOTICE`)를 유지합니다.
 - 이 포크에서 새로 만드는 소스 파일 첫 줄에는 `SPDX-License-Identifier: GPL-3.0-only`를 씁니다.
+- 저장소 루트의 공개 문서(`README`, `CONTRIBUTING`, `SECURITY`, `CHANGELOG`, `NOTICE`, `THIRD_PARTY_LICENSES`)는 한국어 기본 문서와 영문판(`*.en.md`)을 함께 유지합니다(제1원칙). 한쪽을 고치면 같은 변경에서 다른 쪽도 고칩니다. 두 판이 어긋나면 한국어 문서가 기준입니다. `node scripts/check-doc-pairs.mjs`가 쌍과 언어 전환 링크를 검사합니다.
 
 ## 지원 등급별 기여 기대치
 
@@ -79,7 +82,7 @@ npm run verify
 cd src-tauri && cargo deny check
 ```
 
-`npm run verify`는 빌드, 단위 테스트, 계층·규모 경계(파일당 450줄 이하), 버전·식별자 동기화, 라이선스 정책 감사, 지원 범위 문구 검사, `cargo check`, `cargo test`를 실행합니다. 테스트 없이 구현한 코드는 받지 않습니다(헌법 제2원칙, TDD).
+`npm run verify`는 빌드, 단위 테스트, 계층·규모 경계(파일당 450줄 이하), 버전·식별자 동기화, 라이선스 정책 감사, 지원 범위 문구 검사, 공개 문서 국문·영문 쌍 검사, `cargo check`, `cargo test`를 실행합니다. 테스트 없이 구현한 코드는 받지 않습니다(헌법 제2원칙, TDD).
 
 ### 라이선스 감사가 실패할 때
 

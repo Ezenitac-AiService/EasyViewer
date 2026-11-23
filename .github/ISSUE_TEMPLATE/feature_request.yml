@@ -1,21 +1,21 @@
-name: 기능 제안
-description: 이 포크에 바라는 기능을 제안해 주세요.
+name: 기능 제안 / Feature request
+description: Pagelight에 바라는 기능을 제안해 주세요. / Suggest a feature for Pagelight.
 labels: ["enhancement"]
 body:
   - type: textarea
     id: problem
     attributes:
-      label: 해결하고 싶은 문제
+      label: 해결하고 싶은 문제 / Problem to solve
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: 제안하는 방법
+      label: 제안하는 방법 / Proposed solution
   - type: dropdown
     id: platforms
     attributes:
-      label: 관련 플랫폼
+      label: 관련 플랫폼 / Related platforms
       multiple: true
       options:
         - macOS

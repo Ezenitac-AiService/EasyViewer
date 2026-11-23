@@ -32,7 +32,7 @@
 
 ## 확정된 결정
 
-1. **저장소**: 기존 `Ezenitac-AiService/EasyViewer`를 유지하고(URL·스타·이슈·릴리스 이력 보존) GitHub Support에 포크 네트워크 분리를 요청한다. 로컬·CI의 업스트림 동기화 경로는 모두 제거한다.
+1. **저장소**: 기존 `Ezenitac-AiService/EasyViewer`를 유지하고(URL·스타·이슈·릴리스 이력 보존) GitHub Support에 포크 네트워크 분리를 요청한다. 로컬·CI의 업스트림 동기화 경로는 모두 제거한다. (실행: 2026-11-23 Support가 자체 분리를 안내해 설정의 포크 네트워크 탈퇴로 분리했고, 이슈·PR·릴리스 이력이 보존되었다. research R10 실행 결과 참고)
 2. **앱 식별자**: 모든 플랫폼에서 `com.ezenitac.easyviewer`로 바꾼다.
 3. **분기 기준선**: `44c4d37`에 불변 주석 태그 `upstream-base-v0.1.6`을 만든다.
    - 기존 lightweight 태그 `v0.1.6`과 같은 커밋이지만, 의미와 불변성을 명시하려고 별도로 둔다.

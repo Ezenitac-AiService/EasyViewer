@@ -91,7 +91,10 @@ describe('check-identity (spec 003 US5, data-model §4)', () => {
     ['src-tauri/src/main.rs', 'fn main() { easy_viewer_lib::run() }\n', /easy_viewer/],
     ['src-tauri/gen/android/app/build.gradle.kts', 'val p = "src/main/java/com/edith/x"\n', /com\/edith/],
     ['.github/workflows/release.yml', 'run: gh release create "$TAG" --title "EasyViewer $TAG"\n', /EasyViewer/],
-    ['.github/workflows/ci.yml', 'run: cp target/release/easy-viewer.exe out/\n', /easy-viewer/]
+    ['.github/workflows/ci.yml', 'run: cp target/release/easy-viewer.exe out/\n', /easy-viewer/],
+    ['README.en.md', '# EasyViewer\n', /EasyViewer/],
+    ['CONTRIBUTING.en.md', 'Welcome to EasyViewer.\n', /EasyViewer/],
+    ['SECURITY.en.md', 'Report EasyViewer bugs here.\n', /EasyViewer/]
   ])('fails when %s carries the upstream identity outside the allow-list', (rel, content, re) => {
     const res = run(repo({ [rel]: content }))
     expect(res.ok).toBe(false)

@@ -1,5 +1,7 @@
 # 보안 정책
 
+**언어 / Language**: **[한국어](SECURITY.md)** | [English](SECURITY.en.md)
+
 ## 지원 버전
 
 보안 수정은 이 포크(Pagelight)의 **가장 최신 릴리스**에만 적용합니다. 첫 독립 릴리스(`v1.0.0-alpha.1`) 이전의 포크 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)는 보안 수정을 받지 않습니다.

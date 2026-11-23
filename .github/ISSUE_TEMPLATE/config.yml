@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Windows 사용자 — 원저작자 EasyViewer
+  - name: Windows 사용자 — 원저작자 EasyViewer / Windows users — original EasyViewer
     url: https://github.com/edith2580/EasyViewer
-    about: 이 포크는 Windows를 지원·배포하지 않습니다. Windows에서는 원저작자의 EasyViewer를 사용하세요. 이 포크의 Windows 프리릴리스를 쓰던 경우에는 저장소의 docs/windows-migration.md를 참고하세요.
+    about: 이 포크는 Windows를 지원·배포하지 않습니다. Windows에서는 원저작자의 EasyViewer를 사용하세요. 이 포크의 Windows 프리릴리스를 쓰던 경우에는 docs/windows-migration.md를 참고하세요. / This fork does not support or distribute Windows builds. On Windows, use the original EasyViewer. If you used this fork's Windows pre-releases, see docs/windows-migration.md.
+  - name: 보안 취약점 / Security vulnerability
+    url: https://github.com/Ezenitac-AiService/EasyViewer/security/advisories/new
+    about: 취약점은 공개 이슈 대신 비공개로 신고해 주세요. / Report vulnerabilities privately instead of in a public issue.
