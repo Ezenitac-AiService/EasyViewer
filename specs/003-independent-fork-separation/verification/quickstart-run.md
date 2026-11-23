@@ -84,7 +84,8 @@
 **결과**
 
 - 작업 5개(`gate`, `build-desktop` macOS·Linux, `build-android`, `publish`) 모두 성공.
-- `gate`: FR-025 항목 1–7·버전 비중복·`versionCode` 통과. 메인테이너 항목 8(서명 키 백업)만 **경고**로 표시(리허설 규칙).
+- 빌드 전 `gate`(`--phase prebuild`): FR-025 항목 1–5·버전 비중복·`versionCode` 통과. 메인테이너 항목 8(서명 키 백업)만 **경고**로 표시(리허설 규칙).
+- 게시 전 `publish`(`--phase publish`): 항목 6(체크섬)·7(Windows 산출물 없음) 통과.
 - `[REHEARSAL] Pagelight v1.0.0-alpha.1-rehearsal` 초안(프리릴리스) 생성. 산출물 5개:
   - `Pagelight_1.0.0-alpha.1_universal.dmg`(14 MiB), `Pagelight_1.0.0-alpha.1_amd64.deb`(8 MiB), `Pagelight_1.0.0-alpha.1_amd64.AppImage`(82 MiB), `Pagelight_1.0.0-alpha.1_android-arm64-rehearsal.apk`(206 MiB), `SHA256SUMS.txt`
   - 프리릴리스 버전이라 `.rpm`은 만들지 않음(설계대로)
