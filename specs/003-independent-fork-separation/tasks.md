@@ -453,7 +453,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T095 (메인테이너) 원저작자에게 분리 사실, 식별자 변경, 새 표시명, 지원 범위, Windows 사용자 안내 방침을 정중히 알리고 `verification/upstream-notice.md`에 기록한다(data-model §7). 이의가 있으면 이름을 바꾸거나(T050부터 반복) `supportScope.ts`의 `windowsWording: 'unsupported-only'`로 문구를 줄인 뒤 T033 검사를 다시 통과시킨다
 - [X] T096 `node scripts/check-release-gate.mjs --separation`이 통과하는지 확인한다(FR-025 1–5)
 - [X] T097 (메인테이너) `docs/windows-eol-notice.md` 문안을 기존 `v0.1.6-alpha`·`v0.1.6-beta` 릴리스 노트 맨 위에 추가한다(`gh release edit`, 산출물 삭제 금지). 분리 방식에 따라 릴리스가 사라질 수 있으므로 **분리 요청 전에** 게시하고, `gh release download`로 모든 릴리스 산출물·노트를 백업한다(research R10)
-- [ ] T098 (메인테이너) `docs/maintainer-runbook.md`대로 GitHub 저장소 설정에서 비공개 취약점 신고를 켜고 **GitHub Support에** 포크 네트워크 분리를 요청한다. 완료 후 `gh api repos/Ezenitac-AiService/EasyViewer --jq .fork`가 `false`인지, 릴리스와 지원 종료 고지가 남아 있는지, 새 PR 기본 대상과 코드 검색을 확인해 기록한다(SC-003)
+- [X] T098 (메인테이너) `docs/maintainer-runbook.md`대로 GitHub 저장소 설정에서 비공개 취약점 신고를 켜고 **GitHub Support에** 포크 네트워크 분리를 요청한다. 완료 후 `gh api repos/Ezenitac-AiService/EasyViewer --jq .fork`가 `false`인지, 릴리스와 지원 종료 고지가 남아 있는지, 새 PR 기본 대상과 코드 검색을 확인해 기록한다(SC-003)
 - [ ] T099 (메인테이너) `node scripts/check-release-gate.mjs --release --tag v1.0.0-alpha.1`이 통과하면(FR-025 1–8, 버전 비중복, `versionCode` 증가) 태그를 푸시해 첫 독립 릴리스를 게시하고, 산출물·체크섬·서명 지문을 `verification/release-gate.md`에 기록한다
 - [ ] T100 `specs/003-independent-fork-separation/spec.md` Status를 실제 상태(구현 완료 범위와 `BLOCKED` 항목)로 갱신하고, `/speckit-analyze`로 spec·plan·tasks 정합성을 다시 확인한다
 
