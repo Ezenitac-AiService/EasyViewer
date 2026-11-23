@@ -39,7 +39,7 @@ iOS는 공개 배포 채널 없이 **소스 빌드로만 제공**합니다. 직�
 
 - **macOS·Linux**: Pagelight를 처음 실행하면 이전 버전의 서재와 설정을 한 번 복사합니다. 원본은 그대로 남습니다. 결과는 앱 안 안내로 알려 드립니다.
 - **Android·iOS**: 새 앱으로 따로 설치되며 데이터를 자동으로 옮기지 않습니다. [모바일 이전 안내](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/docs/mobile-migration.md)를 참고하세요.
-- **Android 서명**: 이 포크가 소유한 새 서명 키로 서명합니다. 이전 APK 위에 업데이트로 설치되지 않습니다.
+- **Android 서명**: 이 포크가 소유한 새 서명 키로 서명합니다. 이전 APK 위에 업데이트로 설치되지 않습니다. 서명 키가 준비되지 않은 릴리스에는 APK를 넣지 않습니다(debug 서명 APK는 배포하지 않음).
 - **Windows**: 이 포크의 Windows 프리릴리스를 쓰던 경우 [Windows 전환 안내](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/docs/windows-migration.md)를 따르세요.
 
 ## 출처와 라이선스

@@ -242,3 +242,56 @@ describe('release gate phases (contracts §2: gate before builds, artifacts at p
     expect(res.errors.join('\n')).toMatch(/\[7\]/)
   })
 })
+
+describe('release without Android (constitution v4.3.0: no fork key yet)', () => {
+  const DESKTOP = ['Pagelight_1.0.0-alpha.1_universal.dmg', 'Pagelight_1.0.0-alpha.1_amd64.deb']
+  const sums = (files: string[]) => files.map((f) => `${'0'.repeat(64)}  ${f}`).join('\n') + '\n'
+  const NO_KEY = { ...GOOD_RECORDS, [`${V}/release-gate.md`]: '- [ ] 8. Android 서명 키 백업 확인\n' }
+
+  it('skips item 8 (key backup) in prebuild when Android is left out', () => {
+    const r = runGate(
+      repo(NO_KEY),
+      { mode: 'release', phase: 'prebuild', tag: 'v1.0.0-alpha.1', withoutAndroid: true },
+      env()
+    )
+    expect(r.errors).toEqual([])
+    expect(r.items.map((i: { id: string }) => i.id)).not.toContain('8')
+  })
+
+  it('still requires item 8 when Android is included', () => {
+    const r = runGate(repo(NO_KEY), { mode: 'release', phase: 'prebuild', tag: 'v1.0.0-alpha.1' }, env())
+    expect(r.errors.join('\n')).toMatch(/\[8\]/)
+  })
+
+  it('fails publishing when an APK slips into a release without Android', () => {
+    const files = [...DESKTOP, 'Pagelight_1.0.0-alpha.1_android-arm64.apk']
+    const dir = assets([...files, 'SHA256SUMS.txt'])
+    fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), sums(files))
+    const r = runGate(
+      repo({}),
+      { mode: 'release', phase: 'publish', tag: 'v1.0.0-alpha.1', assetsDir: dir, withoutAndroid: true },
+      env()
+    )
+    expect(r.errors.join('\n')).toMatch(/Android/)
+  })
+
+  it('passes publishing desktop-only artifacts when Android is left out', () => {
+    const dir = assets([...DESKTOP, 'SHA256SUMS.txt'])
+    fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), sums(DESKTOP))
+    const r = runGate(
+      repo({}),
+      { mode: 'release', phase: 'publish', tag: 'v1.0.0-alpha.1', assetsDir: dir, withoutAndroid: true },
+      env()
+    )
+    expect(r.errors).toEqual([])
+  })
+
+  it('is not allowed in rehearsal, where Android is always built (debug-signed)', () => {
+    const r = runGate(
+      repo(GOOD_RECORDS),
+      { mode: 'release', phase: 'prebuild', tag: 'v1.0.0-alpha.1-rehearsal', rehearsal: true, withoutAndroid: true },
+      env()
+    )
+    expect(r.errors.join('\n')).toMatch(/리허설/)
+  })
+})

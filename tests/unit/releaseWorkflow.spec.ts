@@ -92,6 +92,20 @@ describe('release.yml (contracts §2)', () => {
     expect(text).toMatch(/-rehearsal/)
   })
 
+  it('leaves Android out (never debug-signed) when the fork signing key is not registered', () => {
+    const gate = jobBlock(text, 'gate')
+    // Only a boolean derived from the secret reaches the gate, never the value.
+    expect(gate).toMatch(/\$\{\{\s*secrets\.ANDROID_KEYSTORE_BASE64\s*!=\s*''\s*\}\}/)
+    expect(gate).toMatch(/android:\s*\$\{\{\s*steps\.\w+\.outputs\.android\s*\}\}/)
+    expect(gate).toContain('--without-android')
+    const android = jobBlock(text, 'build-android')
+    expect(android).toMatch(/if:\s*needs\.gate\.outputs\.android\s*==\s*'true'/)
+    const publish = jobBlock(text, 'publish')
+    expect(publish).toMatch(/needs\.build-android\.result\s*==\s*'skipped'/)
+    expect(publish).toContain('--without-android')
+    expect(publish).toMatch(/Android APK/)
+  })
+
   it('grants contents: write only to publish', () => {
     expect(text).toMatch(/^permissions:\s*\n\s+contents:\s*read\s*$/m)
     expect(jobBlock(text, 'publish')).toMatch(/contents:\s*write/)

@@ -48,7 +48,7 @@ The source of the support-scope wording is `src/config/supportScope.ts`. To chan
 
 ## Operating principles
 
-This fork follows the [project constitution](.specify/memory/constitution.md) (v4.2.0, Korean). In particular, under principle VIII (independent fork governance):
+This fork follows the [project constitution](.specify/memory/constitution.md) (v4.3.0, Korean). In particular, under principle VIII (independent fork governance):
 
 - Public wording describes only this fork's scope. It does not define the original project's role or intent and does not belittle the original app. `node scripts/check-support-scope.mjs` checks for forbidden phrases.
 - The license is `GPL-3.0-only`. The license text (`LICENSE`) is not changed, and the attribution and modification notices (`NOTICE`) are kept.

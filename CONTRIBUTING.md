@@ -50,7 +50,7 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 
 ## 운영 원칙
 
-이 포크는 [프로젝트 헌법](.specify/memory/constitution.md)(v4.2.0)을 따릅니다. 특히 제8원칙(독립 포크 운영)에 따라 다음을 지킵니다.
+이 포크는 [프로젝트 헌법](.specify/memory/constitution.md)(v4.3.0)을 따릅니다. 특히 제8원칙(독립 포크 운영)에 따라 다음을 지킵니다.
 
 - 공개 문구는 이 포크의 범위만 말합니다. 원저작자 프로젝트의 역할·의도를 대신 규정하거나 원저작자 앱을 낮추어 평가하지 않습니다. `node scripts/check-support-scope.mjs`가 금지 표현을 검사합니다.
 - 라이선스는 `GPL-3.0-only`입니다. 라이선스 전문(`LICENSE`)을 바꾸지 않고, 원저작자 귀속과 변경 고지(`NOTICE`)를 유지합니다.

@@ -12,6 +12,8 @@ import { pathToFileURL } from 'node:url'
  *                                items 1–8 + version non-overlap + Android versionCode + no leftover draft.
  *                                `prebuild` (before any build): everything except the artifact items 6–7.
  *                                `publish` (on the collected artifacts): items 6–7 only.
+ *   --without-android            release without Android (no fork signing key yet, constitution v4.3.0):
+ *                                item 8 is not required, and publishing fails if an APK is present.
  *   --static                     workflow rules: scripts exist, no upstream sync, least privilege, pinned actions
  * Exit codes: 0 pass, 1 fail, 2 BLOCKED (a required lookup could not run).
  */
@@ -87,6 +89,11 @@ function itemNoWindows(assetsDir) {
   return win.length ? `Windows 산출물이 있습니다: ${win.join(', ')}` : null
 }
 
+function noApk(assetsDir) {
+  const apks = listAssets(assetsDir).filter((f) => /\.apk$/i.test(f))
+  return apks.length ? `Android를 빼고 게시하는 릴리스에 APK가 있습니다: ${apks.join(', ')}` : null
+}
+
 function itemKeyBackup(root) {
   const text = read(root, `${V}/release-gate.md`)
   if (!/-\s*\[[xX]\]\s*8\./.test(text)) return '메인테이너의 Android 서명 키 백업 확인(항목 8)이 체크되지 않았습니다'
@@ -134,11 +141,18 @@ export function runGate(root, opts, env) {
   if (opts.rehearsal && !String(opts.tag || '').endsWith('-rehearsal')) {
     errors.push('리허설 태그는 반드시 -rehearsal로 끝나야 합니다')
   }
+  if (opts.rehearsal && opts.withoutAndroid) {
+    errors.push('리허설은 Android를 항상 빌드합니다(debug 서명). --without-android와 함께 쓸 수 없습니다')
+  }
 
   const phase = opts.mode === 'release' ? opts.phase ?? 'full' : 'full'
   if (phase === 'publish') {
     record('6', itemChecksums(opts.assetsDir))
     record('7', itemNoWindows(opts.assetsDir))
+    if (opts.withoutAndroid) {
+      const apk = noApk(opts.assetsDir)
+      if (apk) errors.push(apk)
+    }
     return { errors, warnings, blocked, items }
   }
 
@@ -152,8 +166,12 @@ export function runGate(root, opts, env) {
     if (phase !== 'prebuild') {
       record('6', itemChecksums(opts.assetsDir))
       record('7', itemNoWindows(opts.assetsDir))
+      if (opts.withoutAndroid) {
+        const apk = noApk(opts.assetsDir)
+        if (apk) errors.push(apk)
+      }
     }
-    record('8', itemKeyBackup(root))
+    if (!opts.withoutAndroid) record('8', itemKeyBackup(root))
     const v = extraVersion(root, opts.tag, opts.rehearsal, env)
     errors.push(...v.errors)
     blocked.push(...v.blocked)
@@ -283,7 +301,8 @@ function main() {
       tag: arg('--tag'),
       assetsDir: arg('--assets') ?? 'release-assets',
       rehearsal: argv.includes('--rehearsal'),
-      phase: arg('--phase')
+      phase: arg('--phase'),
+      withoutAndroid: argv.includes('--without-android')
     },
     realEnv(root)
   )

@@ -299,7 +299,7 @@ description: "독립 포크 분리 작업 목록"
   - CI 비밀값 `ANDROID_KEYSTORE_BASE64`·`ANDROID_KEYSTORE_PASSWORD`·`ANDROID_KEY_ALIAS`·`ANDROID_KEY_PASSWORD` 등록
   - 서명 인증서 지문 확인 방법
   - 분실·유출 시 사용자 고지와 재설치 안내
-- [ ] T062 [US5] (메인테이너) T061 절차대로 서명 키를 만들고 백업 2곳을 확인한 뒤, GitHub 저장소 비밀값을 등록한다. `verification/release-gate.md` 항목 8에 인증서 SHA-256 지문만 기록한다(비밀값은 기록하지 않음)
+- [ ] T062 [US5] (메인테이너, 첫 독립 릴리스 이후로 연기 — 2026-11-23 메인테이너 결정, 키가 없으면 릴리스에서 Android를 뺀다) T061 절차대로 서명 키를 만들고 백업 2곳을 확인한 뒤, GitHub 저장소 비밀값을 등록한다. `verification/release-gate.md` 항목 8에 인증서 SHA-256 지문만 기록한다(비밀값은 기록하지 않음)
 - [X] T063 [US5] `npm run verify`가 통과하는지 확인한다. 모든 식별자·이름 검사를 통과하고, Windows 대상 컴파일 경로(`cfg(windows)`)를 바꾸지 않았는지 확인한다
 
 **Checkpoint**: 정체성 분리 코드 완료(US6 없이 출시 금지)

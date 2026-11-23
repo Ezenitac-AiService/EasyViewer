@@ -32,6 +32,7 @@ jobs:
     outputs:
       tag: ${{ steps.mode.outputs.tag }}
       rehearsal: ${{ steps.mode.outputs.rehearsal }}
+      android: ${{ steps.android.outputs.android }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -59,19 +60,36 @@ jobs:
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "rehearsal=$REHEARSAL" >> "$GITHUB_OUTPUT"
+      # Constitution v4.3.0: Android ships only when it can be signed with the fork key; without the key
+      # it is left out of the release, never debug-signed. Only a boolean leaves the secret context.
+      - name: Decide whether Android is part of this release
+        id: android
+        shell: bash
+        env:
+          HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+          REHEARSAL: ${{ steps.mode.outputs.rehearsal }}
+        run: |
+          set -euo pipefail
+          if [ "$HAS_KEY" = "true" ] || [ "$REHEARSAL" = "true" ]; then
+            echo "android=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Android signing key is not registered; this release leaves Android out"
+            echo "android=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Release gate before any build (FR-025 1–5, 8, version, versionCode)
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.mode.outputs.tag }}
           REHEARSAL: ${{ steps.mode.outputs.rehearsal }}
+          ANDROID: ${{ steps.android.outputs.android }}
         run: |
           set -euo pipefail
-          if [ "$REHEARSAL" = "true" ]; then
-            node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild --rehearsal
-          else
-            node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild
-          fi
+          EXTRA=""
+          if [ "$REHEARSAL" = "true" ]; then EXTRA="$EXTRA --rehearsal"; fi
+          if [ "$ANDROID" != "true" ]; then EXTRA="$EXTRA --without-android"; fi
+          # shellcheck disable=SC2086 # EXTRA holds fixed flags only
+          node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild $EXTRA
 
   build-desktop:
     needs: gate
@@ -135,6 +153,7 @@ jobs:
 
   build-android:
     needs: gate
+    if: needs.gate.outputs.android == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -222,6 +241,10 @@ jobs:
 
   publish:
     needs: [gate, build-desktop, build-android]
+    if: >-
+      ${{ !cancelled() && needs.gate.result == 'success' && needs.build-desktop.result == 'success' &&
+      (needs.build-android.result == 'success' ||
+      (needs.build-android.result == 'skipped' && needs.gate.outputs.android == 'false')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -246,9 +269,30 @@ jobs:
           (cd release-assets && sha256sum * > SHA256SUMS.txt)
           ls -lh release-assets
       - name: Release gate on the artifacts (FR-025 6–7)
+        shell: bash
         env:
           TAG: ${{ needs.gate.outputs.tag }}
-        run: node scripts/check-release-gate.mjs --release --tag "$TAG" --phase publish --assets release-assets
+          ANDROID: ${{ needs.gate.outputs.android }}
+        run: |
+          set -euo pipefail
+          EXTRA=""
+          if [ "$ANDROID" != "true" ]; then EXTRA="--without-android"; fi
+          # shellcheck disable=SC2086 # EXTRA holds fixed flags only
+          node scripts/check-release-gate.mjs --release --tag "$TAG" --phase publish --assets release-assets $EXTRA
+      - name: Release notes (note when Android is left out)
+        shell: bash
+        env:
+          ANDROID: ${{ needs.gate.outputs.android }}
+        run: |
+          set -euo pipefail
+          cp .github/release-notes.md "$RUNNER_TEMP/release-notes.md"
+          if [ "$ANDROID" != "true" ]; then
+            {
+              echo
+              echo "> **Android**: 이번 릴리스에는 Android APK가 없습니다. 포크 소유 서명 키가 준비된 릴리스부터 제공합니다."
+              echo "> This release has no Android APK. It will be provided from the release where the fork signing key is ready."
+            } >> "$RUNNER_TEMP/release-notes.md"
+          fi
       - name: Create the GitHub release
         shell: bash
         env:
@@ -260,7 +304,7 @@ jobs:
           if [ "$REHEARSAL" = "true" ]; then
             gh release create "$TAG" release-assets/* \
               --title "[REHEARSAL] Pagelight $TAG" \
-              --notes-file .github/release-notes.md \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
               --target "$GITHUB_SHA" --draft --prerelease
             exit 0
           fi
@@ -268,5 +312,5 @@ jobs:
           if [[ "$TAG" == *-* ]]; then PRERELEASE=(--prerelease); fi
           gh release create "$TAG" release-assets/* \
             --title "Pagelight $TAG" \
-            --notes-file .github/release-notes.md \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
             --verify-tag "${PRERELEASE[@]}"

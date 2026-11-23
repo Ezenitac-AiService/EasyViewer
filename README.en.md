@@ -250,7 +250,7 @@ npm run android:release:all # release APKs for all ABIs
 ### GitHub Actions CI and releases
 
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs six jobs on every pull request and every push to `main`: `verify` (full verification gate), `licenses` (cargo-deny and notice consistency), `windows-compile-test` (compile and test the undistributed Windows code), `macos-build` (universal build and signature check), `ios-sim-build` (unsigned simulator build) and `android-debug` (debug APK). It uses no secrets, and `main` only accepts merges that pass all six jobs (repository admins can bypass this in an emergency).
-- [`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag push or `workflow_dispatch`. A release gate (`scripts/check-release-gate.mjs`) must pass before any build, and it builds only the **macOS universal `.dmg`**, **Linux x64 `.deb` and `.AppImage`** (plus `.rpm` for stable versions) and the **Android arm64 `.apk`** signed with the fork key. Before publishing it writes `SHA256SUMS.txt` and checks again that no Windows files are present.
+- [`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag push or `workflow_dispatch`. A release gate (`scripts/check-release-gate.mjs`) must pass before any build, and it builds only the **macOS universal `.dmg`**, **Linux x64 `.deb` and `.AppImage`** (plus `.rpm` for stable versions) and the **Android arm64 `.apk`** signed with the fork key. If the signing-key secrets are not registered, Android is left out of the release and the release notes say so (a debug-signed APK is never published). Before publishing it writes `SHA256SUMS.txt` and checks again that no Windows files are present.
 
 #### Release procedure
 
