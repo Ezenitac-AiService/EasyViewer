@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { checkStatic, runGate } from '../../scripts/check-release-gate.mjs'
+import { CORE_CI_JOBS, checkStatic, runGate, summarizeCiJobs } from '../../scripts/check-release-gate.mjs'
 
 const BASE_SHA = '44c4d37749d29bd070e7a07aea4622eef0b97306'
 const PIN = 'a'.repeat(40)
@@ -293,5 +293,31 @@ describe('release without Android (constitution v4.3.0: no fork key yet)', () =>
       env()
     )
     expect(r.errors.join('\n')).toMatch(/리허설/)
+  })
+})
+
+describe('item 4 looks only at the core CI jobs (constitution v5.0.0: macOS is the only core build)', () => {
+  const ok = (name: string) => ({ name, conclusion: 'success' })
+
+  it('names the core jobs', () => {
+    expect(CORE_CI_JOBS).toEqual(['verify', 'licenses', 'macos-build'])
+  })
+
+  it('passes when every core job succeeded even if lower-priority jobs failed or were cancelled', () => {
+    const jobs = [
+      ...CORE_CI_JOBS.map(ok),
+      { name: 'ios-sim-build', conclusion: 'cancelled' },
+      { name: 'android-debug', conclusion: 'failure' }
+    ]
+    expect(summarizeCiJobs(jobs)).toEqual({ ci: 'success', licenses: 'success' })
+  })
+
+  it('fails when a core job failed or is missing', () => {
+    expect(summarizeCiJobs([ok('verify'), ok('licenses'), { name: 'macos-build', conclusion: 'failure' }]).ci).toBe('failure')
+    expect(summarizeCiJobs([ok('verify'), ok('licenses')]).ci).toBe('failure')
+    expect(summarizeCiJobs([ok('verify'), { name: 'licenses', conclusion: 'failure' }, ok('macos-build')])).toEqual({
+      ci: 'failure',
+      licenses: 'failure'
+    })
   })
 })

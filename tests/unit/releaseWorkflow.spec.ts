@@ -120,10 +120,12 @@ describe('ci.yml (contracts §1)', () => {
     expect(text).toMatch(/push:\s*\n\s*branches:\s*\[?\s*main/)
   })
 
-  it('has the six blocking jobs and no secrets', () => {
-    for (const job of ['verify', 'licenses', 'windows-compile-test', 'macos-build', 'ios-sim-build', 'android-debug']) {
+  it('has the five jobs, no Windows job and no secrets (constitution v5.0.0)', () => {
+    for (const job of ['verify', 'licenses', 'macos-build', 'ios-sim-build', 'android-debug']) {
       expect(jobBlock(text, job), job).not.toBe('')
     }
+    expect(jobBlock(text, 'windows-compile-test')).toBe('')
+    expect(text).not.toMatch(/windows-latest/)
     expect(text).not.toContain('secrets.')
     expect(text).not.toContain('continue-on-error')
   })
@@ -134,12 +136,6 @@ describe('ci.yml (contracts §1)', () => {
     expect(licenses).toContain('cargo deny check')
     expect(licenses).toContain('cargo-about')
     expect(licenses).toMatch(/node scripts\/check-licenses\.mjs\s*$/m)
-    const win = jobBlock(text, 'windows-compile-test')
-    expect(win).toContain('windows-latest')
-    expect(win).toContain('npm test')
-    expect(win).toContain('cargo check')
-    expect(win).toContain('cargo test')
-    expect(win).not.toMatch(/tauri build/)
     expect(jobBlock(text, 'macos-build')).toContain('codesign --verify')
     expect(jobBlock(text, 'ios-sim-build')).toContain('aarch64-sim')
     expect(jobBlock(text, 'android-debug')).toContain('npm run android:build')

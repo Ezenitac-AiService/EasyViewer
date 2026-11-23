@@ -8,9 +8,9 @@
 |---|---|---|---|
 | `verify` | ubuntu-22.04 | `npm ci` → `npm run verify`(빌드·단위 테스트·경계·버전·식별자·지원 범위·라이선스 정책 감사(`--no-notices`, `cargo-about` 불필요)·`cargo check`·`cargo test`) | 예 |
 | `licenses` | ubuntu-latest | `cargo-about` 설치 → `cargo deny check`(`src-tauri/deny.toml`) → `node scripts/check-licenses.mjs`(기본 모드: 고지 생성물이 출하 대상 합집합과 일치하는지 검사) | 예 |
-| `windows-compile-test` | windows-latest | `npm ci` → `npm test` → `cargo check` → `cargo test`. 번들 생성 없음 | 예 |
+| `windows-compile-test` | windows-latest | `npm ci` → `npm test` → `cargo check` → `cargo test`. 번들 생성 없음 | 예 | **(2026-11-24 삭제: 헌법 v5.0.0, Windows는 고려 대상 아님)**
 | `macos-build` | macos-latest | `npm run mac:build`(ad-hoc 서명), `codesign --verify` | 예 |
-| `ios-sim-build` | macos-latest | `ios:init` → 시뮬레이터 debug 빌드, 서명 비밀값 없음 | 작업 자체는 실패로 표시(`continue-on-error` 금지, FR-021). 다만 2026-11-24부터 `main` 병합 필수 검사에서는 뺐다(러너 부족으로 반복 취소, 메인테이너 결정) |
+| `ios-sim-build` | macos-latest | `ios:init` → 시뮬레이터 debug 빌드, 서명 비밀값 없음 | 작업 자체는 실패로 표시(`continue-on-error` 금지, FR-021). 다만 2026-11-24부터 `main` 병합 필수 검사와 릴리스 게이트에서 뺐다(헌법 v5.0.0: 핵심 빌드는 macOS뿐, 후순위 플랫폼은 보고만) |
 | `android-debug` | ubuntu-latest | debug APK 빌드(비밀값 불필요) | 예 |
 
 - 비밀값이 없는 외부 PR에서도 위 작업이 모두 돈다. 서명이 필요한 단계는 `release.yml`에만 둔다.

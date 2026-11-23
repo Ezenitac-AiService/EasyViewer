@@ -58,32 +58,6 @@ jobs:
       - name: License audit and generated notices match every shipped target
         run: node scripts/check-licenses.mjs
 
-  # Windows is not a release target (FR-008), but its code paths keep compiling and passing tests.
-  windows-compile-test:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'npm'
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with:
-          toolchain: stable
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          workspaces: './src-tauri -> target'
-      - run: npm ci
-      - run: npm test
-      # tauri::generate_context! needs the built frontend; no installer bundle is produced.
-      - run: npm run build
-      - name: cargo check
-        working-directory: src-tauri
-        run: cargo check
-      - name: cargo test
-        working-directory: src-tauri
-        run: cargo test
-
   macos-build:
     runs-on: macos-latest
     steps:

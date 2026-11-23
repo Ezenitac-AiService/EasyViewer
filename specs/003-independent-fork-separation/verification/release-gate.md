@@ -44,5 +44,5 @@ origin	https://github.com/Ezenitac-AiService/EasyViewer.git (push)
   - 병합된 PR #1–#4가 그대로 조회된다(문서 경고와 달리 이번 분리에서는 PR이 남았다). 기준선 태그 `upstream-base-v0.1.6`, 비공개 취약점 신고 설정도 유지
   - PR 기본 대상: 부모 저장소가 없어져 새 PR의 대상은 이 저장소뿐이다(`gh repo view` 결과 `isFork: false`, `parent` 없음)
   - 코드 검색: 분리 직후 `gh search code`에 결과가 아직 없다(색인 대기). `BLOCKED` — 색인 후 다시 확인한다
-  - main 규칙 변경(2026-11-24, 메인테이너 결정): `ios-sim-build`를 필수 검사에서 뺐다(필수 5개: verify, licenses, windows-compile-test, macos-build, android-debug). 러너 부족으로 반복 취소되어 병합이 막혔기 때문이다. 릴리스 게이트 항목 4는 여전히 `main` CI 전체 작업 성공을 본다
+  - main 규칙·게이트 변경(2026-11-24, 메인테이너 결정, 헌법 v5.0.0): 핵심 빌드는 macOS 하나다. `main` 필수 검사와 릴리스 게이트 항목 4는 핵심 작업 `verify`·`licenses`·`macos-build`만 요구하고, `ios-sim-build`·`android-debug`는 보고만 한다. `windows-compile-test`는 CI에서 삭제했다
   - 후속 정비(2026-11-23): 이슈 기능 켬, 저장소 설명·토픽을 Pagelight 기준으로 갱신, `main` 규칙(삭제·강제 푸시 금지, CI 6개 작업 필수, 관리자 우회 허용) 적용, 병합된 원격 브랜치 정리. 코드 검색은 이 시점에도 결과 0건으로 `BLOCKED` 유지
