@@ -1,6 +1,6 @@
 # cargo-deny policy (spec 003 FR-005, research R5).
-# Only shipped targets are evaluated. Windows stays in the graph because its code is
-# still compiled and tested in CI (constitution v4.0.0 principle V), even though it is not distributed.
+# Only shipped targets are evaluated. The Windows target stays in the audit until the remaining
+# Windows code paths are removed (constitution v5.0.0: Windows is not considered, no CI build).
 
 [graph]
 targets = [

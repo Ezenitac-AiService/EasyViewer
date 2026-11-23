@@ -7,8 +7,8 @@
 ## 지원 범위
 
 <!-- support-scope:start -->
-이 포크는 **macOS · iOS · Linux**를 중점 지원합니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-Android는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.
+이 포크는 **macOS**를 중점 지원합니다.
+iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
 **Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 웹 브라우저 실행은 개발 보조용입니다.
 Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
@@ -20,7 +20,7 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 
 - 이 포크가 게시했던 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)에 관한 이슈는 **이 저장소에서** 받습니다. 지원이 종료되었으므로 [Windows 전환 안내](docs/windows-migration.md)로 안내하고 이슈를 닫습니다.
 - 이 포크의 Windows 빌드 문제를 원저작자 저장소에 올리지 마세요. 원저작자 앱과는 데이터 형식이 다른 별개의 빌드입니다.
-- Windows를 대상으로 하는 코드는 CI에서 컴파일과 자동 테스트만 계속합니다. 이 검증이 깨지는 변경은 받지 않습니다.
+- Windows는 고려 대상이 아닙니다. CI에서 Windows 코드를 컴파일·테스트하지 않으며, Windows에서만 쓰는 코드를 새로 추가하는 변경은 받지 않습니다.
 
 ## 업스트림과의 관계
 
@@ -61,9 +61,9 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 
 | 등급 | 플랫폼 | 기대치 |
 |---|---|---|
-| 중점 | macOS, iOS, Linux | 변경마다 이 플랫폼들에서의 동작을 고려하고, 가능한 범위에서 실제 환경으로 확인합니다 |
-| 유지 | Android | 빌드와 기존 동작을 깨지 않으면 됩니다. 새 기능의 Android 최적화는 요구하지 않습니다 |
-| 비지원 | Windows | 컴파일과 자동 테스트만 통과하면 됩니다. Windows에서만 쓰는 기능의 추가는 받지 않습니다 |
+| 중점 | macOS | 유일한 핵심 빌드입니다. 변경마다 macOS 동작을 확인하고, `macos-build`를 포함한 핵심 CI가 통과해야 합니다 |
+| 유지(후순위) | iOS, Linux, Android | 빌드와 기존 동작을 깨지 않도록 노력합니다. CI 결과는 보고만 하며 병합을 막지 않지만, 실패는 확인해 고칩니다 |
+| 비지원 | Windows | 고려 대상이 아닙니다. Windows에서만 쓰는 기능이나 코드는 받지 않습니다 |
 | 개발 보조 | 웹 | 개발·테스트용 폴백으로만 유지합니다 |
 
 ## 명세 절차

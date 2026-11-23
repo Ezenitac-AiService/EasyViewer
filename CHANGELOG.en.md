@@ -8,7 +8,7 @@ This is the changelog of the independent fork of the original [EasyViewer](https
 
 This fork split from the original `v0.1.6` (commit `44c4d37`, tag `upstream-base-v0.1.6`) and became independent on 2026-11-17. The GitHub fork network separation was completed on 2026-11-23. Later original releases (`v0.2.0`, `v0.2.1`, `v0.2.2`) were not merged.
 
-Supported platforms: macOS, iOS (source build only) and Linux are the focus; Android is maintained. Windows is not distributed or supported by this fork; on Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer). Running in a web browser is a development aid only.
+Supported platforms: macOS is the focus; iOS (source build only), Linux and Android are maintained with lower priority. Windows is not distributed or supported by this fork; on Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer). Running in a web browser is a development aid only.
 
 ### Added
 
@@ -25,7 +25,7 @@ Supported platforms: macOS, iOS (source build only) and Linux are the focus; And
 
 ### Changed
 
-- The support scope now focuses on macOS, iOS and Linux. Android is maintained.
+- The support scope now focuses on macOS. iOS, Linux and Android are maintained with lower priority, and Windows is not considered (Windows compile and test in CI stopped as well).
 - The app identity now differs from the original app so that both can be installed on the same device.
   - App identifier: `com.edith.easyviewer` → `com.ezenitac.easyviewer` (all platforms)
   - Display name `Pagelight`, package name `pagelight` (Rust library `pagelight_lib`)

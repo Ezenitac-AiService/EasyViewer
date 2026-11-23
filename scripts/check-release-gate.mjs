@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url'
 /**
  * Fork-separation safety gate (spec 003 FR-025, contracts/release-and-ci.md §3).
  *
+ *   Item 4 (main CI) counts only CORE_CI_JOBS (macOS core build and the common gates).
  *   --separation                 items 1–5 (before asking GitHub Support to detach the fork)
  *   --release --tag <t> --assets <dir> [--rehearsal] [--phase prebuild|publish]
  *                                items 1–8 + version non-overlap + Android versionCode + no leftover draft.
@@ -25,6 +26,15 @@ const DATE = /\d{4}-\d{2}-\d{2}/
 const WINDOWS_ARTIFACT = /\.(exe|msi)$|windows|_x64_portable\.zip$|portable\.zip$/i
 const MANUAL_ITEMS = new Set(['1', '2', '3', '8'])
 const PHASES = new Set([undefined, 'full', 'prebuild', 'publish'])
+/** Constitution v5.0.0: macOS is the only core build; iOS/Linux/Android CI jobs only report. */
+export const CORE_CI_JOBS = ['verify', 'licenses', 'macos-build']
+
+/** Item 4 passes when every core job succeeded; lower-priority jobs do not block. */
+export function summarizeCiJobs(jobs) {
+  const conclusion = (name) => jobs.find((j) => j.name === name)?.conclusion ?? 'missing'
+  const ci = CORE_CI_JOBS.every((name) => conclusion(name) === 'success') ? 'success' : 'failure'
+  return { ci, licenses: conclusion('licenses') }
+}
 
 function read(root, rel) {
   const p = path.join(root, rel)
@@ -264,9 +274,7 @@ export function realEnv(root) {
       if (!out) return null
       const jobs = sh('gh', ['api', `repos/${repo}/actions/runs/${out}/jobs`, '--jq', '[.jobs[] | {name, conclusion}]'])
       if (!jobs) return null
-      const list = JSON.parse(jobs)
-      const all = list.every((j) => j.conclusion === 'success') ? 'success' : 'failure'
-      return { ci: all, licenses: list.find((j) => j.name === 'licenses')?.conclusion ?? 'missing' }
+      return summarizeCiJobs(JSON.parse(jobs))
     },
     upstreamVersions() {
       const out = sh('gh', ['api', 'repos/edith2580/EasyViewer/releases', '--paginate', '--jq', '.[].tag_name'])

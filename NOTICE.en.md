@@ -46,7 +46,7 @@ The original includes the full GPLv3 text but does not state whether "any later 
 
 ## 6. Support scope
 
-This fork focuses on **macOS, iOS and Linux**. iOS is provided as a source build only, without a public distribution channel. Android continues to be distributed as a maintained platform with lower priority. **Windows is not a supported or distributed platform of this fork. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).** Running in a web browser is a development aid. Linux is verified on Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland); other distributions may work but are not verified.
+This fork focuses on **macOS**. iOS, Linux and Android are maintained platforms with lower priority; iOS is provided as a source build only, without a public distribution channel. **Windows is not a supported or distributed platform of this fork. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).** Running in a web browser is a development aid. Linux is verified on Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland); other distributions may work but are not verified.
 
 ## 7. Third-party components
 

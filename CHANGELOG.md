@@ -9,8 +9,8 @@
 이 포크는 원작 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었습니다. GitHub 포크 네트워크 분리는 2026-11-23에 끝났습니다. 원작의 이후 릴리스(`v0.2.0`, `v0.2.1`, `v0.2.2`)는 병합하지 않았습니다.
 
 <!-- support-scope:start -->
-이 포크는 **macOS · iOS · Linux**를 중점 지원합니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-Android는 우선순위를 낮춘 유지 플랫폼으로 계속 배포합니다.
+이 포크는 **macOS**를 중점 지원합니다.
+iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
 **Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 웹 브라우저 실행은 개발 보조용입니다.
 Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
@@ -31,7 +31,7 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 
 ### 변경
 
-- 지원 범위를 macOS·iOS·Linux 중점으로 전환했습니다. Android는 유지 플랫폼입니다.
+- 지원 범위를 macOS 중점으로 전환했습니다. iOS·Linux·Android는 후순위 유지 플랫폼이고, Windows는 고려 대상이 아닙니다(CI의 Windows 컴파일·테스트도 중단).
 - 앱 정체성을 원저작자 앱과 구분되도록 바꿨습니다. 원저작자 앱과 같은 기기에 함께 설치하기 위한 변경입니다.
   - 앱 식별자: `com.edith.easyviewer` → `com.ezenitac.easyviewer`(전 플랫폼)
   - 표시명: `Pagelight`, 패키지 이름: `pagelight`(Rust 라이브러리 `pagelight_lib`)

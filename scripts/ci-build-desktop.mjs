@@ -5,8 +5,7 @@ import { pathToFileURL } from 'node:url'
 /**
  * Resolves the desktop Tauri bundle command for stable vs SemVer pre-release versions.
  * Linux RPM (rpmbuild) forbids hyphens in version strings, so a hyphenated pre-release
- * builds DEB+AppImage only. Windows is not a release target of this fork (spec 003 FR-008);
- * its code is still compiled and tested by the CI `windows-compile-test` job.
+ * builds DEB+AppImage only. Windows is not considered by this fork (constitution v5.0.0).
  */
 const SUPPORTED = new Set(['macos-universal', 'linux-x64'])
 
