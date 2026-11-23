@@ -9,6 +9,7 @@ import {
   type LocationIndexCachePort
 } from './locationIndexer'
 import { TouchTapController } from './touchTapController'
+import { anySignal } from './abortSignals'
 import {
   buildSectionMetrics,
   collapseCfiString,
@@ -137,7 +138,7 @@ export class EpubViewerEngine implements DocumentReaderPort {
     const abortController = new AbortController()
     this.activeAbortController = abortController
     const signal = opts.signal
-      ? AbortSignal.any([opts.signal, abortController.signal])
+      ? anySignal([opts.signal, abortController.signal])
       : abortController.signal
 
     // Fast path: restore cached locations before display if already indexed

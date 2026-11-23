@@ -47,3 +47,4 @@
   | Linux 기준 | (언급 없음) | Ubuntu 22.04 이상 또는 동급, deb·AppImage, WebKitGTK 4.1, X11·Wayland | 원문이 더 구체적이다. 헌법과 충돌하지 않는다 |
 
   결론(준비안): 의미 불일치 없음. 원문에 없는 최소 OS 버전을 공개 문구에 넣을지는 메인테이너가 정한다. 메인테이너가 확인하면 이 줄에 확인 날짜를 적고 T090을 완료로 표시한다.
+  - 최소 OS 버전(2026-11-23, 메인테이너가 "사용하는 라이브러리·프레임워크에 따라 결정"하도록 위임): macOS 11.0, iOS 15.0, Android 7.0(API 24), Linux Ubuntu 22.04(WebKitGTK 4.1). 근거는 Tauri 2 기본값(`tauri-utils` 2.10.2: macOS 10.13, iOS 15.0, Android minSdk 24), Vite 6 기본 빌드 대상(Safari 14), `inert`(Safari 15.5). `AbortSignal.any`(Safari·iOS 17.4)는 대체 구현으로 바꿔 요구 사양에서 뺐다. 지원 범위 원문 블록이 아니라 README "최소 요구 사양" 절(국문·영문)에 적었다. 표 대조 자체의 확인은 여전히 메인테이너 몫이다.
