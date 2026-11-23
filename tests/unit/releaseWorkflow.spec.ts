@@ -132,6 +132,26 @@ describe('ci.yml (contracts §1)', () => {
   })
 })
 
+describe('dependency-audit.yml (weekly advisory check)', () => {
+  const file = '.github/workflows/dependency-audit.yml'
+
+  it('runs weekly and on demand, read-only, without secrets', () => {
+    expect(fs.existsSync(path.join(ROOT_DIR, file))).toBe(true)
+    const text = read(file)
+    expect(text).toMatch(/schedule:\s*\n\s*-\s*cron:\s*['"][^'"]+['"]/)
+    expect(text).toMatch(/workflow_dispatch:/)
+    expect(text).toMatch(/^permissions:\s*\n\s+contents:\s*read\s*$/m)
+    expect(text).not.toContain('secrets.')
+    expect(text).not.toContain('continue-on-error')
+  })
+
+  it('checks Rust advisories and production npm advisories', () => {
+    const text = read(file)
+    expect(text).toMatch(/cargo deny check advisories/)
+    expect(text).toMatch(/npm audit --omit=dev --audit-level=(high|critical)/)
+  })
+})
+
 describe('workflow supply chain (contracts §1, research R12)', () => {
   it('build-apple.yml is folded into ci.yml', () => {
     expect(fs.existsSync(path.join(ROOT_DIR, '.github/workflows/build-apple.yml'))).toBe(false)
