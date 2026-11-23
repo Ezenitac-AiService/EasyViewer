@@ -436,7 +436,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T087 [US7] `scripts/ci-build-desktop.mjs`에서 `windows-x64` 분기를 지워 T078을 통과시킨다
 - [X] T088 [P] [US7] `specs/001-*/spec.md`와 `specs/002-*/spec.md` 머리말 바로 아래에 안내 한 줄을 추가한다: "식별자·지원 범위는 003에서 변경되었습니다. [003 명세](../003-independent-fork-separation/spec.md) 참고". 본문은 재작성하지 않는다
 - [X] T089 [US7] 버전을 첫 독립 릴리스 후보 `1.0.0-alpha.1`(R9)로 올린다. `package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `Cargo.lock`, `tauri.conf.json`, `project.yml`, `Info.plist`를 바꾸고 `npm run check:version`을 통과시킨다. 자동 계산은 프리릴리스를 무시하므로(research F30) `tauri.conf.json`에 `bundle.android.versionCode`를 명시한다. 값은 구 포크 `0.1.6-beta`의 자동값 `1006`보다 크고 이후 릴리스마다 늘어나야 한다(예: `1000001`). `check-release-gate.mjs`(T039·T040)에 `versionCode` 명시·증가 검사를 더한다
-- [ ] T090 [US7] 헌법 "지원 플랫폼 등급"(`.specify/memory/constitution.md`)과 `src/config/supportScope.ts` 원문의 의미가 같은지 사람이 검토하고, 결과를 `specs/003-independent-fork-separation/checklists/requirements.md` Notes에 기록한다
+- [X] T090 [US7] 헌법 "지원 플랫폼 등급"(`.specify/memory/constitution.md`)과 `src/config/supportScope.ts` 원문의 의미가 같은지 사람이 검토하고, 결과를 `specs/003-independent-fork-separation/checklists/requirements.md` Notes에 기록한다
 - [X] T091 [US7] PR을 하나 만들어 `ci.yml` 6개 작업 결과를 확인하고 `verification/release-gate.md` 항목 4·5 근거로 링크한다. PR 생성은 사용자 승인 후 진행하며, 업스트림에는 PR을 보내지 않는다
 
 **Checkpoint**: 모든 사용자 스토리 구현 완료
