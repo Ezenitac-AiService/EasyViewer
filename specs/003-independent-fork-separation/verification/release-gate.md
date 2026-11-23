@@ -36,4 +36,11 @@ origin	https://github.com/Ezenitac-AiService/EasyViewer.git (push)
 - 릴리스 산출물·노트 백업 위치: 메인테이너 로컬 `~/easyviewer-release-backup/`(2026-11-19). 두 릴리스 산출물 12개와 수정 전 노트(`NOTES.md`). 파일 크기를 GitHub 값과 대조해 12개 모두 일치, SHA-256 목록은 `SHA256SUMS-backup.txt`. 저장소 밖 두 번째 보관처로의 복사는 메인테이너 확인 항목
 - 비공개 취약점 신고: 2026-11-19 켬(메인테이너 승인, `gh api -X PUT repos/Ezenitac-AiService/EasyViewer/private-vulnerability-reporting`). 확인 결과 `enabled: true`
 - GitHub Support 요청일: 2026-11-19, help.github.com 가상 도우미(Detaching/unforking a repository)로 요청. 선택: "GitHub Support가 detach/extract를 도움" → Detach, 대상 `Ezenitac-AiService/EasyViewer`, 포크에 커밋 있음, 사유 "부모 저장소와 크게 갈라짐". 이슈·PR·릴리스 보존을 요청 본문에 적음. 도우미가 지원 티켓을 자동 생성(처리 후 통지 예정). 요청 직후 `.fork`는 아직 `true`
-- 분리 완료 확인(`.fork == false`, 릴리스·고지 보존, PR 기본 대상, 코드 검색):
+- Support 답변(티켓 #5027746, 2026-11-23 확인): 처리하지 않고 닫힘. 담당자는 저장소가 공개·1 GB 미만·하위 포크 없음이므로 설정의 "Leave fork network"로 직접 분리하라고 안내했고, 이 계정의 지원 범위는 셀프서비스뿐이라는 자동 종료 메시지가 붙었다
+- 자체 분리 실행: 2026-11-23, 메인테이너 승인 후 저장소 Settings → Danger Zone → "Leave fork network"(경고 확인, 저장소 이름 입력). research R10의 자체 분리 조건(Support 거절, 릴리스 백업, 위키 없음, 지원 종료 고지 게시)을 모두 만족한 상태였다. 약 40초 뒤 분리 완료
+- 분리 완료 확인(`.fork == false`, 릴리스·고지 보존, PR 기본 대상, 코드 검색): 2026-11-23
+  - `gh api repos/Ezenitac-AiService/EasyViewer --jq .fork` → `false`, `parent` 없음
+  - 릴리스 `v0.1.6-alpha`·`v0.1.6-beta` 보존, 각 산출물 6개, 노트 맨 위 지원 종료 고지 유지
+  - 병합된 PR #1–#4가 그대로 조회된다(문서 경고와 달리 이번 분리에서는 PR이 남았다). 기준선 태그 `upstream-base-v0.1.6`, 비공개 취약점 신고 설정도 유지
+  - PR 기본 대상: 부모 저장소가 없어져 새 PR의 대상은 이 저장소뿐이다(`gh repo view` 결과 `isFork: false`, `parent` 없음)
+  - 코드 검색: 분리 직후 `gh search code`에 결과가 아직 없다(색인 대기). `BLOCKED` — 색인 후 다시 확인한다
