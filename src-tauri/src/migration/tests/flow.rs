@@ -167,7 +167,10 @@ fn legacy_app_detection_parsers() {
 fn platform_paths_point_at_the_old_and_new_identifiers() {
     let home = Path::new("/home/u");
     let base = Path::new("/home/u/.local/share");
-    if let Some(p) = MigrationPaths::for_platform(base, home) {
+    let paths = MigrationPaths::for_platform(base, home);
+    // Only macOS and Linux have a legacy data folder to migrate from.
+    assert_eq!(paths.is_some(), cfg!(any(target_os = "macos", target_os = "linux")));
+    if let Some(p) = paths {
         let first = &p.pairs[0];
         assert!(first.source.ends_with("com.edith.easyviewer"));
         assert!(first.target.ends_with("com.ezenitac.easyviewer"));
@@ -181,7 +184,5 @@ fn platform_paths_point_at_the_old_and_new_identifiers() {
             assert_eq!(p.pairs.len(), 1);
             assert!(!first.excludes.is_empty());
         }
-    } else {
-        assert!(!cfg!(any(target_os = "macos", target_os = "linux")));
     }
 }

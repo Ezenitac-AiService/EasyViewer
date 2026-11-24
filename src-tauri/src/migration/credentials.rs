@@ -7,10 +7,15 @@ use serde::Serialize;
 pub const MAX_ACCOUNT_KEYS: usize = 64;
 const ACCOUNT_PREFIX: &str = "easyviewer:webdav:";
 
+/// A keychain call failed. It deliberately carries no detail, so no secret, account or OS message
+/// can leak into responses, logs or the migration record.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SecretStoreError;
+
 /// Keychain access, abstracted so the logic is testable with an in-memory double.
 pub trait SecretStore {
-    fn get(&self, account: &str) -> Result<Option<String>, ()>;
-    fn set(&self, account: &str, secret: &str) -> Result<(), ()>;
+    fn get(&self, account: &str) -> Result<Option<String>, SecretStoreError>;
+    fn set(&self, account: &str, secret: &str) -> Result<(), SecretStoreError>;
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
@@ -58,7 +63,7 @@ pub fn migrate_credentials(
         match current.get(key) {
             Ok(Some(existing)) if !existing.is_empty() => continue, // new service wins
             Ok(_) => {}
-            Err(()) => {
+            Err(SecretStoreError) => {
                 out.failed += 1;
                 continue;
             }
@@ -66,10 +71,10 @@ pub fn migrate_credentials(
         match legacy.get(key) {
             Ok(Some(secret)) if !secret.is_empty() => match current.set(key, &secret) {
                 Ok(()) => out.migrated += 1,
-                Err(()) => out.failed += 1,
+                Err(SecretStoreError) => out.failed += 1,
             },
             Ok(_) => out.missing += 1,
-            Err(()) => out.failed += 1,
+            Err(SecretStoreError) => out.failed += 1,
         }
     }
     Ok(out)
@@ -100,15 +105,15 @@ mod tests {
     }
 
     impl SecretStore for MemStore {
-        fn get(&self, account: &str) -> Result<Option<String>, ()> {
+        fn get(&self, account: &str) -> Result<Option<String>, SecretStoreError> {
             if self.deny.contains(account) {
-                return Err(());
+                return Err(SecretStoreError);
             }
             Ok(self.values.borrow().get(account).cloned())
         }
-        fn set(&self, account: &str, secret: &str) -> Result<(), ()> {
+        fn set(&self, account: &str, secret: &str) -> Result<(), SecretStoreError> {
             if self.deny.contains(account) {
-                return Err(());
+                return Err(SecretStoreError);
             }
             *self.writes.borrow_mut() += 1;
             self.values.borrow_mut().insert(account.to_string(), secret.to_string());

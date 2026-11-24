@@ -198,6 +198,19 @@ describe('ci.yml (contracts §1)', () => {
   })
 })
 
+describe('clippy gate (Rust lint warnings fail the build)', () => {
+  it('verify runs cargo clippy on all targets with warnings denied, after cargo check', () => {
+    const verify = read('scripts/verify.mjs')
+    expect(verify).toMatch(/'cargo',\s*\['clippy',\s*'--all-targets',\s*'--',\s*'-D',\s*'warnings'\]/)
+    expect(verify.indexOf("['clippy'")).toBeGreaterThan(verify.indexOf("['check']"))
+  })
+
+  it('the CI verify job installs the clippy component', () => {
+    const verifyJob = jobBlock(read('.github/workflows/ci.yml'), 'verify')
+    expect(verifyJob).toMatch(/rust-toolchain@[0-9a-f]{40}[^\n]*\n\s+with:\n\s+toolchain: stable\n\s+components: clippy/)
+  })
+})
+
 describe('dependency-audit.yml (weekly advisory check)', () => {
   const file = '.github/workflows/dependency-audit.yml'
 

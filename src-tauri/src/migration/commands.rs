@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Tauri commands over the migration record and the legacy credential migration (T069).
 
-use super::credentials::{migrate_credentials, CredentialOutcome, SecretStore};
+use super::credentials::{migrate_credentials, CredentialOutcome, SecretStore, SecretStoreError};
 use super::record::{
     read_record, write_record, CredentialSummary, MigrationRecord, MigrationState,
     SOURCE_IDENTIFIER,
@@ -30,11 +30,11 @@ impl MigrationRuntime {
 struct Keyring<'a>(&'a KeyringStore);
 
 impl SecretStore for Keyring<'_> {
-    fn get(&self, account: &str) -> Result<Option<String>, ()> {
-        self.0.get_password(account).map_err(|_| ())
+    fn get(&self, account: &str) -> Result<Option<String>, SecretStoreError> {
+        self.0.get_password(account).map_err(|_| SecretStoreError)
     }
-    fn set(&self, account: &str, secret: &str) -> Result<(), ()> {
-        self.0.set_password(account, secret).map_err(|_| ())
+    fn set(&self, account: &str, secret: &str) -> Result<(), SecretStoreError> {
+        self.0.set_password(account, secret).map_err(|_| SecretStoreError)
     }
 }
 
