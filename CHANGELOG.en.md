@@ -4,20 +4,9 @@
 
 This is the changelog of the independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) by edith2580. It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The Korean [CHANGELOG.md](CHANGELOG.md) is the authoritative version.
 
-## [Unreleased] — Korean and English public document cleanup (2026-11-24)
+## [1.0.0-alpha.2] — Support scope realignment and public document cleanup (2026-11-24)
 
-Reorganized the structure, flow and terms of the six public document pairs (README, CONTRIBUTING, SECURITY, CHANGELOG, NOTICE, THIRD_PARTY_LICENSES).
-
-### Changed
-
-- The README header now runs title → language switch → six badges → English banner → introduction → first-launch notice → fork and issue notice. The platform badge shows the support tiers, and the support-scope text moved to the "Supported platforms and releases" section.
-- The README body puts the user sections first (differences from the original app, supported platforms and releases, features, controls, installation and first launch, building from source); developer details (tech stack, directory layout, verification commands, versions and builds, CI and releases) moved to the contributing guide.
-- Public document titles and their top format (title → language switch → purpose sentence) are unified, and the original author's side is consistently called the original author, original repository and original app.
-- The public document check (`scripts/check-doc-pairs.mjs`) now also checks the top format, titles, Korean/English section structure, links and anchors, terms and the README header.
-
-## [Unreleased] — Support scope realignment and fork separation wrap-up (2026-11-24)
-
-Applies the platform tiers of constitution v6.1.0 (focus macOS, maintained iOS, test builds Linux and Android, excluded Windows).
+The second independent pre-release. It applies the platform tiers of constitution v6.1.0 (focus macOS, maintained iOS, test builds Linux and Android, excluded Windows) and cleans up the test-build labeling of releases and the public documents. Later original releases (`v0.2.3`, `v0.2.4`) were not merged either. The Android test build is included only when the fork signing key is registered.
 
 ### Changed
 
@@ -25,12 +14,16 @@ Applies the platform tiers of constitution v6.1.0 (focus macOS, maintained iOS, 
 - The bug form is split into a core form (macOS, iOS) and a test build form (Linux, Android, `test-build` label).
 - Releases: Linux and Android file names end in `-test`, and the release notes carry a "Test builds" section and omission notices. A failed test build no longer stops a release when macOS succeeds; three consecutive omissions of the same platform stop the next release. Added security exclusions (`.github/release-exclusions.json`).
 - `SECURITY.md` now states the security scope of test builds.
+- The README header now runs title → language switch → six badges → English banner → introduction → first-launch notice → fork and issue notice. The platform badge shows the support tiers, and the support-scope text moved to the "Supported platforms and releases" section.
+- The README body puts the user sections first (differences from the original app, supported platforms and releases, features, controls, installation and first launch, building from source); developer details (tech stack, directory layout, verification commands, versions and builds, CI and releases) moved to the contributing guide.
+- Public document titles and their top format (title → language switch → purpose sentence) are unified, and the original author's side is consistently called the original author, original repository and original app.
+- The public document check (`scripts/check-doc-pairs.mjs`) now also checks the top format, titles, Korean/English section structure, links and anchors, terms and the README header.
 
 ### Removed
 
 - The remaining Windows-only code, settings, icons and audit target, plus a reintroduction check (`scripts/check-windows-exclusion.mjs`) in the quality gate. The end-of-support history of the Windows pre-releases and the migration guide stay as preserved records.
 
-## [Unreleased] — Independent fork separation (2026-11-17)
+## [1.0.0-alpha.1] — Independent fork separation (2026-11-23)
 
 This fork split from the original `v0.1.6` (commit `44c4d37`, tag `upstream-base-v0.1.6`) and became independent on 2026-11-17. The GitHub fork network separation was completed on 2026-11-23. Later original releases (`v0.2.0`, `v0.2.1`, `v0.2.2`) were not merged.
 

@@ -11,7 +11,7 @@
 
 > This is an independent fork. It focuses on macOS; iOS is a source build only, and Linux and Android are test builds. For Windows, please use the original EasyViewer by edith2580.
 
-Pagelight is a simple viewer for plain text (TXT) and EPUB documents (`v1.0.0-alpha.1`). It is an independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6` by edith2580, and the app files and checksums are on the [Releases](https://github.com/Ezenitac-AiService/EasyViewer/releases) page. The Korean [README.md](README.md) is the authoritative version; this page is kept in sync with it.
+Pagelight is a simple viewer for plain text (TXT) and EPUB documents (`v1.0.0-alpha.2`). It is an independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6` by edith2580, and the app files and checksums are on the [Releases](https://github.com/Ezenitac-AiService/EasyViewer/releases) page. The Korean [README.md](README.md) is the authoritative version; this page is kept in sync with it.
 
 > [!IMPORTANT]
 > **First launch**: the app is not notarized by Apple yet, so the first launch on macOS may say it "is damaged and can't be opened". Check the checksum, then follow the macOS steps in [Installation and first launch](#installation-and-first-launch).
@@ -28,13 +28,13 @@ Pagelight is a simple viewer for plain text (TXT) and EPUB documents (`v1.0.0-al
 ## Differences from the original app
 
 <!-- upstream-diff:start -->
-Only verifiable facts are listed. Values for the original app ([EasyViewer](https://github.com/edith2580/EasyViewer)) are based on `v0.1.6`, where this fork split off, and the latest release `v0.2.2` checked on 2026-11-19.
+Only verifiable facts are listed. Values for the original app ([EasyViewer](https://github.com/edith2580/EasyViewer)) are based on `v0.1.6`, where this fork split off, and the latest release `v0.2.4` checked on 2026-11-24.
 
 | Item | Pagelight (this fork) | EasyViewer (original) |
 |---|---|---|
 | Display name | Pagelight | EasyViewer |
 | App identifier | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |
-| Distributed platforms | macOS, Linux and Android (test builds), iOS as source build only | Windows, macOS, Linux, Android as of `v0.2.2` |
+| Distributed platforms | macOS, Linux and Android (test builds), iOS as source build only | Windows, macOS, Linux, Android as of `v0.2.4` |
 | Windows | Not distributed or supported | Distributed by the original author |
 | Internal data format version | 2 | 1 |
 
@@ -175,6 +175,6 @@ Linux, iOS and Android build commands and version sync are in [Versions and buil
 ## License and copyright notices
 
 - **Original work**: this repository is a derivative work based on the original [EasyViewer](https://github.com/edith2580/EasyViewer) by edith2580. Copyright (C) 2026 edith2580.
-- **Changes in this fork**: Copyright (C) 2026 M5. This fork split from the original `v0.1.6` (commit `44c4d37`, tag `upstream-base-v0.1.6`) and became independent on 2026-11-17; the GitHub fork network separation was completed on 2026-11-23. Later original releases (`v0.2.0`, `v0.2.1`, `v0.2.2`) were not merged. A summary of the main changes is in section 3 of [NOTICE.en.md](./NOTICE.en.md) and in [CHANGELOG.en.md](./CHANGELOG.en.md).
+- **Changes in this fork**: Copyright (C) 2026 M5. This fork split from the original `v0.1.6` (commit `44c4d37`, tag `upstream-base-v0.1.6`) and became independent on 2026-11-17; the GitHub fork network separation was completed on 2026-11-23. Later original releases (`v0.2.0` to `v0.2.4`) were not merged. A summary of the main changes is in section 3 of [NOTICE.en.md](./NOTICE.en.md) and in [CHANGELOG.en.md](./CHANGELOG.en.md).
 - **License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). The license text is unchanged. "Only" is this fork's choice; the reasons and the conditions for revisiting it are in section 5 of [NOTICE.en.md](./NOTICE.en.md).
 - **Third-party components**: a summary of direct dependencies is in [`THIRD_PARTY_LICENSES.en.md`](./THIRD_PARTY_LICENSES.en.md); the full notices and license texts, including transitive dependencies, are in [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt) (also viewable from the app's About screen).

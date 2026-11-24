@@ -1,6 +1,6 @@
 [package]
 name = "pagelight"
-version = "1.0.0-alpha.1"
+version = "1.0.0-alpha.2"
 description = "심플한 Text, EPUB 범용 문서 뷰어"
 authors = ["Pagelight contributors"]
 license = "GPL-3.0-only"
