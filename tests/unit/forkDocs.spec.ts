@@ -127,3 +127,66 @@ describe('Windows exclusion in public docs (spec 004 contracts/windows-exclusion
     expect(text).not.toMatch(ci)
   })
 })
+
+describe('README body and contributing guide (spec 005 contracts/readme-structure.md §2–§3, T012)', () => {
+  const sections = (file: string) =>
+    read(file)
+      .replace(/```[\s\S]*?```/g, '')
+      .split('\n')
+      .filter((l) => l.startsWith('## '))
+      .map((l) => l.slice(3).trim())
+
+  it.each([
+    [
+      'README.md',
+      ['원저작자 앱과의 차이', '지원 플랫폼과 릴리스', '기능', '조작 방법', '설치와 처음 실행', '소스 빌드', '개발·기여와 보안', '라이선스와 저작권 고지']
+    ],
+    [
+      'README.en.md',
+      [
+        'Differences from the original app',
+        'Supported platforms and releases',
+        'Features',
+        'Controls',
+        'Installation and first launch',
+        'Building from source',
+        'Development, contributing and security',
+        'License and copyright notices'
+      ]
+    ]
+  ])('%s has the eight sections in order, user sections before development', (file, expected) => {
+    expect(sections(file)).toEqual(expected)
+  })
+
+  it.each(['README.md', 'README.en.md'])('%s keeps developer details out (SC-009)', (file) => {
+    const text = read(file)
+    expect(text).not.toMatch(/├── src\//)
+    expect(text).not.toMatch(/npm run check:boundaries/)
+    expect(text).not.toMatch(/^- `\.\/package-lock\.json`/m)
+    expect(text).not.toMatch(/git push origin v\d/)
+    expect(text).not.toMatch(/npm run android:release:all/)
+  })
+
+  it.each([
+    ['README.md', 'support-scope:start', '지원 플랫폼과 릴리스'],
+    ['README.en.md', 'support-scope-en:start', 'Supported platforms and releases']
+  ])('%s opens the supported-platforms section with the support-scope block and a five-row tier table', (file, marker, heading) => {
+    const body = section(read(file), heading)
+    const afterHeading = body.split('\n').slice(1).find((l) => l.trim())
+    expect(afterHeading).toContain(marker)
+    for (const p of ['macOS', 'iOS', 'Linux', 'Android', 'Windows']) expect(body).toMatch(new RegExp(`^\\| \\*?\\*?${p}`, 'm'))
+  })
+
+  it.each([
+    ['CONTRIBUTING.md', ['개발 환경과 구조', '검증 명령', '버전과 빌드', 'CI와 릴리스']],
+    ['CONTRIBUTING.en.md', ['Development environment and layout', 'Verification commands', 'Versions and builds', 'CI and releases']]
+  ])('%s carries the moved developer sections', (file, names) => {
+    const found = sections(file)
+    for (const n of names) expect(found).toContain(n)
+    const text = read(file)
+    expect(text).toMatch(/├── src\//)
+    expect(text).toMatch(/npm run check:boundaries/)
+    expect(text).toMatch(/git push origin v\d/)
+  })
+})
+

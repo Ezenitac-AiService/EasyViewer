@@ -4,6 +4,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { checkLinks } from './docs/links.mjs'
+import { checkOutlines } from './docs/outline.mjs'
+import { checkReadmeHeader } from './docs/readmeHeader.mjs'
+import { checkTerms } from './docs/terms.mjs'
+import { checkTopFormat } from './docs/topFormat.mjs'
 
 /** [Korean default, English counterpart] */
 export const DOC_PAIRS = [
@@ -51,8 +56,20 @@ export function checkDocPairs(root) {
   return errors
 }
 
+/** All public-document rules (spec 005 contracts/doc-checks.md D1–D7). */
+export function checkPublicDocs(root) {
+  return [
+    ...checkDocPairs(root),
+    ...checkTopFormat(root),
+    ...checkOutlines(root),
+    ...checkLinks(root),
+    ...checkTerms(root),
+    ...checkReadmeHeader(root)
+  ]
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const errors = checkDocPairs(process.cwd())
+  const errors = checkPublicDocs(process.cwd())
   for (const e of errors) console.error(`[check:doc-pairs] ${e}`)
   if (errors.length) process.exit(1)
   console.log('[check:doc-pairs] 공개 문서 국문·영문 쌍 확인')

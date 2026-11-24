@@ -2,7 +2,7 @@
 
 **언어 / Language**: [한국어](SECURITY.md) | **[English](SECURITY.en.md)**
 
-The Korean [SECURITY.md](SECURITY.md) is the authoritative version.
+This document describes which releases receive security fixes and how to report a vulnerability in Pagelight. The Korean [SECURITY.md](SECURITY.md) is the authoritative version.
 
 ## Supported versions
 

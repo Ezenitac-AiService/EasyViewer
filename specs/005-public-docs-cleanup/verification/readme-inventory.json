@@ -1,0 +1,1676 @@
+[
+ {
+  "id": "K003",
+  "file": "README.md",
+  "line": 3,
+  "text": "**언어 / Language**: **[한국어](README.md)** | [English](README.en.md)"
+ },
+ {
+  "id": "K005",
+  "file": "README.md",
+  "line": 5,
+  "text": "This is an independent fork. It focuses on macOS; iOS is a source build only, and Linux and Android are test builds. For Windows, please use the original EasyViewer by edith2580."
+ },
+ {
+  "id": "K008",
+  "file": "README.md",
+  "line": 8,
+  "text": "이 포크는 **macOS**를 중점 지원합니다."
+ },
+ {
+  "id": "K009",
+  "file": "README.md",
+  "line": 9,
+  "text": "iOS는 우선순위를 낮춘 유지 플랫폼이며, 공개 배포 채널 없이 소스 빌드로만 제공합니다."
+ },
+ {
+  "id": "K010",
+  "file": "README.md",
+  "line": 10,
+  "text": "Linux·Android는 **테스트용 빌드**로만 배포합니다. 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다."
+ },
+ {
+  "id": "K011",
+  "file": "README.md",
+  "line": 11,
+  "text": "**Windows는 이 포크의 범위가 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**"
+ },
+ {
+  "id": "K012",
+  "file": "README.md",
+  "line": 12,
+  "text": "웹 브라우저 실행은 개발 보조용입니다."
+ },
+ {
+  "id": "K013",
+  "file": "README.md",
+  "line": 13,
+  "text": "Linux 테스트용 빌드는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 빌드합니다. Android 테스트용 빌드는 Android 7.0(API 24) 이상이 대상입니다."
+ },
+ {
+  "id": "K016",
+  "file": "README.md",
+  "line": 16,
+  "text": "심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v1.0.0-alpha.1`) — [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크"
+ },
+ {
+  "id": "K018",
+  "file": "README.md",
+  "line": 18,
+  "text": "[![CI](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/ci.yml)"
+ },
+ {
+  "id": "K019",
+  "file": "README.md",
+  "line": 19,
+  "text": "[![Release](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/release.yml/badge.svg)](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/release.yml)"
+ },
+ {
+  "id": "K020",
+  "file": "README.md",
+  "line": 20,
+  "text": "[![GitHub Release](https://img.shields.io/github/v/release/Ezenitac-AiService/EasyViewer?include_prereleases&sort=semver&label=release&logo=github)](https://github.com/Ezenitac-AiService/EasyViewer/releases)"
+ },
+ {
+  "id": "K021",
+  "file": "README.md",
+  "line": 21,
+  "text": "[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](./LICENSE)"
+ },
+ {
+  "id": "K022",
+  "file": "README.md",
+  "line": 22,
+  "text": "[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20iOS%20%7C%20Linux%20%7C%20Android-lightgrey.svg)](#지원-기능)"
+ },
+ {
+  "id": "K023",
+  "file": "README.md",
+  "line": 23,
+  "text": "[![Upstream Origin](https://img.shields.io/badge/upstream%20origin-edith2580%2FEasyViewer%20(v0.1.6)-informational?logo=github)](https://github.com/edith2580/EasyViewer)"
+ },
+ {
+  "id": "K025",
+  "file": "README.md",
+  "line": 25,
+  "text": "[!NOTE]"
+ },
+ {
+  "id": "K026",
+  "file": "README.md",
+  "line": 26,
+  "text": "**독립 포크 안내와 이슈 등록 예절**"
+ },
+ {
+  "id": "K028",
+  "file": "README.md",
+  "line": 28,
+  "text": "- 이 저장소([Ezenitac-AiService/EasyViewer](https://github.com/Ezenitac-AiService/EasyViewer))는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라져 Pagelight라는 이름으로 독립 운영되는 프로젝트입니다. 원저작자의 저작권과 `GPL-3.0-only` 라이선스를 그대로 따릅니다."
+ },
+ {
+  "id": "K029",
+  "file": "README.md",
+  "line": 29,
+  "text": "- **Pagelight에서 생긴 문제와 요청은 이 저장소의 [Issues](https://github.com/Ezenitac-AiService/EasyViewer/issues)에 올려 주세요.** 원저작자 저장소에는 올리지 마세요."
+ },
+ {
+  "id": "K030",
+  "file": "README.md",
+  "line": 30,
+  "text": "- 보안 취약점은 공개 이슈 대신 [SECURITY.md](./SECURITY.md)의 비공개 신고 경로를 이용해 주세요."
+ },
+ {
+  "id": "K032",
+  "file": "README.md",
+  "line": 32,
+  "text": "**라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 출처·변경 고지는 [NOTICE](./NOTICE), 서드파티 고지는 [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md)를 참고하세요."
+ },
+ {
+  "id": "K040",
+  "file": "README.md",
+  "line": 40,
+  "text": "- **보기 모드**: 세로 스크롤(`scroll`) / 가로 페이지 넘김(`paginated`) 실시간 전환 및 읽던 위치 보존"
+ },
+ {
+  "id": "K041",
+  "file": "README.md",
+  "line": 41,
+  "text": "- **타이포그래피**: 글꼴(시스템·로컬 폰트 스택, 외부 CDN 미사용), 글자 크기, 줄 간격, 여백 조절"
+ },
+ {
+  "id": "K042",
+  "file": "README.md",
+  "line": 42,
+  "text": "- **컬러 테마**: 기본(라이트) / 다크 모드 / 세피아 모드"
+ },
+ {
+  "id": "K046",
+  "file": "README.md",
+  "line": 46,
+  "text": "- **EPUB / TXT 열람 및 통합 검색**: 목차(TOC)·챕터 이동(EPUB), 인코딩 자동 감지 및 대용량 청크 로딩(TXT), 책갈피 및 진행률 저장"
+ },
+ {
+  "id": "K047",
+  "file": "README.md",
+  "line": 47,
+  "text": "- **네트워크 다운로드 & WebDAV 동기화**: 원격 파일 다운로드, 로컬 동기화 허브 및 원격 WebDAV/엔드포인트 동기화"
+ },
+ {
+  "id": "K048",
+  "file": "README.md",
+  "line": 48,
+  "text": "- WebDAV `v1 → v2` 마이그레이션으로 평문 비밀번호를 제거하고, 네이티브(데스크톱/모바일)에서는 OS 키체인(`tauri-plugin-keyring-store`), 웹에서는 세션 메모리 기본 격리(명시 동의 시 로컬 저장)를 사용합니다."
+ },
+ {
+  "id": "K049",
+  "file": "README.md",
+  "line": 49,
+  "text": "- **Zero-Trust 보안 경계**:"
+ },
+ {
+  "id": "K050",
+  "file": "README.md",
+  "line": 50,
+  "text": "- **CSP & EPUB 격리**: 앱 수준 `Content-Security-Policy` 활성화, EPUB Zip Bomb 사전 상한 검사(`validateEpubArchiveBounds`) 및 다층 HTML/SVG/CSS 정화(`sanitizeSectionDocument`)"
+ },
+ {
+  "id": "K051",
+  "file": "README.md",
+  "line": 51,
+  "text": "- **SSRF / DNS Pinning / TLS 검증**: 개발·프리뷰 프록시(`/__remote_proxy`)의 Fail-Closed `Origin`/`Sec-Fetch-Site`·세션 논스·총합 타임아웃 및 네이티브 Rust `safe_remote_fetch`(`reqwest 0.13` `rustls` + `url::Host` IPv4/IPv6 분류 + 전체 수명 데드라인) 단일 신뢰 경계 적용"
+ },
+ {
+  "id": "K052",
+  "file": "README.md",
+  "line": 52,
+  "text": "- **최소 권한 Capability & 경로 화이트리스트**: 데스크톱 전용 `desktop.json` 분리, `tauri-plugin-opener` 스코프 제한, `allow_storage_dir` 조상 정규화 및 `read_validated_book_file`(`#[cfg(desktop)]`, 대소문자 비구분 OS 민감 경로 차단)"
+ },
+ {
+  "id": "K058",
+  "file": "README.md",
+  "line": 58,
+  "text": "- **프레임워크**: Vue `^3.5.13` (`<script setup lang=\"ts\">`) + TypeScript `~5.6.3` (`strict: true`) + Vite `^6.0.5`"
+ },
+ {
+  "id": "K059",
+  "file": "README.md",
+  "line": 59,
+  "text": "- **상태 / 라우팅 / UI**: Pinia `^2.3.0`, Vue Router `^4.5.0`, Tailwind CSS `^3.4.17`, Lucide Vue Next `^0.468.0`"
+ },
+ {
+  "id": "K060",
+  "file": "README.md",
+  "line": 60,
+  "text": "- **문서 엔진**: `epubjs ^0.3.93` + `jszip ^3.10.1` + `css-tree ^3.2.1`, Custom TXT Engine(`txtEngine.ts`, `txtMeasuredPagination.ts`)"
+ },
+ {
+  "id": "K061",
+  "file": "README.md",
+  "line": 61,
+  "text": "- **네이티브 백엔드**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls` + `stream`), `dunce`, `sha2`, `zip 9.x`"
+ },
+ {
+  "id": "K062",
+  "file": "README.md",
+  "line": 62,
+  "text": "- **지원 플랫폼**: 중점 macOS(유일한 핵심 빌드), 유지 iOS(소스 빌드만), 테스트 빌드 Linux·Android(테스트용 빌드로 배포만, 보장 없음), Web(개발 보조, `IndexedDB` / 프록시). Windows는 이 포크의 범위가 아닙니다(위 지원 범위 참고)"
+ },
+ {
+  "id": "K066",
+  "file": "README.md",
+  "line": 66,
+  "text": "앱은 각 OS의 내장 WebView에서 실행되므로, 최소 버전은 프레임워크(Tauri 2)·빌드 도구(Vite 6)가 요구하는 값과 앱이 쓰는 WebView 기능으로 정했습니다."
+ },
+ {
+  "id": "K068",
+  "file": "README.md",
+  "line": 68,
+  "text": "| 플랫폼 | 최소 버전 | 근거 |"
+ },
+ {
+  "id": "K070",
+  "file": "README.md",
+  "line": 70,
+  "text": "| macOS | 11.0 Big Sur | Tauri 2 기본값은 10.13이지만, Vite 6 빌드 결과물이 Safari 14 문법을 쓰고 접근성 대화상자의 `inert`가 Safari 15.5 이상에서 동작합니다. Big Sur는 Safari 16.6까지 받을 수 있습니다 |"
+ },
+ {
+  "id": "K071",
+  "file": "README.md",
+  "line": 71,
+  "text": "| iOS | 15.0 | Tauri 2 기본값. iOS의 WebView는 OS 버전을 따르며 Vite 6 결과물(Safari 14 문법)을 실행할 수 있습니다 |"
+ },
+ {
+  "id": "K072",
+  "file": "README.md",
+  "line": 72,
+  "text": "| Android (테스트 빌드) | 7.0 (API 24) | Tauri 2 기본값. 업데이트 가능한 Android System WebView(Chrome 87 이상)가 필요합니다 |"
+ },
+ {
+  "id": "K073",
+  "file": "README.md",
+  "line": 73,
+  "text": "| Linux (테스트 빌드) | Ubuntu 22.04 이상(WebKitGTK 4.1) | 테스트용 빌드의 빌드 환경 기준(검증 보장 아님). 22.04도 보안 업데이트로 WebKitGTK 2.50대를 받습니다 |"
+ },
+ {
+  "id": "K075",
+  "file": "README.md",
+  "line": 75,
+  "text": "EPUB 열기 취소 처리에 쓰던 `AbortSignal.any`(Safari·iOS 17.4 이상 필요)는 같은 동작의 대체 구현으로 바꿔, 위 최소 버전에서도 EPUB을 열 수 있게 했습니다."
+ },
+ {
+  "id": "K080",
+  "file": "README.md",
+  "line": 80,
+  "text": "./"
+ },
+ {
+  "id": "K081",
+  "file": "README.md",
+  "line": 81,
+  "text": "├── src/"
+ },
+ {
+  "id": "K082",
+  "file": "README.md",
+  "line": 82,
+  "text": "│   ├── assets/                 # 글로벌 스타일 및 로컬 폰트 스택 (main.css)"
+ },
+ {
+  "id": "K083",
+  "file": "README.md",
+  "line": 83,
+  "text": "│   ├── components/"
+ },
+ {
+  "id": "K084",
+  "file": "README.md",
+  "line": 84,
+  "text": "│   │   ├── common/             # 접근성 확인/복구 모달 (InAppConfirmModal)"
+ },
+ {
+  "id": "K085",
+  "file": "README.md",
+  "line": 85,
+  "text": "│   │   ├── library/            # 원격 다운로드(RemoteUrlDownloadTab, WebDav*), 동기화/폴더 메뉴"
+ },
+ {
+  "id": "K086",
+  "file": "README.md",
+  "line": 86,
+  "text": "│   │   └── viewer/             # 뷰어 설정 패널, 목차/책갈피/검색 드로어"
+ },
+ {
+  "id": "K087",
+  "file": "README.md",
+  "line": 87,
+  "text": "│   ├── composables/            # UI/독서 세션/TXT 가상·페이지 제어/가져오기/표지 URL 컴포저블"
+ },
+ {
+  "id": "K088",
+  "file": "README.md",
+  "line": 88,
+  "text": "│   ├── engines/                # 순수 문서 엔진 (DocumentReaderPort; 상위 레이어 비의존)"
+ },
+ {
+  "id": "K089",
+  "file": "README.md",
+  "line": 89,
+  "text": "│   │   ├── epub/               # epub.js 어댑터, css-tree AST 정화, 비차단 위치 색인, 터치/탭 제어"
+ },
+ {
+  "id": "K090",
+  "file": "README.md",
+  "line": 90,
+  "text": "│   │   └── txt/                # 인코딩 감지, 청킹·검색, 줄박스/실측 기반 가로 페이지네이션"
+ },
+ {
+  "id": "K091",
+  "file": "README.md",
+  "line": 91,
+  "text": "│   ├── services/"
+ },
+ {
+  "id": "K092",
+  "file": "README.md",
+  "line": 92,
+  "text": "│   │   ├── platform/           # 플랫폼 추상화 포트 (dialog, dragDrop, path, credential)"
+ },
+ {
+  "id": "K093",
+  "file": "README.md",
+  "line": 93,
+  "text": "│   │   ├── storage/            # IndexedDB v2(표지 Blob·색인 캐시 분리), SHA-256 해싱, 네이티브 IPC"
+ },
+ {
+  "id": "K094",
+  "file": "README.md",
+  "line": 94,
+  "text": "│   │   ├── network/            # SSRF 검증기, 안전 fetch/스트리밍 다운로드, WebDAV 클라이언트"
+ },
+ {
+  "id": "K095",
+  "file": "README.md",
+  "line": 95,
+  "text": "│   │   ├── sync/               # 기기 간 읽기 위치·책갈피 병합 및 동기화 서비스"
+ },
+ {
+  "id": "K096",
+  "file": "README.md",
+  "line": 96,
+  "text": "│   │   └── sampleBooks.ts      # 기본 내장 샘플 도서 데이터"
+ },
+ {
+  "id": "K097",
+  "file": "README.md",
+  "line": 97,
+  "text": "│   ├── stores/                 # Pinia 스토어 (useBookStore, useSettingsStore) + 마이그레이션/동기화 헬퍼"
+ },
+ {
+  "id": "K098",
+  "file": "README.md",
+  "line": 98,
+  "text": "│   ├── types/                  # 공통 TypeScript 인터페이스 및 타입 정의"
+ },
+ {
+  "id": "K099",
+  "file": "README.md",
+  "line": 99,
+  "text": "│   └── views/                  # 슬림 라우터 뷰 (LibraryView, ReaderView - /reader/:id 지연 로딩)"
+ },
+ {
+  "id": "K100",
+  "file": "README.md",
+  "line": 100,
+  "text": "├── src-tauri/"
+ },
+ {
+  "id": "K101",
+  "file": "README.md",
+  "line": 101,
+  "text": "│   ├── capabilities/           # 최소 권한 분리 (default.json, desktop.json)"
+ },
+ {
+  "id": "K102",
+  "file": "README.md",
+  "line": 102,
+  "text": "│   └── src/                    # Rust 보안/SSRF/경로 가드(security/) + 파일·스트리밍·EPUB 메타 커맨드(commands/)"
+ },
+ {
+  "id": "K103",
+  "file": "README.md",
+  "line": 103,
+  "text": "├── scripts/                    # 450줄/계층 경계, 전 플랫폼(`com.ezenitac.easyviewer`) 버전 일치, 앱 정체성(`check-identity`), 프록시 가드, verify 스크립트"
+ },
+ {
+  "id": "K104",
+  "file": "README.md",
+  "line": 104,
+  "text": "├── tests/                      # 1계층 Vitest 단위/계약 + 2계층 Playwright E2E/성능 기준선 테스트"
+ },
+ {
+  "id": "K105",
+  "file": "README.md",
+  "line": 105,
+  "text": "└── specs/                      # Spec Kit 기능 명세, 아키텍처 계획, 보안 계약 및 검증 체크리스트"
+ },
+ {
+  "id": "K116",
+  "file": "README.md",
+  "line": 116,
+  "text": "npm install"
+ },
+ {
+  "id": "K119",
+  "file": "README.md",
+  "line": 119,
+  "text": "npm run dev"
+ },
+ {
+  "id": "K122",
+  "file": "README.md",
+  "line": 122,
+  "text": "npm run build"
+ },
+ {
+  "id": "K125",
+  "file": "README.md",
+  "line": 125,
+  "text": "npm run tauri dev"
+ },
+ {
+  "id": "K132",
+  "file": "README.md",
+  "line": 132,
+  "text": "npm test"
+ },
+ {
+  "id": "K135",
+  "file": "README.md",
+  "line": 135,
+  "text": "npm run check:boundaries"
+ },
+ {
+  "id": "K138",
+  "file": "README.md",
+  "line": 138,
+  "text": "npm run check:version"
+ },
+ {
+  "id": "K141",
+  "file": "README.md",
+  "line": 141,
+  "text": "npm run check:commit-msg -- <COMMIT_EDITMSG_PATH>"
+ },
+ {
+  "id": "K145",
+  "file": "README.md",
+  "line": 145,
+  "text": "npm run verify"
+ },
+ {
+  "id": "K148",
+  "file": "README.md",
+  "line": 148,
+  "text": "npm run test:e2e"
+ },
+ {
+  "id": "K151",
+  "file": "README.md",
+  "line": 151,
+  "text": "npm run test:perf"
+ },
+ {
+  "id": "K160",
+  "file": "README.md",
+  "line": 160,
+  "text": "버전 변경 시 아래 파일의 버전을 일치시킨 뒤 `npm run check:version`으로 검증합니다."
+ },
+ {
+  "id": "K162",
+  "file": "README.md",
+  "line": 162,
+  "text": "- `./package.json`"
+ },
+ {
+  "id": "K163",
+  "file": "README.md",
+  "line": 163,
+  "text": "- `./package-lock.json`"
+ },
+ {
+  "id": "K164",
+  "file": "README.md",
+  "line": 164,
+  "text": "- `./src-tauri/Cargo.toml` (및 `cargo check`를 통한 `./src-tauri/Cargo.lock` 반영)"
+ },
+ {
+  "id": "K165",
+  "file": "README.md",
+  "line": 165,
+  "text": "- `./src-tauri/tauri.conf.json`"
+ },
+ {
+  "id": "K169",
+  "file": "README.md",
+  "line": 169,
+  "text": "- 권장 버전: `rustc >= 1.90.0` (최신 Tauri v2 공식 플러그인 및 `reqwest 0.13` `rustls` MSRV 충족)"
+ },
+ {
+  "id": "K172",
+  "file": "README.md",
+  "line": 172,
+  "text": "node -v && npm -v"
+ },
+ {
+  "id": "K173",
+  "file": "README.md",
+  "line": 173,
+  "text": "rustc --version && cargo --version"
+ },
+ {
+  "id": "K174",
+  "file": "README.md",
+  "line": 174,
+  "text": "rustup show"
+ },
+ {
+  "id": "K179",
+  "file": "README.md",
+  "line": 179,
+  "text": "릴리스 페이지에서 `.dmg`와 `SHA256SUMS.txt`를 같은 폴더에 받아 먼저 체크섬을 확인합니다."
+ },
+ {
+  "id": "K182",
+  "file": "README.md",
+  "line": 182,
+  "text": "shasum -a 256 -c SHA256SUMS.txt --ignore-missing"
+ },
+ {
+  "id": "K185",
+  "file": "README.md",
+  "line": 185,
+  "text": "앱은 아직 Apple 공증을 받지 않았습니다. 처음 실행할 때 \"손상되었기 때문에 열 수 없습니다\"가 나오면, 체크섬이 일치하는 것을 확인한 뒤 격리 속성을 해제합니다."
+ },
+ {
+  "id": "K188",
+  "file": "README.md",
+  "line": 188,
+  "text": "xattr -cr /Applications/Pagelight.app"
+ },
+ {
+  "id": "K191",
+  "file": "README.md",
+  "line": 191,
+  "text": "**경고**: 격리 해제는 공증을 받기 전까지 쓰는 **임시 조치**입니다. macOS가 이 앱을 검사하지 않고 실행하게 되므로, 이 저장소의 릴리스 페이지에서 받았고 체크섬이 일치하는 파일에만 쓰세요."
+ },
+ {
+  "id": "K195",
+  "file": "README.md",
+  "line": 195,
+  "text": "Windows는 이 포크의 범위가 아니므로 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요. 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)를 쓰던 경우에는 보존 기록인 [Windows 전환 안내](./docs/windows-migration.md)를 따르세요."
+ },
+ {
+  "id": "K202",
+  "file": "README.md",
+  "line": 202,
+  "text": "APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build -- --bundles deb,rpm,appimage"
+ },
+ {
+  "id": "K209",
+  "file": "README.md",
+  "line": 209,
+  "text": "npm run mac:dev"
+ },
+ {
+  "id": "K212",
+  "file": "README.md",
+  "line": 212,
+  "text": "npm run mac:build"
+ },
+ {
+  "id": "K215",
+  "file": "README.md",
+  "line": 215,
+  "text": "npm run mac:build:arm"
+ },
+ {
+  "id": "K216",
+  "file": "README.md",
+  "line": 216,
+  "text": "npm run mac:build:intel"
+ },
+ {
+  "id": "K219",
+  "file": "README.md",
+  "line": 219,
+  "text": "npm run ios:init"
+ },
+ {
+  "id": "K220",
+  "file": "README.md",
+  "line": 220,
+  "text": "npm run ios:dev"
+ },
+ {
+  "id": "K221",
+  "file": "README.md",
+  "line": 221,
+  "text": "npm run ios:build"
+ },
+ {
+  "id": "K224",
+  "file": "README.md",
+  "line": 224,
+  "text": "npx tauri ios dev --open"
+ },
+ {
+  "id": "K225",
+  "file": "README.md",
+  "line": 225,
+  "text": "npx tauri ios build --open"
+ },
+ {
+  "id": "K228",
+  "file": "README.md",
+  "line": 228,
+  "text": "- **배포 및 macOS 서명 참고 (`1.0.0-alpha.1` 기준)**: 기본 데스크톱 빌드는 비샌드박스(`.dmg`/Hardened Runtime)를 기준으로 하며, `src-tauri/tauri.conf.json`에 `bundle.macOS.signingIdentity: \"-\"`(Ad-Hoc 서명 + Hardened Runtime Seal)이 설정되어 `codesign --verify --deep --strict` 무결성 검증을 통과합니다(전 플랫폼 앱 식별자 `com.ezenitac.easyviewer` 통일). Apple Developer 공증(Notarization) 전 `.dmg`를 브라우저로 내려받은 경우 최초 실행 전 `xattr -cr /Applications/Pagelight.app`로 Gatekeeper 격리 속성을 해제해야 \"손상되었기 때문에 열 수 없습니다\" 오탐을 방지할 수 있습니다. Mac App Store(App Sandbox) 배포 시 `tauri-plugin-persisted-scope`와 `com.apple.security.files.user-selected.read-write` entitlement, 외부 정식 배포 시 Apple Developer 코드 서명·공증(`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY` 환경변수)이 필요합니다."
+ },
+ {
+  "id": "K229",
+  "file": "README.md",
+  "line": 229,
+  "text": "- **macOS 개발/빌드 시 포트·락 정리(필요 시)**:"
+ },
+ {
+  "id": "K232",
+  "file": "README.md",
+  "line": 232,
+  "text": "kill -9 $(lsof -t -i :1420 -i :1421) 2>/dev/null"
+ },
+ {
+  "id": "K233",
+  "file": "README.md",
+  "line": 233,
+  "text": "find src-tauri/target -name \"lock.ios\" -o -name \".cargo*-lock\" -delete 2>/dev/null"
+ },
+ {
+  "id": "K239",
+  "file": "README.md",
+  "line": 239,
+  "text": "npm run android:init"
+ },
+ {
+  "id": "K240",
+  "file": "README.md",
+  "line": 240,
+  "text": "npm run android:dev"
+ },
+ {
+  "id": "K241",
+  "file": "README.md",
+  "line": 241,
+  "text": "npm run android:build       # arm64 debug APK"
+ },
+ {
+  "id": "K242",
+  "file": "README.md",
+  "line": 242,
+  "text": "npm run android:release     # arm64 release APK"
+ },
+ {
+  "id": "K243",
+  "file": "README.md",
+  "line": 243,
+  "text": "npm run android:release:all # 전체 ABI release APK"
+ },
+ {
+  "id": "K248",
+  "file": "README.md",
+  "line": 248,
+  "text": "- [`.github/workflows/ci.yml`](.github/workflows/ci.yml): 모든 PR과 `main` 푸시에서 5개 작업을 실행합니다. `verify`(전체 검증 게이트), `licenses`(cargo-deny·고지 일치), `macos-build`(유니버설 빌드·서명 검증), `ios-sim-build`(서명 없는 시뮬레이터 빌드), `android-debug`(debug APK). 비밀값을 쓰지 않으며, `main` 병합과 릴리스 게이트는 핵심 작업 `verify`·`licenses`·`macos-build`만 요구합니다(저장소 관리자는 긴급 시 우회 가능). 후순위 플랫폼 작업(`ios-sim-build`·`android-debug`)은 결과만 보고하며, 실패하면 따로 확인해 고칩니다."
+ },
+ {
+  "id": "K249",
+  "file": "README.md",
+  "line": 249,
+  "text": "- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**(핵심 빌드)와 테스트용 빌드인 **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. Linux·Android 파일 이름에는 `-test`가 붙고, 릴리스 노트에 \"테스트용 빌드\" 절이 들어갑니다. 테스트용 빌드가 실패하거나 서명 키 비밀값이 없거나 보안상 제외(`.github/release-exclusions.json`)되면 그 플랫폼만 빼고 게시하며 노트에 누락 안내를 남깁니다(debug 서명 APK는 게시하지 않음). macOS 빌드가 실패하면 게시하지 않고, 같은 테스트용 빌드 플랫폼이 3회 연속 빠지면 다음 릴리스 게이트가 멈춥니다. 게시 전에 `SHA256SUMS.txt`를 만들고 표식·누락 안내·Windows 산출물을 다시 확인합니다."
+ },
+ {
+  "id": "K253",
+  "file": "README.md",
+  "line": 253,
+  "text": "1. 버전을 맞추고 검증합니다(`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, Apple 프로젝트 설정, Android `versionCode`)."
+ },
+ {
+  "id": "K255",
+  "file": "README.md",
+  "line": 255,
+  "text": "npm run check:version"
+ },
+ {
+  "id": "K256",
+  "file": "README.md",
+  "line": 256,
+  "text": "npm run verify"
+ },
+ {
+  "id": "K258",
+  "file": "README.md",
+  "line": 258,
+  "text": "2. 리허설로 전체 흐름을 먼저 확인합니다. 리허설은 `-rehearsal` 태그 이름을 쓰고 초안 릴리스만 만듭니다."
+ },
+ {
+  "id": "K260",
+  "file": "README.md",
+  "line": 260,
+  "text": "gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal"
+ },
+ {
+  "id": "K262",
+  "file": "README.md",
+  "line": 262,
+  "text": "3. 태그를 푸시해 실제 릴리스를 게시합니다."
+ },
+ {
+  "id": "K264",
+  "file": "README.md",
+  "line": 264,
+  "text": "git tag v1.0.0-alpha.1"
+ },
+ {
+  "id": "K265",
+  "file": "README.md",
+  "line": 265,
+  "text": "git push origin v1.0.0-alpha.1"
+ },
+ {
+  "id": "K268",
+  "file": "README.md",
+  "line": 268,
+  "text": "자세한 운영 절차는 [메인테이너 운영 절차](./docs/maintainer-runbook.md)와 [Android 서명 키 관리](./docs/android-signing.md)를 참고하세요."
+ },
+ {
+  "id": "K275",
+  "file": "README.md",
+  "line": 275,
+  "text": "이 포크(Pagelight)와 원저작자 앱([EasyViewer](https://github.com/edith2580/EasyViewer))의 차이 중 확인할 수 있는 사실만 적습니다. 원저작자 쪽 값은 이 포크가 갈라진 `v0.1.6`과 2026-11-19에 확인한 최신 릴리스 `v0.2.2` 기준입니다."
+ },
+ {
+  "id": "K277",
+  "file": "README.md",
+  "line": 277,
+  "text": "| 항목 | Pagelight (이 포크) | EasyViewer (원저작자) |"
+ },
+ {
+  "id": "K279",
+  "file": "README.md",
+  "line": 279,
+  "text": "| 표시 이름 | Pagelight | EasyViewer |"
+ },
+ {
+  "id": "K280",
+  "file": "README.md",
+  "line": 280,
+  "text": "| 앱 식별자 | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |"
+ },
+ {
+  "id": "K281",
+  "file": "README.md",
+  "line": 281,
+  "text": "| 배포 플랫폼 | macOS, Linux·Android(테스트용 빌드), iOS는 소스 빌드만 | `v0.2.2` 기준 Windows, macOS, Linux, Android |"
+ },
+ {
+  "id": "K282",
+  "file": "README.md",
+  "line": 282,
+  "text": "| Windows | 배포·지원하지 않음 | 원저작자가 배포 |"
+ },
+ {
+  "id": "K283",
+  "file": "README.md",
+  "line": 283,
+  "text": "| 앱 내부 데이터 형식 버전 | 2 | 1 |"
+ },
+ {
+  "id": "K285",
+  "file": "README.md",
+  "line": 285,
+  "text": "- 식별자가 달라서 두 앱을 한 기기에 함께 설치할 수 있고, 서로의 데이터를 공유하지 않습니다."
+ },
+ {
+  "id": "K286",
+  "file": "README.md",
+  "line": 286,
+  "text": "- 원저작자 앱은 이 포크가 만든 데이터(데이터 형식 2)를 열 수 없습니다. Windows로 옮기는 방법은 [Windows 전환 안내](./docs/windows-migration.md)를 참고하세요."
+ },
+ {
+  "id": "K287",
+  "file": "README.md",
+  "line": 287,
+  "text": "- 원저작자 앱의 이후 버전에서 위 값이 바뀔 수 있습니다."
+ },
+ {
+  "id": "K292",
+  "file": "README.md",
+  "line": 292,
+  "text": "- **원저작물**: 이 저장소는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)를 바탕으로 한 파생 저작물입니다. Copyright (C) 2026 edith2580."
+ },
+ {
+  "id": "K293",
+  "file": "README.md",
+  "line": 293,
+  "text": "- **이 포크의 변경분**: Copyright (C) 2026 M5. 이 포크는 원작 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었고, GitHub 포크 네트워크 분리는 2026-11-23에 끝났습니다. 원작의 이후 릴리스(`v0.2.0`·`v0.2.1`·`v0.2.2`)는 병합하지 않았습니다. 주요 변경 요약은 [NOTICE](./NOTICE) 3절과 [CHANGELOG](./CHANGELOG.md)에 있습니다."
+ },
+ {
+  "id": "K294",
+  "file": "README.md",
+  "line": 294,
+  "text": "- **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 라이선스 전문은 바꾸지 않았습니다. \"only\"는 이 포크의 선택이며, 그 근거와 재검토 조건은 [NOTICE](./NOTICE) 5절에 있습니다."
+ },
+ {
+  "id": "K295",
+  "file": "README.md",
+  "line": 295,
+  "text": "- **서드파티 구성요소**: 직접 의존성 요약은 [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md), 전이 의존성을 포함한 전체 고지와 라이선스 전문은 [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt)(앱 정보 화면에서도 열람 가능)에 있습니다."
+ },
+ {
+  "id": "E003",
+  "file": "README.en.md",
+  "line": 3,
+  "text": "**언어 / Language**: [한국어](README.md) | **[English](README.en.md)**"
+ },
+ {
+  "id": "E005",
+  "file": "README.en.md",
+  "line": 5,
+  "text": "This is an independent fork. It focuses on macOS; iOS is a source build only, and Linux and Android are test builds. For Windows, please use the original EasyViewer by edith2580."
+ },
+ {
+  "id": "E007",
+  "file": "README.en.md",
+  "line": 7,
+  "text": "A simple viewer for plain text (TXT) and EPUB documents (`v1.0.0-alpha.1`), an independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6` by edith2580."
+ },
+ {
+  "id": "E009",
+  "file": "README.en.md",
+  "line": 9,
+  "text": "[![CI](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/ci.yml)"
+ },
+ {
+  "id": "E010",
+  "file": "README.en.md",
+  "line": 10,
+  "text": "[![Release](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/release.yml/badge.svg)](https://github.com/Ezenitac-AiService/EasyViewer/actions/workflows/release.yml)"
+ },
+ {
+  "id": "E011",
+  "file": "README.en.md",
+  "line": 11,
+  "text": "[![GitHub Release](https://img.shields.io/github/v/release/Ezenitac-AiService/EasyViewer?include_prereleases&sort=semver&label=release&logo=github)](https://github.com/Ezenitac-AiService/EasyViewer/releases)"
+ },
+ {
+  "id": "E012",
+  "file": "README.en.md",
+  "line": 12,
+  "text": "[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](./LICENSE)"
+ },
+ {
+  "id": "E013",
+  "file": "README.en.md",
+  "line": 13,
+  "text": "[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20iOS%20%7C%20Linux%20%7C%20Android-lightgrey.svg)](#supported-platforms)"
+ },
+ {
+  "id": "E014",
+  "file": "README.en.md",
+  "line": 14,
+  "text": "[![Upstream Origin](https://img.shields.io/badge/upstream%20origin-edith2580%2FEasyViewer%20(v0.1.6)-informational?logo=github)](https://github.com/edith2580/EasyViewer)"
+ },
+ {
+  "id": "E016",
+  "file": "README.en.md",
+  "line": 16,
+  "text": "[!NOTE]"
+ },
+ {
+  "id": "E017",
+  "file": "README.en.md",
+  "line": 17,
+  "text": "**About this fork and where to file issues**"
+ },
+ {
+  "id": "E019",
+  "file": "README.en.md",
+  "line": 19,
+  "text": "- This repository ([Ezenitac-AiService/EasyViewer](https://github.com/Ezenitac-AiService/EasyViewer)) split from the original [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6` and is maintained independently under the name Pagelight. It keeps the original author's copyright and the `GPL-3.0-only` license."
+ },
+ {
+  "id": "E020",
+  "file": "README.en.md",
+  "line": 20,
+  "text": "- **Please file Pagelight bugs and requests in this repository's [Issues](https://github.com/Ezenitac-AiService/EasyViewer/issues),** not in the original author's repository."
+ },
+ {
+  "id": "E021",
+  "file": "README.en.md",
+  "line": 21,
+  "text": "- Report security vulnerabilities through the private channel in [SECURITY.en.md](./SECURITY.en.md), not in public issues."
+ },
+ {
+  "id": "E023",
+  "file": "README.en.md",
+  "line": 23,
+  "text": "**License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). Attribution and modification notices are in [NOTICE.en.md](./NOTICE.en.md); third-party notices are in [THIRD_PARTY_LICENSES.en.md](./THIRD_PARTY_LICENSES.en.md)."
+ },
+ {
+  "id": "E025",
+  "file": "README.en.md",
+  "line": 25,
+  "text": "The Korean [README.md](README.md) is the authoritative version. This page is kept in sync with it."
+ },
+ {
+  "id": "E032",
+  "file": "README.en.md",
+  "line": 32,
+  "text": "This fork focuses on **macOS**."
+ },
+ {
+  "id": "E033",
+  "file": "README.en.md",
+  "line": 33,
+  "text": "iOS is maintained with lower priority and is provided as a source build only, without a public distribution channel."
+ },
+ {
+  "id": "E034",
+  "file": "README.en.md",
+  "line": 34,
+  "text": "Linux and Android are distributed as **test builds** only, with no guarantee of quality, feature parity, real-device verification or response time."
+ },
+ {
+  "id": "E035",
+  "file": "README.en.md",
+  "line": 35,
+  "text": "**Windows is outside the scope of this fork. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).**"
+ },
+ {
+  "id": "E036",
+  "file": "README.en.md",
+  "line": 36,
+  "text": "Running in a web browser is a development aid only."
+ },
+ {
+  "id": "E037",
+  "file": "README.en.md",
+  "line": 37,
+  "text": "Linux test builds are built for Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland). Android test builds target Android 7.0 (API 24) or later."
+ },
+ {
+  "id": "E044",
+  "file": "README.en.md",
+  "line": 44,
+  "text": "- **View modes**: switch between vertical scrolling (`scroll`) and horizontal pages (`paginated`) at any time while keeping your reading position."
+ },
+ {
+  "id": "E045",
+  "file": "README.en.md",
+  "line": 45,
+  "text": "- **Typography**: font (system and local font stacks, no external CDN), font size, line spacing and margins."
+ },
+ {
+  "id": "E046",
+  "file": "README.en.md",
+  "line": 46,
+  "text": "- **Color themes**: default (light), dark and sepia."
+ },
+ {
+  "id": "E050",
+  "file": "README.en.md",
+  "line": 50,
+  "text": "- **EPUB / TXT reading and search**: table of contents and chapter navigation (EPUB), automatic encoding detection and chunked loading for large files (TXT), bookmarks and reading progress."
+ },
+ {
+  "id": "E051",
+  "file": "README.en.md",
+  "line": 51,
+  "text": "- **Network download and WebDAV sync**: download remote files, a local sync hub and remote WebDAV endpoints."
+ },
+ {
+  "id": "E052",
+  "file": "README.en.md",
+  "line": 52,
+  "text": "- The WebDAV `v1 → v2` migration removed plain-text passwords. Native apps (desktop and mobile) keep credentials in the OS keychain (`tauri-plugin-keyring-store`); the web build keeps them in session memory by default and stores them locally only with explicit consent."
+ },
+ {
+  "id": "E053",
+  "file": "README.en.md",
+  "line": 53,
+  "text": "- **Zero-trust security boundaries**:"
+ },
+ {
+  "id": "E054",
+  "file": "README.en.md",
+  "line": 54,
+  "text": "- **CSP and EPUB isolation**: an app-wide `Content-Security-Policy`, an EPUB zip-bomb bound check before parsing (`validateEpubArchiveBounds`) and layered HTML/SVG/CSS sanitization (`sanitizeSectionDocument`)."
+ },
+ {
+  "id": "E055",
+  "file": "README.en.md",
+  "line": 55,
+  "text": "- **SSRF, DNS pinning and TLS checks**: the development and preview proxy (`/__remote_proxy`) fails closed on `Origin`/`Sec-Fetch-Site`, uses a session nonce and a total timeout; the native Rust `safe_remote_fetch` (`reqwest 0.13` with `rustls`, `url::Host` IPv4/IPv6 classification, a deadline over the whole request) is the single trust boundary."
+ },
+ {
+  "id": "E056",
+  "file": "README.en.md",
+  "line": 56,
+  "text": "- **Least-privilege capabilities and path allow-lists**: a separate desktop-only `desktop.json`, a scoped `tauri-plugin-opener`, ancestor normalization in `allow_storage_dir`, and `read_validated_book_file` (`#[cfg(desktop)]`, case-insensitive blocking of sensitive OS paths)."
+ },
+ {
+  "id": "E062",
+  "file": "README.en.md",
+  "line": 62,
+  "text": "- **Framework**: Vue `^3.5.13` (`<script setup lang=\"ts\">`), TypeScript `~5.6.3` (`strict: true`), Vite `^6.0.5`"
+ },
+ {
+  "id": "E063",
+  "file": "README.en.md",
+  "line": 63,
+  "text": "- **State, routing, UI**: Pinia `^2.3.0`, Vue Router `^4.5.0`, Tailwind CSS `^3.4.17`, Lucide Vue Next `^0.468.0`"
+ },
+ {
+  "id": "E064",
+  "file": "README.en.md",
+  "line": 64,
+  "text": "- **Document engines**: `epubjs ^0.3.93`, `jszip ^3.10.1`, `css-tree ^3.2.1`, and a custom TXT engine (`txtEngine.ts`, `txtMeasuredPagination.ts`)"
+ },
+ {
+  "id": "E065",
+  "file": "README.en.md",
+  "line": 65,
+  "text": "- **Native backend**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls`, `stream`), `dunce`, `sha2`, `zip 9.x`"
+ },
+ {
+  "id": "E066",
+  "file": "README.en.md",
+  "line": 66,
+  "text": "- **Platforms**: focus macOS (the only core build), maintained iOS (source build only), test builds Linux and Android (distributed as test builds only, no guarantees), Web (development aid, `IndexedDB` / proxy). Windows is outside the scope of this fork (see [Supported platforms](#supported-platforms))."
+ },
+ {
+  "id": "E070",
+  "file": "README.en.md",
+  "line": 70,
+  "text": "The app runs in each OS's built-in WebView, so the minimum versions come from what the framework (Tauri 2) and build tool (Vite 6) require and the WebView features the app uses."
+ },
+ {
+  "id": "E072",
+  "file": "README.en.md",
+  "line": 72,
+  "text": "| Platform | Minimum | Basis |"
+ },
+ {
+  "id": "E074",
+  "file": "README.en.md",
+  "line": 74,
+  "text": "| macOS | 11.0 Big Sur | Tauri 2 defaults to 10.13, but the Vite 6 output uses Safari 14 syntax and the accessible dialogs' `inert` works from Safari 15.5. Big Sur can update to Safari 16.6 |"
+ },
+ {
+  "id": "E075",
+  "file": "README.en.md",
+  "line": 75,
+  "text": "| iOS | 15.0 | Tauri 2 default. The iOS WebView follows the OS version and runs the Vite 6 output (Safari 14 syntax) |"
+ },
+ {
+  "id": "E076",
+  "file": "README.en.md",
+  "line": 76,
+  "text": "| Android (test build) | 7.0 (API 24) | Tauri 2 default. Needs an updatable Android System WebView (Chrome 87 or later) |"
+ },
+ {
+  "id": "E077",
+  "file": "README.en.md",
+  "line": 77,
+  "text": "| Linux (test build) | Ubuntu 22.04 or later (WebKitGTK 4.1) | Build-environment baseline for test builds (not a verification guarantee). 22.04 receives WebKitGTK 2.50 through security updates |"
+ },
+ {
+  "id": "E079",
+  "file": "README.en.md",
+  "line": 79,
+  "text": "`AbortSignal.any` (which needs Safari/iOS 17.4 or later), used to cancel opening an EPUB, was replaced with an equivalent fallback so EPUBs open on the minimum versions above."
+ },
+ {
+  "id": "E084",
+  "file": "README.en.md",
+  "line": 84,
+  "text": "./"
+ },
+ {
+  "id": "E085",
+  "file": "README.en.md",
+  "line": 85,
+  "text": "├── src/"
+ },
+ {
+  "id": "E086",
+  "file": "README.en.md",
+  "line": 86,
+  "text": "│   ├── assets/                 # Global styles and local font stack (main.css)"
+ },
+ {
+  "id": "E087",
+  "file": "README.en.md",
+  "line": 87,
+  "text": "│   ├── components/"
+ },
+ {
+  "id": "E088",
+  "file": "README.en.md",
+  "line": 88,
+  "text": "│   │   ├── common/             # Accessible confirm and recovery dialogs (InAppConfirmModal)"
+ },
+ {
+  "id": "E089",
+  "file": "README.en.md",
+  "line": 89,
+  "text": "│   │   ├── library/            # Remote download (RemoteUrlDownloadTab, WebDav*), sync and folder menus"
+ },
+ {
+  "id": "E090",
+  "file": "README.en.md",
+  "line": 90,
+  "text": "│   │   └── viewer/             # Viewer settings panel, TOC, bookmark and search drawers"
+ },
+ {
+  "id": "E091",
+  "file": "README.en.md",
+  "line": 91,
+  "text": "│   ├── composables/            # UI, reading session, TXT virtual and page control, import, cover URLs"
+ },
+ {
+  "id": "E092",
+  "file": "README.en.md",
+  "line": 92,
+  "text": "│   ├── engines/                # Pure document engines (DocumentReaderPort; no upper-layer dependency)"
+ },
+ {
+  "id": "E093",
+  "file": "README.en.md",
+  "line": 93,
+  "text": "│   │   ├── epub/               # epub.js adapter, css-tree AST sanitizer, non-blocking location index, touch and tap"
+ },
+ {
+  "id": "E094",
+  "file": "README.en.md",
+  "line": 94,
+  "text": "│   │   └── txt/                # Encoding detection, chunking and search, line-box and measured pagination"
+ },
+ {
+  "id": "E095",
+  "file": "README.en.md",
+  "line": 95,
+  "text": "│   ├── services/"
+ },
+ {
+  "id": "E096",
+  "file": "README.en.md",
+  "line": 96,
+  "text": "│   │   ├── platform/           # Platform ports (dialog, dragDrop, path, credential)"
+ },
+ {
+  "id": "E097",
+  "file": "README.en.md",
+  "line": 97,
+  "text": "│   │   ├── storage/            # IndexedDB v2 (cover blobs and index cache), SHA-256 hashing, native IPC"
+ },
+ {
+  "id": "E098",
+  "file": "README.en.md",
+  "line": 98,
+  "text": "│   │   ├── network/            # SSRF validator, safe fetch and streaming download, WebDAV client"
+ },
+ {
+  "id": "E099",
+  "file": "README.en.md",
+  "line": 99,
+  "text": "│   │   ├── sync/               # Cross-device reading position and bookmark merge and sync"
+ },
+ {
+  "id": "E100",
+  "file": "README.en.md",
+  "line": 100,
+  "text": "│   │   └── sampleBooks.ts      # Bundled sample books"
+ },
+ {
+  "id": "E101",
+  "file": "README.en.md",
+  "line": 101,
+  "text": "│   ├── stores/                 # Pinia stores (useBookStore, useSettingsStore) with migration and sync helpers"
+ },
+ {
+  "id": "E102",
+  "file": "README.en.md",
+  "line": 102,
+  "text": "│   ├── types/                  # Shared TypeScript interfaces and types"
+ },
+ {
+  "id": "E103",
+  "file": "README.en.md",
+  "line": 103,
+  "text": "│   └── views/                  # Slim router views (LibraryView, ReaderView, lazy /reader/:id)"
+ },
+ {
+  "id": "E104",
+  "file": "README.en.md",
+  "line": 104,
+  "text": "├── src-tauri/"
+ },
+ {
+  "id": "E105",
+  "file": "README.en.md",
+  "line": 105,
+  "text": "│   ├── capabilities/           # Least-privilege split (default.json, desktop.json)"
+ },
+ {
+  "id": "E106",
+  "file": "README.en.md",
+  "line": 106,
+  "text": "│   └── src/                    # Rust security, SSRF and path guards (security/), file, streaming and EPUB commands (commands/)"
+ },
+ {
+  "id": "E107",
+  "file": "README.en.md",
+  "line": 107,
+  "text": "├── scripts/                    # 450-line and layer boundaries, version sync, app identity, proxy guard, verify"
+ },
+ {
+  "id": "E108",
+  "file": "README.en.md",
+  "line": 108,
+  "text": "├── tests/                      # Tier 1 Vitest unit and contract tests, tier 2 Playwright E2E and performance baselines"
+ },
+ {
+  "id": "E109",
+  "file": "README.en.md",
+  "line": 109,
+  "text": "└── specs/                      # Spec Kit feature specs, plans, security contracts and checklists"
+ },
+ {
+  "id": "E120",
+  "file": "README.en.md",
+  "line": 120,
+  "text": "npm install"
+ },
+ {
+  "id": "E123",
+  "file": "README.en.md",
+  "line": 123,
+  "text": "npm run dev"
+ },
+ {
+  "id": "E126",
+  "file": "README.en.md",
+  "line": 126,
+  "text": "npm run build"
+ },
+ {
+  "id": "E129",
+  "file": "README.en.md",
+  "line": 129,
+  "text": "npm run tauri dev"
+ },
+ {
+  "id": "E136",
+  "file": "README.en.md",
+  "line": 136,
+  "text": "npm test"
+ },
+ {
+  "id": "E139",
+  "file": "README.en.md",
+  "line": 139,
+  "text": "npm run check:boundaries"
+ },
+ {
+  "id": "E142",
+  "file": "README.en.md",
+  "line": 142,
+  "text": "npm run check:version"
+ },
+ {
+  "id": "E145",
+  "file": "README.en.md",
+  "line": 145,
+  "text": "npm run check:commit-msg -- <COMMIT_EDITMSG_PATH>"
+ },
+ {
+  "id": "E150",
+  "file": "README.en.md",
+  "line": 150,
+  "text": "npm run verify"
+ },
+ {
+  "id": "E153",
+  "file": "README.en.md",
+  "line": 153,
+  "text": "npm run test:e2e"
+ },
+ {
+  "id": "E156",
+  "file": "README.en.md",
+  "line": 156,
+  "text": "npm run test:perf"
+ },
+ {
+  "id": "E165",
+  "file": "README.en.md",
+  "line": 165,
+  "text": "After changing the version, update these files and run `npm run check:version`."
+ },
+ {
+  "id": "E167",
+  "file": "README.en.md",
+  "line": 167,
+  "text": "- `./package.json`"
+ },
+ {
+  "id": "E168",
+  "file": "README.en.md",
+  "line": 168,
+  "text": "- `./package-lock.json`"
+ },
+ {
+  "id": "E169",
+  "file": "README.en.md",
+  "line": 169,
+  "text": "- `./src-tauri/Cargo.toml` (and `./src-tauri/Cargo.lock` through `cargo check`)"
+ },
+ {
+  "id": "E170",
+  "file": "README.en.md",
+  "line": 170,
+  "text": "- `./src-tauri/tauri.conf.json`"
+ },
+ {
+  "id": "E174",
+  "file": "README.en.md",
+  "line": 174,
+  "text": "- Recommended: `rustc >= 1.90.0` (meets the MSRV of the current Tauri v2 plugins and `reqwest 0.13` with `rustls`)"
+ },
+ {
+  "id": "E177",
+  "file": "README.en.md",
+  "line": 177,
+  "text": "node -v && npm -v"
+ },
+ {
+  "id": "E178",
+  "file": "README.en.md",
+  "line": 178,
+  "text": "rustc --version && cargo --version"
+ },
+ {
+  "id": "E179",
+  "file": "README.en.md",
+  "line": 179,
+  "text": "rustup show"
+ },
+ {
+  "id": "E184",
+  "file": "README.en.md",
+  "line": 184,
+  "text": "Download the `.dmg` and `SHA256SUMS.txt` from the releases page into the same folder and check the checksum first."
+ },
+ {
+  "id": "E187",
+  "file": "README.en.md",
+  "line": 187,
+  "text": "shasum -a 256 -c SHA256SUMS.txt --ignore-missing"
+ },
+ {
+  "id": "E190",
+  "file": "README.en.md",
+  "line": 190,
+  "text": "The app is not notarized by Apple yet. If the first launch says the app \"is damaged and can't be opened\", confirm that the checksum matches and then remove the quarantine attribute."
+ },
+ {
+  "id": "E193",
+  "file": "README.en.md",
+  "line": 193,
+  "text": "xattr -cr /Applications/Pagelight.app"
+ },
+ {
+  "id": "E196",
+  "file": "README.en.md",
+  "line": 196,
+  "text": "**Warning**: removing the quarantine attribute is a **temporary measure** until the app is notarized. macOS will run the app without checking it, so only do this for a file you downloaded from this repository's releases page and whose checksum matches."
+ },
+ {
+  "id": "E200",
+  "file": "README.en.md",
+  "line": 200,
+  "text": "Windows is outside the scope of this fork, so on Windows use the original [EasyViewer](https://github.com/edith2580/EasyViewer). If you used this fork's Windows pre-releases (`v0.1.6-alpha`, `v0.1.6-beta`), follow the preserved [Windows migration guide](./docs/windows-migration.md) (Korean)."
+ },
+ {
+  "id": "E207",
+  "file": "README.en.md",
+  "line": 207,
+  "text": "APPIMAGE_EXTRACT_AND_RUN=1 npm run tauri build -- --bundles deb,rpm,appimage"
+ },
+ {
+  "id": "E214",
+  "file": "README.en.md",
+  "line": 214,
+  "text": "npm run mac:dev"
+ },
+ {
+  "id": "E217",
+  "file": "README.en.md",
+  "line": 217,
+  "text": "npm run mac:build"
+ },
+ {
+  "id": "E220",
+  "file": "README.en.md",
+  "line": 220,
+  "text": "npm run mac:build:arm"
+ },
+ {
+  "id": "E221",
+  "file": "README.en.md",
+  "line": 221,
+  "text": "npm run mac:build:intel"
+ },
+ {
+  "id": "E224",
+  "file": "README.en.md",
+  "line": 224,
+  "text": "npm run ios:init"
+ },
+ {
+  "id": "E225",
+  "file": "README.en.md",
+  "line": 225,
+  "text": "npm run ios:dev"
+ },
+ {
+  "id": "E226",
+  "file": "README.en.md",
+  "line": 226,
+  "text": "npm run ios:build"
+ },
+ {
+  "id": "E229",
+  "file": "README.en.md",
+  "line": 229,
+  "text": "npx tauri ios dev --open"
+ },
+ {
+  "id": "E230",
+  "file": "README.en.md",
+  "line": 230,
+  "text": "npx tauri ios build --open"
+ },
+ {
+  "id": "E233",
+  "file": "README.en.md",
+  "line": 233,
+  "text": "- **Distribution and macOS signing (`1.0.0-alpha.1`)**: the default desktop build is non-sandboxed (`.dmg`, Hardened Runtime). `src-tauri/tauri.conf.json` sets `bundle.macOS.signingIdentity: \"-\"` (ad-hoc signature with the Hardened Runtime seal), so `codesign --verify --deep --strict` passes. The app identifier is `com.ezenitac.easyviewer` on every platform. Before notarization, a `.dmg` downloaded with a browser needs `xattr -cr /Applications/Pagelight.app` before the first launch. A Mac App Store (App Sandbox) build needs `tauri-plugin-persisted-scope` and the `com.apple.security.files.user-selected.read-write` entitlement; public distribution needs Apple Developer code signing and notarization (`APPLE_DEVELOPMENT_TEAM`, `APPLE_SIGNING_IDENTITY`). The iOS source build is described in [docs/ios-build.md](./docs/ios-build.md) (Korean)."
+ },
+ {
+  "id": "E234",
+  "file": "README.en.md",
+  "line": 234,
+  "text": "- **Clearing ports and locks on macOS (if needed)**:"
+ },
+ {
+  "id": "E237",
+  "file": "README.en.md",
+  "line": 237,
+  "text": "kill -9 $(lsof -t -i :1420 -i :1421) 2>/dev/null"
+ },
+ {
+  "id": "E238",
+  "file": "README.en.md",
+  "line": 238,
+  "text": "find src-tauri/target -name \"lock.ios\" -o -name \".cargo*-lock\" -delete 2>/dev/null"
+ },
+ {
+  "id": "E244",
+  "file": "README.en.md",
+  "line": 244,
+  "text": "npm run android:init"
+ },
+ {
+  "id": "E245",
+  "file": "README.en.md",
+  "line": 245,
+  "text": "npm run android:dev"
+ },
+ {
+  "id": "E246",
+  "file": "README.en.md",
+  "line": 246,
+  "text": "npm run android:build       # arm64 debug APK"
+ },
+ {
+  "id": "E247",
+  "file": "README.en.md",
+  "line": 247,
+  "text": "npm run android:release     # arm64 release APK"
+ },
+ {
+  "id": "E248",
+  "file": "README.en.md",
+  "line": 248,
+  "text": "npm run android:release:all # release APKs for all ABIs"
+ },
+ {
+  "id": "E253",
+  "file": "README.en.md",
+  "line": 253,
+  "text": "- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs five jobs on every pull request and every push to `main`: `verify` (full verification gate), `licenses` (cargo-deny and notice consistency), `macos-build` (universal build and signature check), `ios-sim-build` (unsigned simulator build) and `android-debug` (debug APK). It uses no secrets, and merges to `main` and the release gate require only the core jobs `verify`, `licenses` and `macos-build` (repository admins can bypass this in an emergency). The lower-priority platform jobs (`ios-sim-build`, `android-debug`) only report; a failure is still looked into and fixed."
+ },
+ {
+  "id": "E254",
+  "file": "README.en.md",
+  "line": 254,
+  "text": "- [`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag push or `workflow_dispatch`. A release gate (`scripts/check-release-gate.mjs`) must pass before any build, and it builds only the **macOS universal `.dmg`** (the core build) and the test builds **Linux x64 `.deb` and `.AppImage`** (plus `.rpm` for stable versions) and the **Android arm64 `.apk`** signed with the fork key. Linux and Android file names end in `-test`, and the release notes get a \"Test builds\" section. When a test build fails, the signing-key secrets are missing or a platform is under a security exclusion (`.github/release-exclusions.json`), only that platform is left out and the notes say so (a debug-signed APK is never published). If the macOS build fails nothing is published, and when the same test build platform is left out three releases in a row the next release gate stops. Before publishing it writes `SHA256SUMS.txt` and checks the markers, omission notices and that no Windows files are present again."
+ },
+ {
+  "id": "E258",
+  "file": "README.en.md",
+  "line": 258,
+  "text": "1. Align and verify the version (`package.json`, `package-lock.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, `src-tauri/tauri.conf.json`, the Apple project settings and the Android `versionCode`)."
+ },
+ {
+  "id": "E260",
+  "file": "README.en.md",
+  "line": 260,
+  "text": "npm run check:version"
+ },
+ {
+  "id": "E261",
+  "file": "README.en.md",
+  "line": 261,
+  "text": "npm run verify"
+ },
+ {
+  "id": "E263",
+  "file": "README.en.md",
+  "line": 263,
+  "text": "2. Rehearse the whole flow first. A rehearsal uses a tag name ending in `-rehearsal` and only creates a draft release."
+ },
+ {
+  "id": "E265",
+  "file": "README.en.md",
+  "line": 265,
+  "text": "gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.1-rehearsal"
+ },
+ {
+  "id": "E267",
+  "file": "README.en.md",
+  "line": 267,
+  "text": "3. Push the tag to publish the release."
+ },
+ {
+  "id": "E269",
+  "file": "README.en.md",
+  "line": 269,
+  "text": "git tag v1.0.0-alpha.1"
+ },
+ {
+  "id": "E270",
+  "file": "README.en.md",
+  "line": 270,
+  "text": "git push origin v1.0.0-alpha.1"
+ },
+ {
+  "id": "E273",
+  "file": "README.en.md",
+  "line": 273,
+  "text": "Operational details are in the [maintainer runbook](./docs/maintainer-runbook.md) and the [Android signing key guide](./docs/android-signing.md) (both Korean)."
+ },
+ {
+  "id": "E280",
+  "file": "README.en.md",
+  "line": 280,
+  "text": "Only verifiable facts are listed. Values for the original app ([EasyViewer](https://github.com/edith2580/EasyViewer)) are based on `v0.1.6`, where this fork split off, and the latest release `v0.2.2` checked on 2026-11-19."
+ },
+ {
+  "id": "E282",
+  "file": "README.en.md",
+  "line": 282,
+  "text": "| Item | Pagelight (this fork) | EasyViewer (original) |"
+ },
+ {
+  "id": "E284",
+  "file": "README.en.md",
+  "line": 284,
+  "text": "| Display name | Pagelight | EasyViewer |"
+ },
+ {
+  "id": "E285",
+  "file": "README.en.md",
+  "line": 285,
+  "text": "| App identifier | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |"
+ },
+ {
+  "id": "E286",
+  "file": "README.en.md",
+  "line": 286,
+  "text": "| Distributed platforms | macOS, Linux and Android (test builds), iOS as source build only | Windows, macOS, Linux, Android as of `v0.2.2` |"
+ },
+ {
+  "id": "E287",
+  "file": "README.en.md",
+  "line": 287,
+  "text": "| Windows | Not distributed or supported | Distributed by the original author |"
+ },
+ {
+  "id": "E288",
+  "file": "README.en.md",
+  "line": 288,
+  "text": "| Internal data format version | 2 | 1 |"
+ },
+ {
+  "id": "E290",
+  "file": "README.en.md",
+  "line": 290,
+  "text": "- Because the identifiers differ, both apps can be installed on the same device and do not share data."
+ },
+ {
+  "id": "E291",
+  "file": "README.en.md",
+  "line": 291,
+  "text": "- The original app cannot open data created by this fork (data format 2). To move to Windows, see the [Windows migration guide](./docs/windows-migration.md) (Korean)."
+ },
+ {
+  "id": "E292",
+  "file": "README.en.md",
+  "line": 292,
+  "text": "- These values may change in later versions of the original app."
+ },
+ {
+  "id": "E297",
+  "file": "README.en.md",
+  "line": 297,
+  "text": "- **Original work**: this repository is a derivative work based on the original [EasyViewer](https://github.com/edith2580/EasyViewer) by edith2580. Copyright (C) 2026 edith2580."
+ },
+ {
+  "id": "E298",
+  "file": "README.en.md",
+  "line": 298,
+  "text": "- **Changes in this fork**: Copyright (C) 2026 M5. This fork split from the original `v0.1.6` (commit `44c4d37`, tag `upstream-base-v0.1.6`) and became independent on 2026-11-17; the GitHub fork network separation was completed on 2026-11-23. Later original releases (`v0.2.0`, `v0.2.1`, `v0.2.2`) were not merged. A summary of the main changes is in section 3 of [NOTICE.en.md](./NOTICE.en.md) and in [CHANGELOG.en.md](./CHANGELOG.en.md)."
+ },
+ {
+  "id": "E299",
+  "file": "README.en.md",
+  "line": 299,
+  "text": "- **License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). The license text is unchanged. \"Only\" is this fork's choice; the reasons and the conditions for revisiting it are in section 5 of [NOTICE.en.md](./NOTICE.en.md)."
+ },
+ {
+  "id": "E300",
+  "file": "README.en.md",
+  "line": 300,
+  "text": "- **Third-party components**: a summary of direct dependencies is in [`THIRD_PARTY_LICENSES.en.md`](./THIRD_PARTY_LICENSES.en.md); the full notices and license texts, including transitive dependencies, are in [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt) (also viewable from the app's About screen)."
+ }
+]
