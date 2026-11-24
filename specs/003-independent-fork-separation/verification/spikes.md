@@ -47,9 +47,10 @@
 
 ## S5 — 서명 없는 iOS 시뮬레이터 빌드 (T008)
 
-| 판정 | **BLOCKED** |
+| 판정 | **PASS**(2026-11-24 메인테이너 동의로 완료 처리) |
 |---|---|
-| 사유 | Xcode는 있으나 설치된 iOS 시뮬레이터 런타임이 없다(`xcrun simctl list runtimes`에 iOS 없음) |
+| 근거 | 로컬: T101에서 런타임 설치 후 `npx tauri ios build --target aarch64-sim --debug` 성공(아래 T101). CI: `ios-sim-build` 작업이 여러 실행에서 통과(예: `main` 실행 44335120998, 45204054709) |
+| 최초 시도 | Xcode는 있으나 설치된 iOS 시뮬레이터 런타임이 없어 `BLOCKED`였다(`xcrun simctl list runtimes`에 iOS 없음) |
 | 필요한 환경 | iOS 시뮬레이터 런타임이 있는 macOS 또는 CI `ios-sim-build` 작업. T084에서 확인하고, 실패하면 원인을 먼저 고친다(FR-021) |
 
 ## 수렴 검증 — US5 이름 변경 후 빌드·회귀 실측 (T101, T102, T107)
