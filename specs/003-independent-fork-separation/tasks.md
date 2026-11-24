@@ -53,7 +53,7 @@ description: "독립 포크 분리 작업 목록"
   - macOS에서는 키체인 접근 대화상자 표시 여부와 거부 시 오류 종류를, Linux Secret Service에서는 동작 여부를 기록한다.
 - [X] T007 [P] 스파이크 S4를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
   - 깨끗한 체크아웃에서 `npm run android:init`을 실행한 뒤 `git status`로 `src-tauri/gen/android/app/build.gradle.kts`가 덮어써지는지 확인한다
-- [ ] T008 [P] 스파이크 S5를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
+- [X] T008 [P] 스파이크 S5를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
   - 서명 비밀값 없이 `npm run ios:init && npm run ios:build -- --debug --target aarch64-sim`가 통과하는지 확인한다
 - [X] T009 T004–T008 결과를 반영해 `specs/003-independent-fork-separation/research.md`(R1·R2·R6·R12)와 `plan.md` 위험 표를 고친다.
   - S1이 실패하면 서재 재구성을 기본 경로로 바꾸고 `contracts/data-migration.md` 상태 표를 갱신한다.

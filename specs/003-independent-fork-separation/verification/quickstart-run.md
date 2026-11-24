@@ -13,7 +13,7 @@
 | 절 | 판정 | 비고 |
 |---|---|---|
 | §1 자동 게이트 | **PASS** | 로컬 전체 + PR #3 CI 6개 작업 |
-| §2 저장소 상태 | **미완**(메인테이너 단계 대기) | 태그 미게시, `upstream` 원격 남음, 분리 전 |
+| §2 저장소 상태 | **PASS**(2026-11-24 재확인) | 기준선 태그 게시, `upstream` 원격 제거, 포크 네트워크 분리, 코드 검색 동작. 세부는 `release-gate.md` |
 | §3 데이터 이전 | macOS **부분 PASS**, Linux **BLOCKED** | `migration-macos.md`, `migration-linux.md` |
 | §4 공존 설치 | **BLOCKED** | T077 미실행 |
 | §5 Android 업데이트 연속성 | **BLOCKED** | 포크 release 키 없음(T062) |
