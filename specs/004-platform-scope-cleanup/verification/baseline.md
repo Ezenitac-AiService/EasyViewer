@@ -12,4 +12,4 @@
 
 ## 라벨 (T002)
 
-`test-build` 라벨 생성은 메인테이너 승인 대기.
+2026-11-24 메인테이너 승인 후 생성: `test-build`, 설명 "Linux·Android 테스트용 빌드 / Linux·Android test build", 색 `FBCA04`(`gh api repos/Ezenitac-AiService/EasyViewer/labels/test-build`로 확인).
