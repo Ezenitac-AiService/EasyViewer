@@ -155,7 +155,7 @@ description: "지원 범위 재정렬과 독립 포크 분리 마무리 — 작�
 - [X] T046 CI 6개 작업(필수 `verify`·`licenses`·`macos-build`, 보고 `ios-sim-build`·`android-debug`)이 PR에서 통과하는지 확인하고 실행 링크를 `specs/004-platform-scope-cleanup/verification/release-rehearsal.md`에 적는다(번들 아이콘 제거 후 빌드 확인 포함, research R1)
 - [X] T047 (메인테이너 승인 후) 정상 리허설: `gh workflow run release.yml -f rehearsal=true -f tag_name=v1.0.0-alpha.2-rehearsal`. macOS 표식 없음, Linux `-test`, Android `-test-rehearsal`, 노트의 "테스트용 빌드" 절을 확인하고 `verification/release-rehearsal.md`에 기록한 뒤 초안을 지운다(SC-002)
 - [X] T048 (메인테이너 승인 후) 실패 주입 리허설: 같은 명령에 `-f fail_linux=true`. macOS·Android 게시, Linux 없음, 노트에 Linux 누락 안내와 `<!-- pagelight:omitted linux=build-failed -->`를 확인하고 기록한 뒤 초안을 지운다(SC-003a). 리허설 태그는 남기지 않는다
-- [ ] T049 (메인테이너 승인 후) `v1.0.0-alpha.1` 릴리스 노트 끝에 Linux 테스트용 빌드 한·영 안내와 `<!-- pagelight:omitted android=no-signing-key -->`를 `gh release edit`로 덧붙이고, 산출물·체크섬이 그대로인지 확인해 기록한다(FR-007, research R8)
+- [X] T049 (메인테이너 승인 후) `v1.0.0-alpha.1` 릴리스 노트 끝에 Linux 테스트용 빌드 한·영 안내와 `<!-- pagelight:omitted android=no-signing-key -->`를 `gh release edit`로 덧붙이고, 산출물·체크섬이 그대로인지 확인해 기록한다(FR-007, research R8)
 - [X] T050 `v0.1.6-alpha`·`v0.1.6-beta`의 산출물 수(각 6개)·지원 종료 고지·고지에서 링크한 `docs/windows-migration.md`가 열리고 보존 기록 표시가 보이는지, `CHANGELOG.md`·`CHANGELOG.en.md`의 Windows 지원 종료 항목이 남아 있는지 확인해 기록한다(SC-006, FR-009)
 - [ ] T051 (macOS 실기기) 003에서 이관한 항목을 실행한다: 데이터 이전 시나리오 1·6·8(003 quickstart §3), 레거시 키체인 접근 창(003 S2), 원저작자 앱과의 공존 설치(003 S3 macOS 부분). 실행하지 못하면 `BLOCKED`로 기록한다(`verification/macos-followups.md`)
 - [X] T052 `README.md`·`README.en.md`·`CHANGELOG.md`·`CHANGELOG.en.md`에 004 변경(지원 등급, 테스트 빌드 표식, Windows 정리)을 반영하고 `node scripts/check-doc-pairs.mjs`로 국문·영문 쌍을 확인한다

@@ -5,7 +5,7 @@
 | T046 PR CI | **PASS** | PR #19: `verify`·`licenses`·`macos-build`·`ios-sim-build` 통과(`android-debug`는 병합 시점 진행 중). 병합 후 `main`(`5a03a58`) CI 5개 작업 모두 통과([run 45332038593](https://github.com/Ezenitac-AiService/EasyViewer/actions/runs/45332038593)). `icon.ico`·`Square*Logo` 제거 후에도 macOS 번들 서명 검증 통과(research R1). 작업 목록의 "6개"는 Windows 작업 삭제 전 숫자 |
 | T047 정상 리허설 | **PASS** | 아래 1 |
 | T048 실패 주입 리허설 | **PASS** | 아래 2 |
-| T049 `v1.0.0-alpha.1` 노트 보강 | 승인 대기 | 게시된 릴리스 편집이라 별도 승인 후 실행 |
+| T049 `v1.0.0-alpha.1` 노트 보강 | **PASS** | [existing-releases.md](existing-releases.md) |
 
 리허설 태그는 게이트가 매니페스트 버전과 맞춰 보므로 quickstart의 `v1.0.0-alpha.2-rehearsal`이 아니라 `v1.0.0-alpha.1-rehearsal`을 썼다(매니페스트 `1.0.0-alpha.1`).
 
