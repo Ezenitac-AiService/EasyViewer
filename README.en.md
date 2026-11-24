@@ -2,7 +2,7 @@
 
 **언어 / Language**: [한국어](README.md) | **[English](README.en.md)**
 
-> This is an independent fork. It focuses on macOS; iOS (source build only), Linux and Android are maintained with lower priority. For Windows, please use the original EasyViewer by edith2580.
+> This is an independent fork. It focuses on macOS; iOS is a source build only, and Linux and Android are test builds. For Windows, please use the original EasyViewer by edith2580.
 
 A simple viewer for plain text (TXT) and EPUB documents (`v1.0.0-alpha.1`), an independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6` by edith2580.
 
@@ -28,11 +28,14 @@ The Korean [README.md](README.md) is the authoritative version. This page is kep
 
 ## Supported platforms
 
-- **Focus**: macOS — the only core build.
-- **Maintained, lower priority**: iOS (source build only, no public distribution channel), Linux and Android. They are still built and distributed, but their CI results only report and do not block merges or releases.
-- **Not supported**: Windows is not considered. This fork does not distribute, support or test Windows builds. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).
-- Running in a web browser is a development aid only.
-- Linux is verified on Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland). Other distributions may work but are not verified.
+<!-- support-scope-en:start -->
+This fork focuses on **macOS**.
+iOS is maintained with lower priority and is provided as a source build only, without a public distribution channel.
+Linux and Android are distributed as **test builds** only, with no guarantee of quality, feature parity, real-device verification or response time.
+**Windows is outside the scope of this fork. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).**
+Running in a web browser is a development aid only.
+Linux test builds are built for Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland). Android test builds target Android 7.0 (API 24) or later.
+<!-- support-scope-en:end -->
 
 ## Features
 
@@ -60,7 +63,7 @@ The Korean [README.md](README.md) is the authoritative version. This page is kep
 - **State, routing, UI**: Pinia `^2.3.0`, Vue Router `^4.5.0`, Tailwind CSS `^3.4.17`, Lucide Vue Next `^0.468.0`
 - **Document engines**: `epubjs ^0.3.93`, `jszip ^3.10.1`, `css-tree ^3.2.1`, and a custom TXT engine (`txtEngine.ts`, `txtMeasuredPagination.ts`)
 - **Native backend**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls`, `stream`), `dunce`, `sha2`, `zip 9.x`
-- **Platforms**: see [Supported platforms](#supported-platforms).
+- **Platforms**: focus macOS (the only core build), maintained iOS (source build only), test builds Linux and Android (distributed as test builds only, no guarantees), Web (development aid, `IndexedDB` / proxy). Windows is outside the scope of this fork (see [Supported platforms](#supported-platforms)).
 
 ### Minimum requirements
 
@@ -70,8 +73,8 @@ The app runs in each OS's built-in WebView, so the minimum versions come from wh
 |---|---|---|
 | macOS | 11.0 Big Sur | Tauri 2 defaults to 10.13, but the Vite 6 output uses Safari 14 syntax and the accessible dialogs' `inert` works from Safari 15.5. Big Sur can update to Safari 16.6 |
 | iOS | 15.0 | Tauri 2 default. The iOS WebView follows the OS version and runs the Vite 6 output (Safari 14 syntax) |
-| Android | 7.0 (API 24) | Tauri 2 default. Needs an updatable Android System WebView (Chrome 87 or later) |
-| Linux | Ubuntu 22.04 or later (WebKitGTK 4.1) | Support-scope baseline. 22.04 receives WebKitGTK 2.50 through security updates |
+| Android (test build) | 7.0 (API 24) | Tauri 2 default. Needs an updatable Android System WebView (Chrome 87 or later) |
+| Linux (test build) | Ubuntu 22.04 or later (WebKitGTK 4.1) | Build-environment baseline for test builds (not a verification guarantee). 22.04 receives WebKitGTK 2.50 through security updates |
 
 `AbortSignal.any` (which needs Safari/iOS 17.4 or later), used to cancel opening an EPUB, was replaced with an equivalent fallback so EPUBs open on the minimum versions above.
 
@@ -194,9 +197,7 @@ xattr -cr /Applications/Pagelight.app
 
 ### Windows users
 
-This fork does not distribute or officially support Windows installers. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer). If you used this fork's Windows pre-releases (`v0.1.6-alpha`, `v0.1.6-beta`), follow the [Windows migration guide](./docs/windows-migration.md) (Korean).
-
-Windows is not considered by this fork, so its code paths are no longer compiled or tested in CI. They will be removed in a later change.
+Windows is outside the scope of this fork, so on Windows use the original [EasyViewer](https://github.com/edith2580/EasyViewer). If you used this fork's Windows pre-releases (`v0.1.6-alpha`, `v0.1.6-beta`), follow the preserved [Windows migration guide](./docs/windows-migration.md) (Korean).
 
 ### Linux build
 
@@ -250,7 +251,7 @@ npm run android:release:all # release APKs for all ABIs
 ### GitHub Actions CI and releases
 
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs five jobs on every pull request and every push to `main`: `verify` (full verification gate), `licenses` (cargo-deny and notice consistency), `macos-build` (universal build and signature check), `ios-sim-build` (unsigned simulator build) and `android-debug` (debug APK). It uses no secrets, and merges to `main` and the release gate require only the core jobs `verify`, `licenses` and `macos-build` (repository admins can bypass this in an emergency). The lower-priority platform jobs (`ios-sim-build`, `android-debug`) only report; a failure is still looked into and fixed.
-- [`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag push or `workflow_dispatch`. A release gate (`scripts/check-release-gate.mjs`) must pass before any build, and it builds only the **macOS universal `.dmg`**, **Linux x64 `.deb` and `.AppImage`** (plus `.rpm` for stable versions) and the **Android arm64 `.apk`** signed with the fork key. If the signing-key secrets are not registered, Android is left out of the release and the release notes say so (a debug-signed APK is never published). Before publishing it writes `SHA256SUMS.txt` and checks again that no Windows files are present.
+- [`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag push or `workflow_dispatch`. A release gate (`scripts/check-release-gate.mjs`) must pass before any build, and it builds only the **macOS universal `.dmg`** (the core build) and the test builds **Linux x64 `.deb` and `.AppImage`** (plus `.rpm` for stable versions) and the **Android arm64 `.apk`** signed with the fork key. Linux and Android file names end in `-test`, and the release notes get a "Test builds" section. When a test build fails, the signing-key secrets are missing or a platform is under a security exclusion (`.github/release-exclusions.json`), only that platform is left out and the notes say so (a debug-signed APK is never published). If the macOS build fails nothing is published, and when the same test build platform is left out three releases in a row the next release gate stops. Before publishing it writes `SHA256SUMS.txt` and checks the markers, omission notices and that no Windows files are present again.
 
 #### Release procedure
 
@@ -282,7 +283,7 @@ Only verifiable facts are listed. Values for the original app ([EasyViewer](http
 |---|---|---|
 | Display name | Pagelight | EasyViewer |
 | App identifier | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |
-| Distributed platforms | macOS, Linux, Android (iOS as source build only) | Windows, macOS, Linux, Android as of `v0.2.2` |
+| Distributed platforms | macOS, Linux and Android (test builds), iOS as source build only | Windows, macOS, Linux, Android as of `v0.2.2` |
 | Windows | Not distributed or supported | Distributed by the original author |
 | Internal data format version | 2 | 1 |
 

@@ -1,0 +1,58 @@
+name: 테스트 빌드 버그 신고 / Test build bug report
+description: Pagelight 테스트용 빌드(Linux·Android)에서 발견한 문제를 알려 주세요. / Report a problem found in a Pagelight test build (Linux, Android).
+labels: ["bug", "test-build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **테스트용 빌드라 품질·대응 일정을 보장하지 않습니다.** 신고는 기록하지만 언제 고칠지 약속하지 않습니다.
+        **Test builds come with no guarantee of quality or response time.** Reports are recorded, but no fix date is promised.
+
+        Windows는 이 포크의 지원 대상이 아닙니다. Windows에서는 원저작자의 EasyViewer(https://github.com/edith2580/EasyViewer)를 사용하세요.
+        Windows is not supported by this fork. On Windows, use the original EasyViewer (https://github.com/edith2580/EasyViewer).
+
+        보안 취약점은 이 양식이 아니라 SECURITY.md의 비공개 신고 경로를 이용해 주세요.
+        Report security vulnerabilities through the private channel in SECURITY.en.md, not with this form.
+  - type: checkboxes
+    id: fork-confirmation
+    attributes:
+      label: 포크 확인 / Fork confirmation
+      description: 원저작자 앱이 아니라 Pagelight에서 생긴 문제인지 확인해 주세요. / Please confirm the problem happens in Pagelight, not in the original app.
+      options:
+        - label: 이 문제는 Pagelight(이 저장소의 앱)에서 발생합니다. / This problem happens in Pagelight (the app from this repository).
+          required: true
+        - label: 테스트용 빌드는 품질·대응 일정을 보장하지 않는다는 것을 이해했습니다. / I understand that test builds come with no guarantee of quality or response time.
+          required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 플랫폼 / Platform
+      options:
+        - Linux
+        - Android
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 앱 버전 / App version
+      description: 앱 정보 화면에 표시된 버전 / The version shown on the About screen
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS 버전·배포판 / OS version or distribution
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 절차 / Steps to reproduce
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 동작과 실제 동작 / Expected and actual behavior
+    validations:
+      required: true

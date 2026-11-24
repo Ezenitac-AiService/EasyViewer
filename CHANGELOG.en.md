@@ -4,11 +4,33 @@
 
 This is the changelog of the independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) by edith2580. It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The Korean [CHANGELOG.md](CHANGELOG.md) is the authoritative version.
 
+## [Unreleased] — Support scope realignment and fork separation wrap-up (2026-11-24)
+
+Applies the platform tiers of constitution v6.1.0 (focus macOS, maintained iOS, test builds Linux and Android, excluded Windows).
+
+### Changed
+
+- The support-scope source, public documents (Korean and English) and the About screen now use the new tiers. English documents also carry a support-scope block (`support-scope-en`), which is checked.
+- The bug form is split into a core form (macOS, iOS) and a test build form (Linux, Android, `test-build` label).
+- Releases: Linux and Android file names end in `-test`, and the release notes carry a "Test builds" section and omission notices. A failed test build no longer stops a release when macOS succeeds; three consecutive omissions of the same platform stop the next release. Added security exclusions (`.github/release-exclusions.json`).
+- `SECURITY.md` now states the security scope of test builds.
+
+### Removed
+
+- The remaining Windows-only code, settings, icons and audit target, plus a reintroduction check (`scripts/check-windows-exclusion.mjs`) in the quality gate. The end-of-support history of the Windows pre-releases and the migration guide stay as preserved records.
+
 ## [Unreleased] — Independent fork separation (2026-11-17)
 
 This fork split from the original `v0.1.6` (commit `44c4d37`, tag `upstream-base-v0.1.6`) and became independent on 2026-11-17. The GitHub fork network separation was completed on 2026-11-23. Later original releases (`v0.2.0`, `v0.2.1`, `v0.2.2`) were not merged.
 
-Supported platforms: macOS is the focus; iOS (source build only), Linux and Android are maintained with lower priority. Windows is not distributed or supported by this fork; on Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer). Running in a web browser is a development aid only.
+<!-- support-scope-en:start -->
+This fork focuses on **macOS**.
+iOS is maintained with lower priority and is provided as a source build only, without a public distribution channel.
+Linux and Android are distributed as **test builds** only, with no guarantee of quality, feature parity, real-device verification or response time.
+**Windows is outside the scope of this fork. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).**
+Running in a web browser is a development aid only.
+Linux test builds are built for Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland). Android test builds target Android 7.0 (API 24) or later.
+<!-- support-scope-en:end -->
 
 ### Added
 

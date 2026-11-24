@@ -4,6 +4,11 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { CORE_CI_JOBS, checkStatic, runGate, summarizeCiJobs } from '../../scripts/check-release-gate.mjs'
+import {
+  consecutiveOmissions,
+  gateOutputs,
+  validateExclusions
+} from '../../scripts/release-gate/testBuilds.mjs'
 
 const BASE_SHA = '44c4d37749d29bd070e7a07aea4622eef0b97306'
 const PIN = 'a'.repeat(40)
@@ -38,6 +43,7 @@ function env(over: Partial<Record<string, unknown>> = {}) {
     ciStatus: () => ({ ci: 'success', licenses: 'success' }),
     upstreamVersions: () => ['0.1.6', '0.2.0', '0.2.1'],
     draftReleases: () => [] as string[],
+    recentReleases: () => [] as unknown[],
     ...over
   }
 }
@@ -81,10 +87,10 @@ describe('separation gate (FR-025 items 1–5)', () => {
 
 describe('release gate (FR-025 items 1–8 + extras)', () => {
   const okAssets = () => {
-    const dir = assets(['Fork_1.0.0-alpha.1_universal.dmg', 'Fork_1.0.0-alpha.1_amd64.deb'])
+    const dir = assets(['Fork_1.0.0-alpha.1_universal.dmg', 'Fork_1.0.0-alpha.1_amd64-test.deb'])
     fs.writeFileSync(
       path.join(dir, 'SHA256SUMS.txt'),
-      'x  Fork_1.0.0-alpha.1_universal.dmg\ny  Fork_1.0.0-alpha.1_amd64.deb\n'
+      'x  Fork_1.0.0-alpha.1_universal.dmg\ny  Fork_1.0.0-alpha.1_amd64-test.deb\n'
     )
     return dir
   }
@@ -149,8 +155,8 @@ describe('release gate (FR-025 items 1–8 + extras)', () => {
 describe('rehearsal mode', () => {
   it('downgrades maintainer items 1–3 and 8 to warnings but still checks automatic items', () => {
     const root = repo({ ...GOOD_RECORDS, [`${V}/security-coordination.md`]: '', [`${V}/upstream-notice.md`]: '', [`${V}/release-gate.md`]: '' })
-    const dir = assets(['Fork_1.0.0-alpha.1-rehearsal_amd64.deb', 'app.exe'])
-    fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), 'x  Fork_1.0.0-alpha.1-rehearsal_amd64.deb\nw  app.exe\n')
+    const dir = assets(['Fork_1.0.0-alpha.1-rehearsal_amd64-test.deb', 'app.exe'])
+    fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), 'x  Fork_1.0.0-alpha.1-rehearsal_amd64-test.deb\nw  app.exe\n')
     const r = runGate(root, { mode: 'release', rehearsal: true, tag: 'v1.0.0-alpha.1-rehearsal', assetsDir: dir },
       env({ remoteTagSha: () => null }))
     expect(r.warnings.join('\n')).toMatch(/\[1\][\s\S]*\[2\][\s\S]*\[3\][\s\S]*\[8\]/)
@@ -205,7 +211,7 @@ jobs:
 })
 
 describe('release gate phases (contracts §2: gate before builds, artifacts at publish)', () => {
-  const GOOD_ASSETS = ['Pagelight_1.0.0-alpha.1_universal.dmg', 'Pagelight_1.0.0-alpha.1_amd64.deb']
+  const GOOD_ASSETS = ['Pagelight_1.0.0-alpha.1_universal.dmg', 'Pagelight_1.0.0-alpha.1_amd64-test.deb']
   function sums(files: string[]) {
     return files.map((f) => `${'0'.repeat(64)}  ${f}`).join('\n') + '\n'
   }
@@ -244,7 +250,7 @@ describe('release gate phases (contracts §2: gate before builds, artifacts at p
 })
 
 describe('release without Android (constitution v4.3.0: no fork key yet)', () => {
-  const DESKTOP = ['Pagelight_1.0.0-alpha.1_universal.dmg', 'Pagelight_1.0.0-alpha.1_amd64.deb']
+  const DESKTOP = ['Pagelight_1.0.0-alpha.1_universal.dmg', 'Pagelight_1.0.0-alpha.1_amd64-test.deb']
   const sums = (files: string[]) => files.map((f) => `${'0'.repeat(64)}  ${f}`).join('\n') + '\n'
   const NO_KEY = { ...GOOD_RECORDS, [`${V}/release-gate.md`]: '- [ ] 8. Android 서명 키 백업 확인\n' }
 
@@ -318,6 +324,165 @@ describe('item 4 looks only at the core CI jobs (constitution v5.0.0: macOS is t
     expect(summarizeCiJobs([ok('verify'), { name: 'licenses', conclusion: 'failure' }, ok('macos-build')])).toEqual({
       ci: 'failure',
       licenses: 'failure'
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Spec 004 US2: test builds (contracts/release-test-builds.md §2–§3)
+// ---------------------------------------------------------------------------
+
+const sha = (files: string[]) => files.map((f) => `${'0'.repeat(64)}  ${f}`).join('\n') + '\n'
+function publishDir(files: string[]) {
+  const dir = assets([...files, 'SHA256SUMS.txt'])
+  fs.writeFileSync(path.join(dir, 'SHA256SUMS.txt'), sha(files))
+  return dir
+}
+const DMG = 'Pagelight_1.1.0_universal.dmg'
+const publish = (files: string[], extra: Record<string, unknown> = {}, root = repo({})) =>
+  runGate(root, { mode: 'release', phase: 'publish', tag: 'v1.1.0', assetsDir: publishDir(files), ...extra }, env())
+
+describe('publish phase marks test builds (spec 004 FR-004, FR-005)', () => {
+  it('passes when every Linux and Android file carries the -test marker', () => {
+    const r = publish([DMG, 'Pagelight_1.1.0_amd64-test.deb', 'Pagelight_1.1.0_amd64-test.AppImage', 'Pagelight_1.1.0_android-arm64-test.apk'], {
+      linuxResult: 'success',
+      androidResult: 'success',
+      notes: ''
+    })
+    expect(r.errors).toEqual([])
+  })
+
+  it.each(['Pagelight_1.1.0_amd64.deb', 'Pagelight_1.1.0_amd64.AppImage', 'Pagelight_1.1.0-1.x86_64.rpm', 'Pagelight_1.1.0_android-arm64.apk'])(
+    'fails when %s has no -test marker',
+    (file) => {
+      expect(publish([DMG, file]).errors.join('\n')).toMatch(/테스트용 빌드 표식/)
+    }
+  )
+
+  it('accepts the rehearsal marker on a rehearsal APK', () => {
+    expect(publish([DMG, 'Pagelight_1.1.0_android-arm64-test-rehearsal.apk']).errors).toEqual([])
+  })
+
+  it('fails when the macOS file carries a -test marker', () => {
+    expect(publish(['Pagelight_1.1.0_universal-test.dmg']).errors.join('\n')).toMatch(/macOS/)
+  })
+
+  it('fails when a failed test build has no omission marker in the notes', () => {
+    const r = publish([DMG], { linuxResult: 'failure', androidResult: 'success', notes: '노트' })
+    expect(r.errors.join('\n')).toMatch(/linux/)
+    const ok = publish([DMG], { linuxResult: 'failure', notes: '<!-- pagelight:omitted linux=build-failed -->' })
+    expect(ok.errors).toEqual([])
+  })
+
+  it('fails when an excluded platform still has an artifact', () => {
+    const root = repo({ '.github/release-exclusions.json': JSON.stringify([{ platform: 'linux', advisory: 'PAGELIGHT-2026-001', since: '2026-12-01' }]) })
+    const r = publish([DMG, 'Pagelight_1.1.0_amd64-test.deb'], {}, root)
+    expect(r.errors.join('\n')).toMatch(/보안상 제외/)
+  })
+})
+
+describe('release exclusions file (spec 004 data-model §4)', () => {
+  it('accepts an empty list and well-formed entries', () => {
+    expect(validateExclusions([])).toEqual([])
+    expect(validateExclusions([{ platform: 'android', advisory: 'PAGELIGHT-2026-002', since: '2026-12-01' }])).toEqual([])
+  })
+
+  it.each([
+    [{ platform: 'macos', advisory: 'X', since: '2026-12-01' }],
+    [{ platform: 'ios', advisory: 'X', since: '2026-12-01' }],
+    [{ platform: 'linux', since: '2026-12-01' }],
+    [{ platform: 'linux', advisory: 'X', since: '12/01' }],
+    [{ platform: 'linux', advisory: 'X', since: '2026-12-01', details: 'heap overflow' }]
+  ])('rejects %j', (entry) => {
+    expect(validateExclusions([entry]).length).toBeGreaterThan(0)
+  })
+
+  it('rejects a file that is not an array', () => {
+    expect(validateExclusions({ platform: 'linux' }).length).toBeGreaterThan(0)
+  })
+})
+
+type Rel = { tag: string; body: string; assets: string[] }
+const rel = (tag: string, assetsList: string[], body = ''): Rel => ({ tag, body, assets: assetsList })
+const LINUX_OK = ['Pagelight_x_amd64-test.deb']
+const ANDROID_OK = ['Pagelight_x_android-arm64-test.apk']
+const NO_KEY = '<!-- pagelight:omitted android=no-signing-key -->'
+
+describe('consecutive omissions (spec 004 FR-005c, research R4)', () => {
+  it('counts Linux build failures and security exclusions, newest first', () => {
+    const releases = [
+      rel('v1.4.0', [DMG], '<!-- pagelight:omitted linux=build-failed -->'),
+      rel('v1.3.0', [DMG], '<!-- pagelight:omitted linux=security -->'),
+      rel('v1.2.0', [DMG], '<!-- pagelight:omitted linux=build-failed -->'),
+      rel('v1.1.0', [DMG, ...LINUX_OK])
+    ]
+    expect(consecutiveOmissions(releases, 'linux').count).toBe(3)
+    expect(consecutiveOmissions(releases.slice(1), 'linux').count).toBe(2)
+  })
+
+  it('does not count Android releases left out for lack of a signing key', () => {
+    const releases = [
+      rel('v1.4.0', [DMG], '<!-- pagelight:omitted android=build-failed -->'),
+      rel('v1.3.0', [DMG], NO_KEY),
+      rel('v1.2.0', [DMG], '<!-- pagelight:omitted android=build-failed -->'),
+      rel('v1.1.0', [DMG, ...ANDROID_OK])
+    ]
+    expect(consecutiveOmissions(releases, 'android').count).toBe(2)
+  })
+
+  it('ignores releases before the marker was introduced and reads v1.0.0-alpha.1 as no signing key', () => {
+    const alpha1 = rel('v1.0.0-alpha.1', [DMG, 'Pagelight_1.0.0-alpha.1_amd64.deb'], '> **Android**: 이번 릴리스에는 Android APK가 없습니다. 포크 소유 서명 키가 준비된 릴리스부터 제공합니다.')
+    const old = [rel('v0.1.6-beta', [DMG]), rel('v0.1.6-alpha', [DMG])]
+    expect(consecutiveOmissions([alpha1, ...old], 'linux').count).toBe(0)
+    expect(consecutiveOmissions([alpha1, ...old], 'android').count).toBe(0)
+  })
+
+  it('ignores rehearsals', () => {
+    const releases = [
+      rel('v1.3.0-rehearsal', [DMG]),
+      rel('v1.2.0', [DMG], '<!-- pagelight:omitted linux=build-failed -->'),
+      rel('v1.1.0', [DMG, ...LINUX_OK])
+    ]
+    expect(consecutiveOmissions(releases, 'linux').count).toBe(1)
+  })
+})
+
+describe('prebuild gate stops the fourth release and sets build outputs (spec 004 FR-005c, R5)', () => {
+  const three = [
+    rel('v1.4.0', [DMG], '<!-- pagelight:omitted linux=build-failed -->'),
+    rel('v1.3.0', [DMG], '<!-- pagelight:omitted linux=build-failed -->'),
+    rel('v1.2.0', [DMG], '<!-- pagelight:omitted linux=build-failed -->')
+  ]
+  const prebuild = (e: ReturnType<typeof env>, extra: Record<string, unknown> = {}, root = repo(GOOD_RECORDS)) =>
+    runGate(root, { mode: 'release', phase: 'prebuild', tag: 'v1.0.0-alpha.1', ...extra }, e)
+
+  it('fails after three consecutive Linux omissions', () => {
+    const msg = prebuild(env({ recentReleases: () => three })).errors.join('\n')
+    expect(msg).toMatch(/linux/)
+    expect(msg).toMatch(/v1\.4\.0/)
+  })
+
+  it('reports BLOCKED when the release history cannot be fetched', () => {
+    const r = prebuild(env({ recentReleases: () => null }))
+    expect(r.blocked.join('\n')).toMatch(/릴리스/)
+  })
+
+  it('builds both test platforms by default', () => {
+    expect(prebuild(env()).outputs).toEqual({ linux: true, android: true })
+  })
+
+  it('skips Android without a signing key and any platform under a security exclusion', () => {
+    const root = repo({ ...GOOD_RECORDS, '.github/release-exclusions.json': JSON.stringify([{ platform: 'linux', advisory: 'PAGELIGHT-2026-001', since: '2026-12-01' }]) })
+    expect(prebuild(env(), { withoutAndroid: true }, root).outputs).toEqual({ linux: false, android: false })
+  })
+
+  it('computes outputs from exclusions and the signing key', () => {
+    expect(gateOutputs({ exclusions: [], hasSigningKey: true })).toEqual({ linux: true, android: true })
+    expect(gateOutputs({ exclusions: [], hasSigningKey: false })).toEqual({ linux: true, android: false })
+    expect(gateOutputs({ exclusions: [], hasSigningKey: false, rehearsal: true })).toEqual({ linux: true, android: true })
+    expect(gateOutputs({ exclusions: [{ platform: 'android', advisory: 'X', since: '2026-12-01' }], hasSigningKey: true })).toEqual({
+      linux: true,
+      android: false
     })
   })
 })

@@ -85,7 +85,7 @@ test.describe('Accessibility & UX Gates (T039)', () => {
     await expect(dialog).toBeVisible()
     await expect(dialog).toHaveAttribute('aria-modal', 'true')
     await expect(dialog).toContainText('GPL-3.0-only')
-    await expect(dialog).toContainText('iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼')
+    await expect(dialog).toContainText('Linux·Android는 테스트용 빌드로만 배포')
     await expect(dialog).not.toContainText('법적 의무')
 
     for (let i = 0; i < 12; i++) {

@@ -4,16 +4,32 @@
 
 이 문서는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)에서 갈라진 독립 포크의 변경 이력입니다. 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따릅니다.
 
+## [미출시] — 지원 범위 재정렬과 독립 포크 분리 마무리 (2026-11-24)
+
+헌법 v6.1.0의 플랫폼 등급(중점 macOS, 유지 iOS, 테스트 빌드 Linux·Android, 제외 Windows)을 반영했습니다.
+
+### 변경
+
+- 지원 범위 원문·공개 문서(국문·영문)·앱 정보 화면을 새 등급으로 고쳤습니다. 영문 문서에도 지원 범위 블록(`support-scope-en`)을 넣고 검사합니다.
+- 버그 양식을 핵심(macOS·iOS)과 테스트 빌드(Linux·Android, `test-build` 라벨)로 나눴습니다.
+- 릴리스: Linux·Android 파일 이름에 `-test`를 붙이고 릴리스 노트에 "테스트용 빌드" 절과 누락 안내를 넣습니다. 테스트용 빌드가 실패해도 macOS가 성공하면 게시하며, 같은 플랫폼이 3회 연속 빠지면 다음 릴리스를 멈춥니다. 보안상 제외 선언(`.github/release-exclusions.json`)을 추가했습니다.
+- `SECURITY.md`에 테스트용 빌드의 보안 범위를 적었습니다.
+
+### 제거
+
+- Windows에서만 쓰이던 남은 코드·설정·아이콘·감사 대상을 지우고, 재유입 검사(`scripts/check-windows-exclusion.mjs`)를 품질 게이트에 넣었습니다. Windows 프리릴리스 지원 종료 이력과 전환 안내는 보존 기록으로 남깁니다.
+
 ## [미출시] — 독립 포크 분리 (2026-11-17)
 
 이 포크는 원작 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었습니다. GitHub 포크 네트워크 분리는 2026-11-23에 끝났습니다. 원작의 이후 릴리스(`v0.2.0`, `v0.2.1`, `v0.2.2`)는 병합하지 않았습니다.
 
 <!-- support-scope:start -->
 이 포크는 **macOS**를 중점 지원합니다.
-iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-**Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
+iOS는 우선순위를 낮춘 유지 플랫폼이며, 공개 배포 채널 없이 소스 빌드로만 제공합니다.
+Linux·Android는 **테스트용 빌드**로만 배포합니다. 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다.
+**Windows는 이 포크의 범위가 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 웹 브라우저 실행은 개발 보조용입니다.
-Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
+Linux 테스트용 빌드는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 빌드합니다. Android 테스트용 빌드는 Android 7.0(API 24) 이상이 대상입니다.
 <!-- support-scope:end -->
 
 ### 추가

@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
+import { checkPrebuildTestBuilds, checkTestBuildAssets, gateOutputs, readExclusions } from './release-gate/testBuilds.mjs'
 
 /**
  * Fork-separation safety gate (spec 003 FR-025, contracts/release-and-ci.md §3).
@@ -15,6 +16,12 @@ import { pathToFileURL } from 'node:url'
  *                                `publish` (on the collected artifacts): items 6–7 only.
  *   --without-android            release without Android (no fork signing key yet, constitution v4.3.0):
  *                                item 8 is not required, and publishing fails if an APK is present.
+ *   --notes <file> --linux-result <r> --android-result <r>
+ *                                publish: test-build checks (spec 004 contracts/release-test-builds.md §3):
+ *                                -test marker on Linux/Android files, none on macOS, omission markers in the
+ *                                notes, no artifact of a platform under a security exclusion.
+ *                                prebuild also stops after three consecutive test-build omissions and prints
+ *                                the gate outputs `linux=` and `android=` (§2).
  *   --static                     workflow rules: scripts exist, no upstream sync, least privilege, pinned actions
  * Exit codes: 0 pass, 1 fail, 2 BLOCKED (a required lookup could not run).
  */
@@ -135,6 +142,7 @@ export function runGate(root, opts, env) {
   const warnings = []
   const blocked = []
   const items = []
+  let outputs
   const record = (id, result) => {
     items.push({ id, ok: result === null })
     if (result === null) return
@@ -156,13 +164,20 @@ export function runGate(root, opts, env) {
   }
 
   const phase = opts.mode === 'release' ? opts.phase ?? 'full' : 'full'
-  if (phase === 'publish') {
+  const publishChecks = () => {
     record('6', itemChecksums(opts.assetsDir))
     record('7', itemNoWindows(opts.assetsDir))
     if (opts.withoutAndroid) {
       const apk = noApk(opts.assetsDir)
       if (apk) errors.push(apk)
     }
+    const { list, errors: exclusionErrors } = readExclusions(root)
+    errors.push(...exclusionErrors)
+    const testBuild = checkTestBuildAssets(listAssets(opts.assetsDir), { ...opts, exclusions: list })
+    errors.push(...testBuild.map((e) => `[테스트 빌드] ${e}`))
+  }
+  if (phase === 'publish') {
+    publishChecks()
     return { errors, warnings, blocked, items }
   }
 
@@ -173,14 +188,11 @@ export function runGate(root, opts, env) {
   record('5', itemCi(env, 'licenses', '라이선스 감사'))
 
   if (opts.mode === 'release') {
-    if (phase !== 'prebuild') {
-      record('6', itemChecksums(opts.assetsDir))
-      record('7', itemNoWindows(opts.assetsDir))
-      if (opts.withoutAndroid) {
-        const apk = noApk(opts.assetsDir)
-        if (apk) errors.push(apk)
-      }
-    }
+    if (phase !== 'prebuild') publishChecks()
+    const tb = checkPrebuildTestBuilds(root, env)
+    errors.push(...tb.errors.map((e) => `[테스트 빌드] ${e}`))
+    blocked.push(...tb.blocked.map((b) => `[테스트 빌드] ${b}`))
+    outputs = gateOutputs({ exclusions: tb.exclusions, hasSigningKey: !opts.withoutAndroid, rehearsal: opts.rehearsal })
     if (!opts.withoutAndroid) record('8', itemKeyBackup(root))
     const v = extraVersion(root, opts.tag, opts.rehearsal, env)
     errors.push(...v.errors)
@@ -190,7 +202,7 @@ export function runGate(root, opts, env) {
     const drafts = env.draftReleases() ?? []
     if (!opts.rehearsal && drafts.includes(opts.tag)) errors.push(`같은 태그(${opts.tag})의 초안 릴리스가 남아 있습니다`)
   }
-  return { errors, warnings, blocked, items }
+  return { errors, warnings, blocked, items, outputs }
 }
 
 // ---------------------------------------------------------------------------
@@ -283,6 +295,17 @@ export function realEnv(root) {
     draftReleases() {
       const out = sh('gh', ['api', `repos/${repo}/releases`, '--jq', '.[] | select(.draft) | .tag_name'])
       return out === null ? [] : out.split('\n').filter(Boolean)
+    },
+    /** Published (non-draft) releases, newest first, for the consecutive-omission count (research R4). */
+    recentReleases() {
+      const out = sh('gh', [
+        'api',
+        `repos/${repo}/releases?per_page=30`,
+        '--jq',
+        '[.[] | select(.draft | not) | {tag: .tag_name, body: (.body // ""), assets: [.assets[].name], published: .published_at}]'
+      ])
+      if (out === null) return null
+      return JSON.parse(out).sort((a, b) => String(b.published).localeCompare(String(a.published)))
     }
   }
 }
@@ -310,7 +333,10 @@ function main() {
       assetsDir: arg('--assets') ?? 'release-assets',
       rehearsal: argv.includes('--rehearsal'),
       phase: arg('--phase'),
-      withoutAndroid: argv.includes('--without-android')
+      withoutAndroid: argv.includes('--without-android'),
+      notes: arg('--notes') ? fs.readFileSync(arg('--notes'), 'utf-8') : undefined,
+      linuxResult: arg('--linux-result'),
+      androidResult: arg('--android-result')
     },
     realEnv(root)
   )
@@ -319,6 +345,7 @@ function main() {
   for (const b of r.blocked) console.error(`[release-gate] BLOCKED ${b}`)
   if (r.errors.length) process.exit(1)
   if (r.blocked.length) process.exit(2)
+  if (r.outputs) for (const [k, v] of Object.entries(r.outputs)) console.log(`${k}=${v}`)
   console.log(`[release-gate] ${mode === 'release' ? '릴리스' : '분리'} 게이트 통과`)
 }
 

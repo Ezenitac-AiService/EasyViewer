@@ -7,7 +7,7 @@ use super::record::{
     iso8601_utc, read_record, write_record, MigrationErrorKind, MigrationRecord, MigrationState,
     RECORD_FILE, SOURCE_IDENTIFIER, TARGET_IDENTIFIER,
 };
-use crate::security::path_guard::is_sensitive_path_with_case_mode;
+use crate::security::path_guard::{case_insensitive_platform, is_sensitive_path_with_case_mode};
 use std::collections::BTreeMap;
 use std::fs;
 use std::io;
@@ -151,7 +151,7 @@ fn scan(root: &Path, excludes: &[String]) -> io::Result<Snapshot> {
 }
 
 fn scan_dir(root: &Path, rel: &Path, excludes: &[String], snap: &mut Snapshot) -> io::Result<()> {
-    let case_insensitive = cfg!(any(target_os = "macos", target_os = "windows"));
+    let case_insensitive = case_insensitive_platform(std::env::consts::OS);
     for entry in fs::read_dir(root.join(rel))? {
         let entry = entry?;
         let child = rel.join(entry.file_name());

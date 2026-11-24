@@ -4,7 +4,14 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { checkAndroidReleaseSigning, checkIdentity, NEW_IDENTITY, STORAGE_KEYS } from '../../scripts/check-identity.mjs'
+import {
+  checkAndroidReleaseSigning,
+  checkIcons,
+  checkIdentity,
+  LEGACY_ICON_HASHES,
+  NEW_IDENTITY,
+  STORAGE_KEYS
+} from '../../scripts/check-identity.mjs'
 
 /**
  * spec 003 US5 / data-model §4: the fork's own identity (Pagelight, com.ezenitac.easyviewer)
@@ -248,5 +255,12 @@ describe('Android release signing contract (spec 003 FR-017, T057)', () => {
   it('fails when a keystore password is hardcoded', () => {
     const bad = GOOD.replace('storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")', 'storePassword = "hunter2"')
     expect(checkAndroidReleaseSigning(bad).join('\n')).toMatch(/storePassword/)
+  })
+
+  it('does not track the Windows-only icon.ico and passes without it (spec 004 T027)', () => {
+    expect(Object.keys(LEGACY_ICON_HASHES)).not.toContain('src-tauri/icons/icon.ico')
+    expect(Object.keys(LEGACY_ICON_HASHES).some((k) => /Square\d+x\d+Logo|StoreLogo/.test(k))).toBe(false)
+    const root = repo({})
+    expect(checkIcons(root).filter((e: string) => /icon\.ico/.test(e))).toEqual([])
   })
 })

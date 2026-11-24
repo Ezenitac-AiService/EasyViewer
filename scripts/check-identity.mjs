@@ -37,7 +37,6 @@ export const LEGACY_ICON_HASHES = Object.freeze({
   'src-tauri/icons/128x128.png': 'e1b7756ab5f299a493292ddde7a24b782e0c643c1bd725063e31df9128e9a787',
   'src-tauri/icons/128x128@2x.png': 'f88a888cb1b8fe463d9467a3bbac792d16763ae6569fc3b39e75c6f4f374a7ea',
   'src-tauri/icons/icon.icns': 'ff4c56d6d05a49bcef1b80e8a130c2d3d5c4289a71a822af40c5457baedd0e84',
-  'src-tauri/icons/icon.ico': '66b118195dbfc04be4041eea5036586e04efd086d766118f6acfcb4032d5ac32',
   'src-tauri/gen/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png':
     'e0e684a6f8ab8fa690d05ed8388bb1d519e24769e3b575c5bfdec47363f61097',
   'src-tauri/gen/apple/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png':

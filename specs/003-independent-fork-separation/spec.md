@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-17
 
-**Status**: Draft
+**Status**: Completed (2026-11-24): 분리·첫 독립 릴리스 완료, Windows 관련·Linux/Android 실기기 항목 범위 제외, macOS 실기기 잔여 항목은 004로 이관
 
 **Input**: User description: "`/Users/dev/DEV/EasyViewer/easyviewer-003-fork-separation-specify-input.md` 문서의 내용으로 스펙 작성 진행" — 입력 문서(개정 2판) §3 "`/speckit-specify` 입력 본문"을 원문으로 삼았다. 같은 문서의 §1(현재 상태), §2(선례 비교), §4(plan 단계 메모), §5(결정 기록)는 명세에 옮기지 않고 `/speckit-plan`의 참고 자료로 남긴다.
 
@@ -13,6 +13,7 @@
 이 명세는 EasyViewer 저장소를 업스트림(`edith2580/EasyViewer`)에서 독립된 포크 프로젝트(`Ezenitac-AiService/EasyViewer`)로 분리한다. 범위는 다섯 가지다: **법적 준수**, **저장소 독립**, **지원 플랫폼 범위 전환**, **앱 정체성 분리**, **기존 사용자 데이터 보호**. 뷰어 기능 추가나 재작성은 범위가 아니다. 형제 프로젝트 ImageViewer의 `003-independent-fork-separation`을 선례로 삼되, EasyViewer는 원저작자가 같은 이름의 멀티플랫폼 앱을 계속 배포하고 있다는 점이 다르다.
 
 - 이 포크의 **지원 범위는 macOS · iOS · Linux**이다. 설계·검증·품질 투자는 이 세 플랫폼을 기준으로 한다.
+  - **개정 메모 (2026-11-24)**: 지원 범위는 헌법 v6.1.0 등급으로 바뀌었다. 중점 macOS(유일한 핵심 빌드), 유지 iOS(소스 빌드만), 테스트 빌드 Linux·Android(테스트용 빌드로 배포만, 보장 없음), 제외 Windows. 후속 정리는 `specs/004-platform-scope-cleanup`을 따른다.
 - **Windows는 이 포크의 공식 지원·배포 대상이 아니며, Windows 사용자에게는 원저작자(`edith2580/EasyViewer`)의 애플리케이션 사용을 권장한다.**
 - 공개 문구는 **포크 자신의 범위만** 말한다. 원저작자 프로젝트의 역할·의도·지원 범위를 대신 규정하지 않는다.
   - "역할 분담", "경쟁하지 않는다" 같은 표현은 원저작자가 동의한 경우에만 쓴다.

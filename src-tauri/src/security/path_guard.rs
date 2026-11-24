@@ -144,12 +144,14 @@ pub fn is_sensitive_path_with_case_mode(
     false
 }
 
+/// File names compare case-insensitively only on macOS, the one shipped desktop platform whose
+/// default file system (APFS) is case-insensitive. Linux and the mobile platforms are case-sensitive.
+pub fn case_insensitive_platform(os: &str) -> bool {
+    os == "macos"
+}
+
 pub fn is_sensitive_path(path: &Path, home_dir: Option<&Path>) -> bool {
-    is_sensitive_path_with_case_mode(
-        path,
-        home_dir,
-        cfg!(any(target_os = "macos", target_os = "windows")),
-    )
+    is_sensitive_path_with_case_mode(path, home_dir, case_insensitive_platform(std::env::consts::OS))
 }
 
 pub fn validate_and_prepare_storage_dir(
@@ -316,6 +318,16 @@ mod tests {
         assert!(is_sensitive_path_with_case_mode(Path::new("/ETC/passwd"), Some(&fake_home), true));
         assert!(is_sensitive_path_with_case_mode(&fake_home.join(".SSH/id_ed25519"), Some(&fake_home), true));
         assert!(!is_sensitive_path_with_case_mode(Path::new("/etcetera/Books"), Some(&fake_home), true));
+    }
+
+    #[test]
+    fn case_insensitive_matching_is_macos_only_spec004_t028() {
+        assert!(case_insensitive_platform("macos"));
+        assert!(!case_insensitive_platform("linux"));
+        assert!(!case_insensitive_platform("windows"));
+        assert!(!case_insensitive_platform("android"));
+        assert!(!case_insensitive_platform("ios"));
+        assert_eq!(case_insensitive_platform(std::env::consts::OS), cfg!(target_os = "macos"));
     }
 
     #[test]

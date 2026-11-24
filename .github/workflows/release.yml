@@ -1,6 +1,8 @@
-# Tag release for the supported platforms only (spec 003 contracts/release-and-ci.md §2).
-# gate (FR-025, before any build) → macOS/Linux/Android builds → publish (artifact gate, checksums).
-# Rehearsal runs only from workflow_dispatch, never from a tag push, and only creates a draft.
+# Tag release for the supported platforms only (spec 003 contracts/release-and-ci.md §2,
+# spec 004 contracts/release-test-builds.md §1).
+# gate (FR-025, before any build) → build-macos (core) + build-linux/build-android (test builds)
+# → publish (-test names, notes, checksums, artifact gate). A failed test build only drops that platform;
+# a failed macOS build stops the release. Rehearsal runs only from workflow_dispatch and only creates a draft.
 name: Release
 
 on:
@@ -18,6 +20,16 @@ on:
         required: false
         default: false
         type: boolean
+      fail_linux:
+        description: 'Rehearsal only: make build-linux fail on purpose to check that the release continues without it'
+        required: false
+        default: false
+        type: boolean
+      fail_android:
+        description: 'Rehearsal only: make build-android fail on purpose to check that the release continues without it'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -32,7 +44,9 @@ jobs:
     outputs:
       tag: ${{ steps.mode.outputs.tag }}
       rehearsal: ${{ steps.mode.outputs.rehearsal }}
-      android: ${{ steps.android.outputs.android }}
+      has_key: ${{ steps.key.outputs.has_key }}
+      linux: ${{ steps.gate.outputs.linux }}
+      android: ${{ steps.gate.outputs.android }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -45,6 +59,8 @@ jobs:
           EVENT: ${{ github.event_name }}
           INPUT_TAG: ${{ inputs.tag_name }}
           INPUT_REHEARSAL: ${{ inputs.rehearsal }}
+          FAIL_LINUX: ${{ inputs.fail_linux }}
+          FAIL_ANDROID: ${{ inputs.fail_android }}
         run: |
           set -euo pipefail
           if [ "$EVENT" = "push" ]; then
@@ -58,60 +74,46 @@ jobs:
           if [ "$REHEARSAL" != "true" ] && [[ "$TAG" == *-rehearsal ]]; then
             echo "::error::A -rehearsal tag can only be used with rehearsal=true"; exit 1
           fi
+          if [ "$REHEARSAL" != "true" ] && { [ "$FAIL_LINUX" = "true" ] || [ "$FAIL_ANDROID" = "true" ]; }; then
+            echo "::error::fail_linux and fail_android are rehearsal-only inputs"; exit 1
+          fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "rehearsal=$REHEARSAL" >> "$GITHUB_OUTPUT"
-      # Constitution v4.3.0: Android ships only when it can be signed with the fork key; without the key
+      # Constitution v6.1.0: Android ships only when it can be signed with the fork key; without the key
       # it is left out of the release, never debug-signed. Only a boolean leaves the secret context.
-      - name: Decide whether Android is part of this release
-        id: android
+      - name: Check whether the Android signing key is registered
+        id: key
         shell: bash
         env:
           HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-          REHEARSAL: ${{ steps.mode.outputs.rehearsal }}
         run: |
           set -euo pipefail
-          if [ "$HAS_KEY" = "true" ] || [ "$REHEARSAL" = "true" ]; then
-            echo "android=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::notice::Android signing key is not registered; this release leaves Android out"
-            echo "android=false" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::notice::Android signing key is not registered; a release leaves Android out"
           fi
-      - name: Release gate before any build (FR-025 1–5, 8, version, versionCode)
+          echo "has_key=$HAS_KEY" >> "$GITHUB_OUTPUT"
+      # The gate also stops after three consecutive test-build omissions and decides, from
+      # .github/release-exclusions.json and the key, whether build-linux and build-android run.
+      - name: Release gate before any build (FR-025 1–5, 8, version, versionCode, test builds)
+        id: gate
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.mode.outputs.tag }}
           REHEARSAL: ${{ steps.mode.outputs.rehearsal }}
-          ANDROID: ${{ steps.android.outputs.android }}
+          HAS_KEY: ${{ steps.key.outputs.has_key }}
         run: |
           set -euo pipefail
           EXTRA=""
           if [ "$REHEARSAL" = "true" ]; then EXTRA="$EXTRA --rehearsal"; fi
-          if [ "$ANDROID" != "true" ]; then EXTRA="$EXTRA --without-android"; fi
+          if [ "$HAS_KEY" != "true" ] && [ "$REHEARSAL" != "true" ]; then EXTRA="$EXTRA --without-android"; fi
           # shellcheck disable=SC2086 # EXTRA holds fixed flags only
-          node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild $EXTRA
+          node scripts/check-release-gate.mjs --release --tag "$TAG" --phase prebuild $EXTRA | tee "$RUNNER_TEMP/gate.out"
+          grep -E '^(linux|android)=(true|false)$' "$RUNNER_TEMP/gate.out" >> "$GITHUB_OUTPUT"
 
-  build-desktop:
+  build-macos:
     needs: gate
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: macos-universal
-            os: macos-latest
-            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
-            build_cmd: npm run mac:build
-            bundle_path: |
-              src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-          - name: linux-x64
-            os: ubuntu-22.04
-            rust_targets: x86_64-unknown-linux-gnu
-            build_cmd: npx tauri build --bundles deb,rpm,appimage
-            bundle_path: |
-              src-tauri/target/release/bundle/deb/*.deb
-              src-tauri/target/release/bundle/rpm/*.rpm
-              src-tauri/target/release/bundle/appimage/*.AppImage
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -121,25 +123,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
         with:
           toolchain: stable
-          targets: ${{ matrix.rust_targets }}
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: './src-tauri -> target'
-          prefix-key: ${{ matrix.name }}-rust
-      - name: Install Linux system dependencies
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf rpm
+          prefix-key: macos-universal-rust
       - run: npm ci
-      - name: Build Tauri bundle (${{ matrix.name }})
+      - name: Build Tauri bundle (macos-universal)
         env:
-          APPIMAGE_EXTRACT_AND_RUN: '1'
-          MATRIX_NAME: ${{ matrix.name }}
-          MATRIX_BUILD_CMD: ${{ matrix.build_cmd }}
+          MATRIX_NAME: macos-universal
+          MATRIX_BUILD_CMD: npm run mac:build
         run: node scripts/ci-build-desktop.mjs
       - name: Verify macOS bundle signature and DMG integrity
-        if: matrix.name == 'macos-universal'
         run: |
           codesign --verify --deep --strict -vvv src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
           for dmg in src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg; do
@@ -147,15 +142,65 @@ jobs:
           done
       - uses: actions/upload-artifact@v7
         with:
-          name: bundle-${{ matrix.name }}
-          path: ${{ matrix.bundle_path }}
+          name: bundle-macos-universal
+          path: src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
           if-no-files-found: error
 
+  # Test build (constitution v6.1.0): a failure here leaves Linux out of the release, nothing more.
+  build-linux:
+    needs: gate
+    if: needs.gate.outputs.linux == 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+          targets: x86_64-unknown-linux-gnu
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: './src-tauri -> target'
+          prefix-key: linux-x64-rust
+      - name: 'Rehearsal: fail on purpose (fail_linux)'
+        if: inputs.fail_linux == true
+        run: |
+          echo "::warning::fail_linux=true: build-linux fails on purpose"
+          exit 1
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf rpm
+      - run: npm ci
+      - name: Build Tauri bundle (linux-x64)
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+          MATRIX_NAME: linux-x64
+          MATRIX_BUILD_CMD: npx tauri build --bundles deb,rpm,appimage
+        run: node scripts/ci-build-desktop.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bundle-linux-x64
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+
+  # Test build (constitution v6.1.0): fork-key signed only (debug signing only in a rehearsal).
   build-android:
     needs: gate
     if: needs.gate.outputs.android == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: 'Rehearsal: fail on purpose (fail_android)'
+        if: inputs.fail_android == true
+        run: |
+          echo "::warning::fail_android=true: build-android fails on purpose"
+          exit 1
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
@@ -240,11 +285,8 @@ jobs:
           if-no-files-found: error
 
   publish:
-    needs: [gate, build-desktop, build-android]
-    if: >-
-      ${{ !cancelled() && needs.gate.result == 'success' && needs.build-desktop.result == 'success' &&
-      (needs.build-android.result == 'success' ||
-      (needs.build-android.result == 'skipped' && needs.gate.outputs.android == 'false')) }}
+    needs: [gate, build-macos, build-linux, build-android]
+    if: ${{ !cancelled() && needs.gate.result == 'success' && needs.build-macos.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -257,7 +299,7 @@ jobs:
         with:
           path: release-artifacts
           merge-multiple: true
-      - name: Collect artifacts, refuse Windows files, write SHA256SUMS.txt
+      - name: Collect artifacts and refuse Windows files
         shell: bash
         run: |
           set -euo pipefail
@@ -266,33 +308,52 @@ jobs:
           fi
           mkdir -p release-assets
           find release-artifacts -type f \( -name '*.dmg' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.apk' \) -exec cp {} release-assets/ \;
-          (cd release-assets && sha256sum * > SHA256SUMS.txt)
+      - name: Mark Linux and Android files as test builds (-test, rehearsal APK -test-rehearsal)
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in release-assets/*.deb release-assets/*.rpm release-assets/*.AppImage release-assets/*.apk; do
+            case "$f" in
+              *-rehearsal.apk) mv "$f" "${f%-rehearsal.apk}-test-rehearsal.apk" ;;
+              *) mv "$f" "${f%.*}-test.${f##*.}" ;;
+            esac
+          done
           ls -lh release-assets
-      - name: Release gate on the artifacts (FR-025 6–7)
+      - name: Release notes with the test-build section and omission notices
+        shell: bash
+        env:
+          LINUX_RESULT: ${{ needs.build-linux.result }}
+          ANDROID_RESULT: ${{ needs.build-android.result }}
+          HAS_KEY: ${{ needs.gate.outputs.has_key }}
+          REHEARSAL: ${{ needs.gate.outputs.rehearsal }}
+        run: |
+          set -euo pipefail
+          REASON=""
+          if [ "$ANDROID_RESULT" = "skipped" ] && [ "$HAS_KEY" != "true" ] && [ "$REHEARSAL" != "true" ]; then
+            REASON="no-signing-key"
+          fi
+          node scripts/release-notes.mjs --base .github/release-notes.md --linux-result "$LINUX_RESULT" --android-result "$ANDROID_RESULT" \
+            --android-reason "$REASON" --out "$RUNNER_TEMP/release-notes.md"
+      - name: Write SHA256SUMS.txt
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd release-assets && sha256sum * > SHA256SUMS.txt)
+      - name: Release gate on the artifacts and notes (FR-025 6–7, test builds)
         shell: bash
         env:
           TAG: ${{ needs.gate.outputs.tag }}
           ANDROID: ${{ needs.gate.outputs.android }}
+          LINUX_RESULT: ${{ needs.build-linux.result }}
+          ANDROID_RESULT: ${{ needs.build-android.result }}
         run: |
           set -euo pipefail
           EXTRA=""
           if [ "$ANDROID" != "true" ]; then EXTRA="--without-android"; fi
           # shellcheck disable=SC2086 # EXTRA holds fixed flags only
-          node scripts/check-release-gate.mjs --release --tag "$TAG" --phase publish --assets release-assets $EXTRA
-      - name: Release notes (note when Android is left out)
-        shell: bash
-        env:
-          ANDROID: ${{ needs.gate.outputs.android }}
-        run: |
-          set -euo pipefail
-          cp .github/release-notes.md "$RUNNER_TEMP/release-notes.md"
-          if [ "$ANDROID" != "true" ]; then
-            {
-              echo
-              echo "> **Android**: 이번 릴리스에는 Android APK가 없습니다. 포크 소유 서명 키가 준비된 릴리스부터 제공합니다."
-              echo "> This release has no Android APK. It will be provided from the release where the fork signing key is ready."
-            } >> "$RUNNER_TEMP/release-notes.md"
-          fi
+          node scripts/check-release-gate.mjs --release --tag "$TAG" --phase publish --assets release-assets \
+            --notes "$RUNNER_TEMP/release-notes.md" --linux-result "$LINUX_RESULT" --android-result "$ANDROID_RESULT" $EXTRA
       - name: Create the GitHub release
         shell: bash
         env:

@@ -2,10 +2,11 @@
 
 <!-- support-scope:start -->
 이 포크는 **macOS**를 중점 지원합니다.
-iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-**Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
+iOS는 우선순위를 낮춘 유지 플랫폼이며, 공개 배포 채널 없이 소스 빌드로만 제공합니다.
+Linux·Android는 **테스트용 빌드**로만 배포합니다. 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다.
+**Windows는 이 포크의 범위가 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 웹 브라우저 실행은 개발 보조용입니다.
-Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
+Linux 테스트용 빌드는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 빌드합니다. Android 테스트용 빌드는 Android 7.0(API 24) 이상이 대상입니다.
 <!-- support-scope:end -->
 
 ## 내려받은 파일 확인 (체크섬)
@@ -37,9 +38,9 @@ iOS는 공개 배포 채널 없이 **소스 빌드로만 제공**합니다. 직�
 
 이 릴리스부터 앱 이름이 **Pagelight**로, 앱 식별자가 `com.ezenitac.easyviewer`로 바뀌었습니다.
 
-- **macOS·Linux**: Pagelight를 처음 실행하면 이전 버전의 서재와 설정을 한 번 복사합니다. 원본은 그대로 남습니다. 결과는 앱 안 안내로 알려 드립니다.
+- **macOS·Linux(테스트용 빌드)**: Pagelight를 처음 실행하면 이전 버전의 서재와 설정을 한 번 복사합니다. 원본은 그대로 남습니다. 결과는 앱 안 안내로 알려 드립니다.
 - **Android·iOS**: 새 앱으로 따로 설치되며 데이터를 자동으로 옮기지 않습니다. [모바일 이전 안내](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/docs/mobile-migration.md)를 참고하세요.
-- **Android 서명**: 이 포크가 소유한 새 서명 키로 서명합니다. 이전 APK 위에 업데이트로 설치되지 않습니다. 서명 키가 준비되지 않은 릴리스에는 APK를 넣지 않습니다(debug 서명 APK는 배포하지 않음).
+- **Android 서명**: Android 테스트용 빌드는 이 포크가 소유한 새 서명 키로만 서명합니다. 이전 APK 위에 업데이트로 설치되지 않습니다. 서명 키가 준비되지 않은 릴리스에는 APK를 넣지 않습니다(debug 서명 APK는 배포하지 않음).
 - **Windows**: 이 포크의 Windows 프리릴리스를 쓰던 경우 [Windows 전환 안내](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/docs/windows-migration.md)를 따르세요.
 
 ## 출처와 라이선스

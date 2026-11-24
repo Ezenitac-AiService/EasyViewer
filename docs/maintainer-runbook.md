@@ -61,3 +61,29 @@ gh api -X PUT repos/Ezenitac-AiService/EasyViewer/private-vulnerability-reportin
 - 원저작자 앱의 데이터 형식 버전이 바뀌었는지
 
 변화가 있으면 `src/config/supportScope.ts`의 Windows 문구와 [Windows 전환 안내](windows-migration.md)를 갱신하고 `node scripts/check-support-scope.mjs`로 확인합니다.
+
+## 6. 테스트용 빌드 운영 (Linux·Android)
+
+Linux·Android는 테스트용 빌드로만 배포합니다(헌법 v6.1.0). 릴리스 워크플로는 두 플랫폼 파일 이름에 `-test`를 붙이고, 릴리스 노트에 "테스트용 빌드" 절과 빠진 플랫폼마다 누락 안내(`<!-- pagelight:omitted <platform>=<reason> -->`)를 남깁니다. 테스트용 빌드 하나가 실패해도 macOS가 성공하면 릴리스는 게시됩니다.
+
+### 보안상 제외 선언
+
+테스트용 빌드에만 있는 취약점을 아직 고치지 못했다면 다음 순서로 그 플랫폼을 릴리스에서 뺍니다.
+
+1. `.github/release-exclusions.json`에 항목을 추가하는 PR을 엽니다. 형식은 `{ "platform": "linux" | "android", "advisory": "<비공개 식별자>", "since": "YYYY-MM-DD" }`입니다. macOS·iOS는 이 방식으로 뺄 수 없고, 결함 세부는 적지 않습니다.
+2. 병합하면 다음 릴리스부터 게이트가 그 플랫폼 빌드를 건너뛰고, 릴리스 노트에 `security` 누락 안내가 붙습니다.
+3. 이미 게시된 이전 릴리스에 그 플랫폼 산출물이 있으면, 해당 릴리스 노트에 미수정 취약점 안내를 덧붙입니다(`gh release edit <tag> --notes-file <file>`). 공개 행위이므로 메인테이너가 승인한 뒤에 하고, 결함 세부는 적지 않습니다.
+4. 고친 릴리스를 낼 때 항목을 지우는 PR을 엽니다.
+
+### 연속 누락으로 게이트가 멈췄을 때
+
+같은 테스트용 빌드 플랫폼이 3회 연속 빠지면(빌드 실패나 보안상 제외. Android 서명 키 미등록은 세지 않음) 네 번째 릴리스의 게이트가 빌드 전에 멈춥니다. 다음 중 하나를 별도 변경으로 결정합니다.
+
+- 그 플랫폼의 빌드를 고칩니다. 고친 뒤 리허설로 해당 빌드가 성공하는지 확인하고 릴리스합니다.
+- 그 플랫폼을 지원 범위에서 뺍니다. 헌법 개정 절차(메인테이너 명시 승인과 PR)를 따르고 `src/config/supportScope.ts`와 공개 문서를 함께 고칩니다.
+
+게이트를 우회하려고 이전 릴리스 노트의 누락 안내를 지우지 않습니다.
+
+### 리허설로 실패 격리 확인
+
+`workflow_dispatch`에서 `rehearsal=true`와 함께 `fail_linux` 또는 `fail_android`를 켜면 해당 빌드를 일부러 실패시켜, 그 플랫폼만 빠지고 초안 릴리스가 만들어지는지 확인할 수 있습니다. 두 입력은 리허설에서만 쓸 수 있습니다.
