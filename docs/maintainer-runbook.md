@@ -84,6 +84,14 @@ Linux·Android는 테스트용 빌드로만 배포합니다(헌법 v6.1.0). 릴�
 
 게이트를 우회하려고 이전 릴리스 노트의 누락 안내를 지우지 않습니다.
 
+### macOS 빌드가 러너 부족으로 취소되었을 때
+
+GitHub의 macOS arm64 러너가 모자라면 `build-macos`가 시작하지 못하고 취소된다. 이때 릴리스는 게시되지 않는다. 태그를 다시 만들지 말고 실패한 작업만 다시 실행한다.
+
+```bash
+gh run rerun <run-id> --failed
+```
+
 ### 리허설로 실패 격리 확인
 
 `workflow_dispatch`에서 `rehearsal=true`와 함께 `fail_linux` 또는 `fail_android`를 켜면 해당 빌드를 일부러 실패시켜, 그 플랫폼만 빠지고 초안 릴리스가 만들어지는지 확인할 수 있습니다. 두 입력은 리허설에서만 쓸 수 있습니다.
