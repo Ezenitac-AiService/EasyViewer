@@ -27,6 +27,8 @@ describe('AboutDialog (FR-004, contracts/about-screen.md)', () => {
     expect(text).toContain('v0.1.6')
     expect(text).toContain(about.separatedAt)
     expect(text).toContain('macOS를 중점 지원')
+    expect(text).toContain('Linux·Android는 테스트용 빌드로만 배포')
+    expect(text).not.toContain('iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼')
     for (const dep of about.thirdParty) expect(text).toContain(dep.name)
     wrapper.unmount()
   })

@@ -74,3 +74,56 @@ describe('SECURITY.md (T081)', () => {
     expect(checkForbiddenWording(root, exceptions)).toEqual([])
   })
 })
+
+describe('SECURITY test-build scope (spec 004 FR-005b, T022)', () => {
+  it('states the test-build security scope in Korean', () => {
+    const body = section(read('SECURITY.md'), '테스트용 빌드의 보안 범위')
+    expect(body).not.toBe('')
+    expect(body).toMatch(/공통 코드[^\n]*같은 릴리스/)
+    expect(body).toMatch(/테스트용 빌드에만[^\n]*고칠 때까지[^\n]*(제외|뺍니다)/)
+    expect(body).toContain('.github/release-exclusions.json')
+  })
+
+  it('states the same scope in English', () => {
+    const body = section(read('SECURITY.en.md'), 'Security scope of test builds')
+    expect(body).not.toBe('')
+    expect(body).toMatch(/shared code[^\n]*same release/i)
+    expect(body).toMatch(/only (affects|in) (a )?test build[^\n]*until[^\n]*(left out|excluded)/i)
+    expect(body).toContain('.github/release-exclusions.json')
+  })
+})
+
+describe('Windows exclusion in public docs (spec 004 contracts/windows-exclusion.md §3–§4, T030)', () => {
+  const PRESERVED =
+    '> **보존 기록**: 이 문서는 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`) 지원 종료 이력으로 남긴 것이며 더 이상 갱신하지 않습니다. Windows는 이 포크의 범위가 아닙니다(헌법 v6.1.0).'
+
+  it.each(['docs/windows-migration.md', 'docs/windows-eol-notice.md'])('marks %s as a preserved record at the top', (file) => {
+    const lines = read(file).split('\n')
+    expect(lines.slice(0, 4).join('\n')).toContain(PRESERVED)
+  })
+
+  it.each([
+    ['README.md', 'Windows 사용자 안내', /원저작자의 \[EasyViewer\]/, /windows-migration\.md/],
+    ['README.en.md', 'Windows users', /original \[EasyViewer\]/, /windows-migration\.md/]
+  ])('keeps the %s Windows section to the upstream pointer and the preserved-record link', (file, heading, upstream, link) => {
+    const text = read(file)
+    const start = text.indexOf(`### ${heading}`)
+    expect(start).toBeGreaterThan(-1)
+    const rest = text.slice(start + 4)
+    const body = rest.slice(rest.indexOf('\n'), rest.indexOf('\n#')).trim()
+    const sentences = body.split(/(?<=[.다])\s+(?=\S)/).filter((s) => s.trim())
+    expect(sentences).toHaveLength(2)
+    expect(body).toMatch(upstream)
+    expect(body).toMatch(link)
+    expect(body).not.toMatch(/CI|컴파일|compiled/)
+  })
+
+  it.each([
+    ['CONTRIBUTING.md', /Windows에서만 (쓰는|동작하는) 코드/, /Windows[^\n]*(CI|컴파일)|(CI|컴파일)[^\n]*Windows/],
+    ['CONTRIBUTING.en.md', /Windows-only code/, /Windows[^\n]*(CI|compile)|(CI|compile)[^\n]*Windows/]
+  ])('%s rejects Windows-only code and no longer talks about Windows CI', (file, rule, ci) => {
+    const text = read(file)
+    expect(text).toMatch(rule)
+    expect(text).not.toMatch(ci)
+  })
+})

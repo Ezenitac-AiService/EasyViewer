@@ -2,14 +2,15 @@
 
 **언어 / Language**: **[한국어](README.md)** | [English](README.en.md)
 
-> This is an independent fork. It focuses on macOS; iOS (source build only), Linux and Android are maintained with lower priority. For Windows, please use the original EasyViewer by edith2580.
+> This is an independent fork. It focuses on macOS; iOS is a source build only, and Linux and Android are test builds. For Windows, please use the original EasyViewer by edith2580.
 >
 > <!-- support-scope:start -->
 > 이 포크는 **macOS**를 중점 지원합니다.
-> iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-> **Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
+> iOS는 우선순위를 낮춘 유지 플랫폼이며, 공개 배포 채널 없이 소스 빌드로만 제공합니다.
+> Linux·Android는 **테스트용 빌드**로만 배포합니다. 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다.
+> **Windows는 이 포크의 범위가 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 > 웹 브라우저 실행은 개발 보조용입니다.
-> Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
+> Linux 테스트용 빌드는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 빌드합니다. Android 테스트용 빌드는 Android 7.0(API 24) 이상이 대상입니다.
 > <!-- support-scope:end -->
 
 심플한 Text(TXT), EPUB 범용 문서 뷰어 (`v1.0.0-alpha.1`) — [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크
@@ -58,7 +59,7 @@
 - **상태 / 라우팅 / UI**: Pinia `^2.3.0`, Vue Router `^4.5.0`, Tailwind CSS `^3.4.17`, Lucide Vue Next `^0.468.0`
 - **문서 엔진**: `epubjs ^0.3.93` + `jszip ^3.10.1` + `css-tree ^3.2.1`, Custom TXT Engine(`txtEngine.ts`, `txtMeasuredPagination.ts`)
 - **네이티브 백엔드**: Tauri `2` (`@tauri-apps/api ^2.12.4`, `plugin-dialog`, `plugin-fs`, `plugin-store`, `plugin-opener`, `tauri-plugin-keyring-store`), Rust `reqwest 0.13` (`rustls` + `stream`), `dunce`, `sha2`, `zip 9.x`
-- **지원 플랫폼**: macOS 중점(유일한 핵심 빌드), iOS(소스 빌드)·Linux·Android는 후순위 유지, Web(개발 보조, `IndexedDB` / 프록시). Windows는 고려 대상이 아닙니다(위 지원 범위 참고)
+- **지원 플랫폼**: 중점 macOS(유일한 핵심 빌드), 유지 iOS(소스 빌드만), 테스트 빌드 Linux·Android(테스트용 빌드로 배포만, 보장 없음), Web(개발 보조, `IndexedDB` / 프록시). Windows는 이 포크의 범위가 아닙니다(위 지원 범위 참고)
 
 ### 최소 요구 사양
 
@@ -68,8 +69,8 @@
 |---|---|---|
 | macOS | 11.0 Big Sur | Tauri 2 기본값은 10.13이지만, Vite 6 빌드 결과물이 Safari 14 문법을 쓰고 접근성 대화상자의 `inert`가 Safari 15.5 이상에서 동작합니다. Big Sur는 Safari 16.6까지 받을 수 있습니다 |
 | iOS | 15.0 | Tauri 2 기본값. iOS의 WebView는 OS 버전을 따르며 Vite 6 결과물(Safari 14 문법)을 실행할 수 있습니다 |
-| Android | 7.0 (API 24) | Tauri 2 기본값. 업데이트 가능한 Android System WebView(Chrome 87 이상)가 필요합니다 |
-| Linux | Ubuntu 22.04 이상(WebKitGTK 4.1) | 지원 범위 기준. 22.04도 보안 업데이트로 WebKitGTK 2.50대를 받습니다 |
+| Android (테스트 빌드) | 7.0 (API 24) | Tauri 2 기본값. 업데이트 가능한 Android System WebView(Chrome 87 이상)가 필요합니다 |
+| Linux (테스트 빌드) | Ubuntu 22.04 이상(WebKitGTK 4.1) | 테스트용 빌드의 빌드 환경 기준(검증 보장 아님). 22.04도 보안 업데이트로 WebKitGTK 2.50대를 받습니다 |
 
 EPUB 열기 취소 처리에 쓰던 `AbortSignal.any`(Safari·iOS 17.4 이상 필요)는 같은 동작의 대체 구현으로 바꿔, 위 최소 버전에서도 EPUB을 열 수 있게 했습니다.
 
@@ -191,9 +192,7 @@ xattr -cr /Applications/Pagelight.app
 
 ### Windows 사용자 안내
 
-이 포크는 Windows용 설치 파일을 배포하지 않고 공식 지원하지도 않습니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요. 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)를 쓰던 경우에는 [Windows 전환 안내](./docs/windows-migration.md)를 따르세요.
-
-Windows는 이 포크의 고려 대상이 아니어서 Windows 코드 경로를 CI에서 더 이상 컴파일·테스트하지 않습니다. 남은 경로는 이후 변경에서 제거합니다.
+Windows는 이 포크의 범위가 아니므로 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요. 이 포크의 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)를 쓰던 경우에는 보존 기록인 [Windows 전환 안내](./docs/windows-migration.md)를 따르세요.
 
 ### Linux 빌드
 
@@ -247,7 +246,7 @@ npm run android:release:all # 전체 ABI release APK
 ### GitHub Actions CI·릴리스
 
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml): 모든 PR과 `main` 푸시에서 5개 작업을 실행합니다. `verify`(전체 검증 게이트), `licenses`(cargo-deny·고지 일치), `macos-build`(유니버설 빌드·서명 검증), `ios-sim-build`(서명 없는 시뮬레이터 빌드), `android-debug`(debug APK). 비밀값을 쓰지 않으며, `main` 병합과 릴리스 게이트는 핵심 작업 `verify`·`licenses`·`macos-build`만 요구합니다(저장소 관리자는 긴급 시 우회 가능). 후순위 플랫폼 작업(`ios-sim-build`·`android-debug`)은 결과만 보고하며, 실패하면 따로 확인해 고칩니다.
-- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**, **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. 서명 키 비밀값이 등록되지 않았으면 Android는 빌드하지 않고 빼고 게시하며, 릴리스 노트에 그 사실을 덧붙입니다(debug 서명 APK는 게시하지 않음). 게시 전에 `SHA256SUMS.txt`를 만들고 Windows 산출물이 없는지 다시 확인합니다.
+- [`.github/workflows/release.yml`](.github/workflows/release.yml): `v*` 태그 푸시 또는 `workflow_dispatch`로 실행합니다. 빌드 전에 릴리스 게이트(`scripts/check-release-gate.mjs`)를 통과해야 하고, **macOS 유니버설 `.dmg`**(핵심 빌드)와 테스트용 빌드인 **Linux x64 `.deb`·`.AppImage`**(정식 버전은 `.rpm` 추가), **Android arm64 `.apk`**(포크 서명 키)만 만듭니다. Linux·Android 파일 이름에는 `-test`가 붙고, 릴리스 노트에 "테스트용 빌드" 절이 들어갑니다. 테스트용 빌드가 실패하거나 서명 키 비밀값이 없거나 보안상 제외(`.github/release-exclusions.json`)되면 그 플랫폼만 빼고 게시하며 노트에 누락 안내를 남깁니다(debug 서명 APK는 게시하지 않음). macOS 빌드가 실패하면 게시하지 않고, 같은 테스트용 빌드 플랫폼이 3회 연속 빠지면 다음 릴리스 게이트가 멈춥니다. 게시 전에 `SHA256SUMS.txt`를 만들고 표식·누락 안내·Windows 산출물을 다시 확인합니다.
 
 #### 릴리스 절차
 
@@ -279,7 +278,7 @@ npm run android:release:all # 전체 ABI release APK
 |---|---|---|
 | 표시 이름 | Pagelight | EasyViewer |
 | 앱 식별자 | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |
-| 배포 플랫폼 | macOS, Linux, Android (iOS는 소스 빌드만) | `v0.2.2` 기준 Windows, macOS, Linux, Android |
+| 배포 플랫폼 | macOS, Linux·Android(테스트용 빌드), iOS는 소스 빌드만 | `v0.2.2` 기준 Windows, macOS, Linux, Android |
 | Windows | 배포·지원하지 않음 | 원저작자가 배포 |
 | 앱 내부 데이터 형식 버전 | 2 | 1 |
 

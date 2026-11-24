@@ -13,6 +13,14 @@ Security fixes go only into the **latest release** of this fork (Pagelight). The
 | Latest release | Supported |
 | Earlier releases | Not supported (please update to the latest release) |
 
+## Security scope of test builds
+
+Linux and Android are distributed as test builds only (constitution v6.1.0). Quality and response time are not guaranteed, but for security we keep to the following.
+
+- Security fixes in shared code (the app UI, document engines, Rust backend and other code every platform uses) go into every artifact of the same release.
+- If a vulnerability that only affects a test build is not fixed yet, then until it is fixed that platform is left out of releases. The maintainer declares it in `.github/release-exclusions.json` with a private identifier and without defect details.
+- If an earlier published release contains that artifact, a notice about the unfixed vulnerability is added to that release's notes.
+
 ## Reporting a vulnerability
 
 Report vulnerabilities in this fork through GitHub private vulnerability reporting.

@@ -4,6 +4,8 @@
 
 **Input**: Feature specification from `/specs/003-independent-fork-separation/spec.md`
 
+> **개정 메모 (2026-11-24)**: 이 계획의 "Windows 컴파일·테스트는 CI에서 유지"(R12, 원칙 V 판정)는 헌법 v5.0.0에서 Windows CI 작업 삭제로, v6.0.0에서 Windows 완전 제외로 대체되었다. 남은 Windows 전용 요소 제거와 재유입 검사는 `specs/004-platform-scope-cleanup`(US3)이 맡는다. 이 문서는 설계 당시 기록으로 남긴다.
+
 **참고 자료**: 입력 문서 `easyviewer-003-fork-separation-specify-input.md` §4(기술 사실·영향 파일·리서치 항목·작업 순서 제약). 2026-11-17 실측으로 일부를 갱신했다. 특히 업스트림이 `v0.2.1`까지 릴리스했다([research.md](research.md) F3).
 
 ## Summary

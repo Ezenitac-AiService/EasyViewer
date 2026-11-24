@@ -8,19 +8,19 @@
 
 <!-- support-scope:start -->
 이 포크는 **macOS**를 중점 지원합니다.
-iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-**Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
+iOS는 우선순위를 낮춘 유지 플랫폼이며, 공개 배포 채널 없이 소스 빌드로만 제공합니다.
+Linux·Android는 **테스트용 빌드**로만 배포합니다. 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다.
+**Windows는 이 포크의 범위가 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 웹 브라우저 실행은 개발 보조용입니다.
-Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
+Linux 테스트용 빌드는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 빌드합니다. Android 테스트용 빌드는 Android 7.0(API 24) 이상이 대상입니다.
 <!-- support-scope:end -->
 
-지원 범위 문구의 원문은 `src/config/supportScope.ts`입니다. 문구를 바꿀 때는 원문을 고친 뒤 위 블록이 있는 문서를 함께 갱신하고 `node scripts/check-support-scope.mjs`로 확인합니다.
+지원 범위 문구의 원문은 `src/config/supportScope.ts`입니다. 문구를 바꿀 때는 원문을 고친 뒤 위 블록(한국어 `support-scope`, 영문 `support-scope-en`)이 있는 문서를 함께 갱신하고 `node scripts/check-support-scope.mjs`로 확인합니다.
 
 ## Windows 관련 이슈 처리 방침
 
-- 이 포크가 게시했던 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)에 관한 이슈는 **이 저장소에서** 받습니다. 지원이 종료되었으므로 [Windows 전환 안내](docs/windows-migration.md)로 안내하고 이슈를 닫습니다.
-- 이 포크의 Windows 빌드 문제를 원저작자 저장소에 올리지 마세요. 원저작자 앱과는 데이터 형식이 다른 별개의 빌드입니다.
-- Windows는 고려 대상이 아닙니다. CI에서 Windows 코드를 컴파일·테스트하지 않으며, Windows에서만 쓰는 코드를 새로 추가하는 변경은 받지 않습니다.
+- Windows는 이 포크의 범위가 아니므로, Windows에서만 쓰는 코드·설정·파일을 추가하는 변경은 받지 않습니다(`node scripts/check-windows-exclusion.mjs`가 검사합니다).
+- 이 포크가 게시했던 Windows 프리릴리스(`v0.1.6-alpha`·`v0.1.6-beta`)에 관한 문의는 보존 기록인 [Windows 전환 안내](docs/windows-migration.md)로 안내하고 닫습니다. 원저작자 저장소에는 올리지 마세요.
 
 ## 업스트림과의 관계
 
@@ -62,8 +62,9 @@ Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.
 | 등급 | 플랫폼 | 기대치 |
 |---|---|---|
 | 중점 | macOS | 유일한 핵심 빌드입니다. 변경마다 macOS 동작을 확인하고, `macos-build`를 포함한 핵심 CI가 통과해야 합니다 |
-| 유지(후순위) | iOS, Linux, Android | 빌드와 기존 동작을 깨지 않도록 노력합니다. CI 결과는 보고만 하며 병합을 막지 않지만, 실패는 확인해 고칩니다 |
-| 비지원 | Windows | 고려 대상이 아닙니다. Windows에서만 쓰는 기능이나 코드는 받지 않습니다 |
+| 유지(후순위) | iOS | 소스 빌드만 제공합니다. 빌드와 기존 동작을 깨지 않도록 노력합니다. CI 결과는 보고만 하며 병합을 막지 않지만, 실패는 확인해 고칩니다 |
+| 테스트 빌드 | Linux, Android | 테스트용 빌드로만 배포하며 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다. 빌드가 깨지지 않게만 유지하고 CI 결과는 보고만 합니다. 버그는 테스트 빌드 버그 양식으로 받습니다 |
+| 제외 | Windows | 이 포크의 범위가 아닙니다. Windows에서만 쓰는 코드·설정·기능은 받지 않습니다 |
 | 개발 보조 | 웹 | 개발·테스트용 폴백으로만 유지합니다 |
 
 ## 명세 절차

@@ -47,8 +47,8 @@ description: "독립 포크 분리 작업 목록"
   - 원저작자 앱을 실행한 상태에서 복사했을 때의 결과(WAL 불일치 여부)와, 다른 앱의 `~/Library/WebKit` 폴더를 읽을 때 개인정보 보호 권한 창이 뜨는지 기록한다.
   - 새 데이터 폴더에 시작 시점에 생기는 파일 목록을 기록해 contracts/data-migration.md "비어 있음" 정의에 고정한다.
   - IndexedDB·`localStorage` 데이터가 보이는지, salt 파일 필요 여부, 1 GB 서재 복사 시간(APFS 복제 여부)을 기록한다.
-- [ ] T005 [P] 스파이크 S1(Linux)을 T004와 같은 절차로 진행한다. 대상 폴더는 `~/.local/share/com.edith.easyviewer`이다. 결과는 `verification/spikes.md`에 기록한다
-- [ ] T006 스파이크 S2를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
+- [X] ~~T005 [P] 스파이크 S1(Linux)을 T004와 같은 절차로 진행한다. 대상 폴더는 `~/.local/share/com.edith.easyviewer`이다. 결과는 `verification/spikes.md`에 기록한다~~ (범위 제외: Linux는 테스트 빌드 등급이라 실기기 스파이크를 하지 않고 이전 동작은 자동 테스트로 확인, 헌법 v6.1.0·004 FR-015)
+- [X] T006 스파이크 S2를 진행한다. 결과는 `verification/spikes.md`에 기록한다. (004로 이관: 004 T051, macOS 실기기 확인)
   - 일회성 테스트 바이너리로 `tauri_plugin_keyring_store::KeyringStore::new("com.edith.easyviewer").get_password("easyviewer:webdav:<id>")`를 새 식별자 빌드에서 호출한다.
   - macOS에서는 키체인 접근 대화상자 표시 여부와 거부 시 오류 종류를, Linux Secret Service에서는 동작 여부를 기록한다.
 - [X] T007 [P] 스파이크 S4를 진행한다. 결과는 `verification/spikes.md`에 기록한다.
@@ -249,8 +249,8 @@ description: "독립 포크 분리 작업 목록"
   - 백업 없이 원저작자 앱을 먼저 설치했을 때의 복구
   - 그 뒤 `check-support-scope.mjs`를 통과시킨다
 - [X] T047 [P] [US4] `docs/windows-eol-notice.md`에 기존 Windows 프리릴리스(`v0.1.6-alpha`, `v0.1.6-beta`) 릴리스 노트 맨 위에 붙일 지원 종료 고지 문안을 쓴다. 지원 범위 원문, 전환 문서 링크, 산출물은 삭제하지 않는다는 사실을 담는다
-- [ ] T048 [US4] (메인테이너·Windows 실기기) quickstart §7을 실행하고 `verification/windows-migration.md`에 기록한다. 원저작자 최신 릴리스 버전, Windows 버전, 각 단계 결과, 실제 손실 항목, 3단계를 건너뛴 경우의 증상을 적는다. 실기기가 없으면 `BLOCKED`로 기록하고 첫 독립 릴리스 게이트에서 미해결로 표시한다
-- [ ] T049 [US4] T048 결과가 문서와 다르면 `docs/windows-migration.md`를 고치고 T048을 다시 실행한다
+- [X] ~~T048 [US4] (메인테이너·Windows 실기기) quickstart §7을 실행하고 `verification/windows-migration.md`에 기록한다. 원저작자 최신 릴리스 버전, Windows 버전, 각 단계 결과, 실제 손실 항목, 3단계를 건너뛴 경우의 증상을 적는다. 실기기가 없으면 `BLOCKED`로 기록하고 첫 독립 릴리스 게이트에서 미해결로 표시한다~~ (범위 제외: Windows는 이 포크의 범위가 아님, 헌법 v6.0.0)
+- [X] ~~T049 [US4] T048 결과가 문서와 다르면 `docs/windows-migration.md`를 고치고 T048을 다시 실행한다~~ (범위 제외: Windows는 이 포크의 범위가 아님, 헌법 v6.0.0)
 
 **Checkpoint**: Windows 사용자 전환 경로 준비(고지 게시는 Final Phase)
 
@@ -299,7 +299,7 @@ description: "독립 포크 분리 작업 목록"
   - CI 비밀값 `ANDROID_KEYSTORE_BASE64`·`ANDROID_KEYSTORE_PASSWORD`·`ANDROID_KEY_ALIAS`·`ANDROID_KEY_PASSWORD` 등록
   - 서명 인증서 지문 확인 방법
   - 분실·유출 시 사용자 고지와 재설치 안내
-- [ ] T062 [US5] (메인테이너, 첫 독립 릴리스 이후로 연기 — 2026-11-23 메인테이너 결정, 키가 없으면 릴리스에서 Android를 뺀다) T061 절차대로 서명 키를 만들고 백업 2곳을 확인한 뒤, GitHub 저장소 비밀값을 등록한다. `verification/release-gate.md` 항목 8에 인증서 SHA-256 지문만 기록한다(비밀값은 기록하지 않음)
+- [ ] T062 [US5] (메인테이너, 첫 독립 릴리스 이후로 연기 — 2026-11-23 메인테이너 결정, 키가 없으면 릴리스에서 Android를 뺀다) T061 절차대로 서명 키를 만들고 백업 2곳을 확인한 뒤, GitHub 저장소 비밀값을 등록한다. `verification/release-gate.md` 항목 8에 인증서 SHA-256 지문만 기록한다(비밀값은 기록하지 않음) (메인테이너 작업, 완료 조건 아님)
 - [X] T063 [US5] `npm run verify`가 통과하는지 확인한다. 모든 식별자·이름 검사를 통과하고, Windows 대상 컴파일 경로(`cfg(windows)`)를 바꾸지 않았는지 확인한다
 
 **Checkpoint**: 정체성 분리 코드 완료(US6 없이 출시 금지)
@@ -384,8 +384,8 @@ description: "독립 포크 분리 작업 목록"
 - [X] T073 [US6] `src/components/library/MigrationNotice.vue`를 구현해 T067을 통과시키고, `src/views/LibraryView.vue`에 배치한다. 450줄 이하를 유지하고, 접근성 대화상자 또는 알림 영역 규약, `light`·`dark`·`sepia` 테마, 데스크톱·모바일 입력 환경을 모두 지원한다(헌법 품질 게이트)
 - [X] T074 [P] [US6] `docs/mobile-migration.md`를 작성한다. 새 식별자 앱은 별도 앱으로 설치되고 자동 이전이 없다는 사실, 대체 경로(WebDAV 동기화, 책 파일 다시 가져오기), 잃는 항목, 이전 앱 제거 시점을 담는다
 - [X] T075 [US6] `npm run verify`와 `cd src-tauri && cargo test`가 통과하는지 확인한다. 이어서 `rustup target add x86_64-pc-windows-msvc` 후 `cd src-tauri && cargo check --target x86_64-pc-windows-msvc`로 Windows 경로가 컴파일되는지 로컬에서 확인한다(헌법 제5원칙). 크로스 확인이 툴체인·C 의존성 때문에 실패하면 `BLOCKED`로 기록하고 T084 `windows-compile-test` 결과로 대신한다
-- [ ] T076 [US6] (실기기) quickstart §3 시나리오 1–9를 macOS와 Linux에서 실행해 `verification/migration-macos.md`·`verification/migration-linux.md`에 기록한다. 실행하지 못한 시나리오는 `BLOCKED`로 둔다
-- [ ] T077 [US6] (실기기) 스파이크 S3를 진행한다. 새 이름으로 macOS `.app`·Linux deb·AppImage·(정식 버전 빌드로) rpm, Android APK를 만들어 원저작자 최신 앱과 함께 설치하고 quickstart §4 결과를 `verification/coexistence.md`에 기록한다(SC-007)
+- [X] T076 [US6] (실기기) quickstart §3 시나리오 1–9를 macOS와 Linux에서 실행해 `verification/migration-macos.md`·`verification/migration-linux.md`에 기록한다. 실행하지 못한 시나리오는 `BLOCKED`로 둔다 (004로 이관: 004 T051, macOS 부분 / 범위 제외: Linux·Android 부분은 테스트 빌드라 실기기 검증을 보장하지 않음, 헌법 v6.1.0·004 FR-013)
+- [X] T077 [US6] (실기기) 스파이크 S3를 진행한다. 새 이름으로 macOS `.app`·Linux deb·AppImage·(정식 버전 빌드로) rpm, Android APK를 만들어 원저작자 최신 앱과 함께 설치하고 quickstart §4 결과를 `verification/coexistence.md`에 기록한다(SC-007) (004로 이관: 004 T051, macOS 부분 / 범위 제외: Linux·Android 부분은 테스트 빌드라 실기기 검증을 보장하지 않음, 헌법 v6.1.0·004 FR-013)
 
 **Checkpoint**: US5+US6 함께 출시 가능
 
@@ -455,7 +455,7 @@ description: "독립 포크 분리 작업 목록"
 - [X] T097 (메인테이너) `docs/windows-eol-notice.md` 문안을 기존 `v0.1.6-alpha`·`v0.1.6-beta` 릴리스 노트 맨 위에 추가한다(`gh release edit`, 산출물 삭제 금지). 분리 방식에 따라 릴리스가 사라질 수 있으므로 **분리 요청 전에** 게시하고, `gh release download`로 모든 릴리스 산출물·노트를 백업한다(research R10)
 - [X] T098 (메인테이너) `docs/maintainer-runbook.md`대로 GitHub 저장소 설정에서 비공개 취약점 신고를 켜고 **GitHub Support에** 포크 네트워크 분리를 요청한다. 완료 후 `gh api repos/Ezenitac-AiService/EasyViewer --jq .fork`가 `false`인지, 릴리스와 지원 종료 고지가 남아 있는지, 새 PR 기본 대상과 코드 검색을 확인해 기록한다(SC-003)
 - [X] T099 (메인테이너) `node scripts/check-release-gate.mjs --release --tag v1.0.0-alpha.1`이 통과하면(FR-025 1–8, 버전 비중복, `versionCode` 증가) 태그를 푸시해 첫 독립 릴리스를 게시하고, 산출물·체크섬·서명 지문을 `verification/release-gate.md`에 기록한다
-- [ ] T100 `specs/003-independent-fork-separation/spec.md` Status를 실제 상태(구현 완료 범위와 `BLOCKED` 항목)로 갱신하고, `/speckit-analyze`로 spec·plan·tasks 정합성을 다시 확인한다
+- [X] T100 `specs/003-independent-fork-separation/spec.md` Status를 실제 상태(구현 완료 범위와 `BLOCKED` 항목)로 갱신하고, `/speckit-analyze`로 spec·plan·tasks 정합성을 다시 확인한다 (004 T044·T045에서 완료)
 
 ---
 
@@ -538,7 +538,7 @@ Setup → Foundational ─┬─▶ US1 ─┐
 ## Phase 11: Convergence
 
 - [X] T101 이름을 바꾼 Apple 프로젝트(`src-tauri/gen/apple/pagelight.xcodeproj`, `pagelight_iOS/`, `Sources/pagelight/`)를 Tauri CLI가 그대로 쓰는지 iOS 시뮬레이터 빌드(`APPLE_DEVELOPMENT_TEAM` 지정 후 `npm run tauri ios build -- --target aarch64-sim`)로 확인한다. 실패하면 `xcodegen` 설치 후 `npm run ios:init`으로 재생성해 diff를 검토하고 `project.yml` 수동 변경(팀 ID 제거, 식별자·`PRODUCT_NAME`)을 다시 적용한다. 결과를 `verification/spikes.md`에 기록한다 per FR-015, FR-021, T058 (partial)
-- [ ] T102 Android 패키지 이동(`com/ezenitac/easyviewer`)과 release 서명 설정 후 `npm run android:build`(debug APK)가 성공하는지, 서명 환경 변수 없이 `npm run android:release`를 실행하면 `GradleException`으로 실패하는지 로컬에서 확인하고 `verification/spikes.md`에 기록한다 per FR-015, FR-017, T056, T057 (partial)
+- [X] ~~T102 Android 패키지 이동(`com/ezenitac/easyviewer`)과 release 서명 설정 후 `npm run android:build`(debug APK)가 성공하는지, 서명 환경 변수 없이 `npm run android:release`를 실행하면 `GradleException`으로 실패하는지 로컬에서 확인하고 `verification/spikes.md`에 기록한다 per FR-015, FR-017, T056, T057 (partial)~~ (범위 제외: Android는 테스트 빌드 등급이고 로컬 SDK가 없어 게이트·CI 규칙 테스트 `checkAndroidReleaseSigning`으로 대체, 헌법 v6.1.0)
 - [X] T103 `README.md` "출처와 라이선스" 절의 라이선스 버전 선택 근거 참조를 `NOTICE` 4절에서 5절로 고친다(NOTICE에 "앱 이름과 아이콘" 절이 4절로 들어가며 번호가 밀림) per FR-003 (contradicts)
 - [X] T104 `docs/ios-build.md`에 저장소에서 지운 개인 기기 UDID와 Apple 팀 ID가 git 이력에는 남아 있고 이력 재작성 금지(헌법 VIII) 때문에 지울 수 없다는 한계를 명시한다 per FR-017 (partial)
 - [X] T105 `CHANGELOG.md` `[미출시]` 항목에 US5 변경(식별자 `com.ezenitac.easyviewer`, 표시명 `Pagelight`, 패키지 이름 `pagelight`, 새 아이콘, Android 고정 서명 키, Apple 팀 정보 환경 변수화, `check-identity` 검사)을 추가한다 per FR-002, FR-023 (partial)

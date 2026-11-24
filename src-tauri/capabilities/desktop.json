@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "desktop-library",
   "description": "Desktop-only storage, dialog, and validated drag-drop capabilities",
-  "platforms": ["linux", "macOS", "windows"],
+  "platforms": ["linux", "macOS"],
   "windows": ["main"],
   "permissions": [
     {

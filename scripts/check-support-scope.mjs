@@ -2,17 +2,25 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { renderSupportScopeKo, supportScopeBannerEn } from '../src/config/supportScope.ts'
+import { renderSupportScopeEn, renderSupportScopeKo, supportScopeBannerEn } from '../src/config/supportScope.ts'
 
 /**
  * Support-scope and public-wording gate (spec 003 FR-006, FR-007, FR-009, FR-010,
- * contracts/support-scope-wording.md).
+ * contracts/support-scope-wording.md; spec 004 contracts/support-scope-text.md §4–§5).
  */
 
 const START = '<!-- support-scope:start -->'
 const END = '<!-- support-scope:end -->'
+const START_EN = '<!-- support-scope-en:start -->'
+const END_EN = '<!-- support-scope-en:end -->'
 export const REQUIRED_BLOCK_FILES = ['README.md', 'NOTICE', 'CHANGELOG.md', 'CONTRIBUTING.md']
-export const SUPPORTED_ISSUE_PLATFORMS = ['macOS', 'iOS', 'Linux', 'Android']
+export const REQUIRED_EN_BLOCK_FILES = ['README.en.md', 'NOTICE.en.md', 'CHANGELOG.en.md', 'CONTRIBUTING.en.md']
+/** Preserved end-of-support records (spec 004 FR-009): their blocks are frozen and not compared. */
+export const PRESERVED_RECORDS = ['docs/windows-migration.md', 'docs/windows-eol-notice.md']
+export const CORE_ISSUE_PLATFORMS = ['macOS', 'iOS']
+export const TEST_BUILD_ISSUE_PLATFORMS = ['Linux', 'Android']
+const TEST_BUILD_FORM = '.github/ISSUE_TEMPLATE/bug_report_test_build.yml'
+const TEST_BUILD_NOTICE = /보장하지\s*않습니다/
 const SECURITY_RECORD = 'specs/003-independent-fork-separation/verification/security-coordination.md'
 const WINDOWS_DOC = 'docs/windows-migration.md'
 const LOST_ITEMS = ['읽기 진행률', '책갈피', '표시 설정', 'WebDAV 자격증명']
@@ -27,12 +35,12 @@ const FORBIDDEN = [
 ]
 
 /** Returns the support-scope block body without Markdown blockquote markers, or null. */
-export function extractBlock(text) {
-  const i = text.indexOf(START)
-  const j = text.indexOf(END)
+export function extractBlock(text, start = START, end = END) {
+  const i = text.indexOf(start)
+  const j = text.indexOf(end)
   if (i < 0 || j < 0 || j < i) return null
   return text
-    .slice(i + START.length, j)
+    .slice(i + start.length, j)
     .split('\n')
     .map((line) => line.replace(/^\s*>\s?/, ''))
     .join('\n')
@@ -67,18 +75,27 @@ export function publicFiles(root) {
   return files
 }
 
-export function checkBlocks(root, canonical) {
+export function checkBlocks(root, canonical, canonicalEn = renderSupportScopeEn()) {
   const errors = []
-  for (const f of REQUIRED_BLOCK_FILES) {
+  const required = [
+    ...REQUIRED_BLOCK_FILES.map((f) => [f, START, END, 'support-scope']),
+    ...REQUIRED_EN_BLOCK_FILES.map((f) => [f, START_EN, END_EN, 'support-scope-en'])
+  ]
+  for (const [f, start, end, name] of required) {
     const text = read(root, f)
     if (text === null) errors.push(`${f}: 파일이 없습니다`)
-    else if (extractBlock(text) === null) errors.push(`${f}: support-scope 블록이 없습니다`)
+    else if (extractBlock(text, start, end) === null) errors.push(`${f}: ${name} 블록이 없습니다`)
   }
   for (const f of walk(root, '.', (rel) => /\.(md|yml|yaml)$|^\.?\/?NOTICE$/.test(rel))) {
     const rel = f.replace(/^\.\//, '')
-    if (rel.startsWith('specs/') || rel.startsWith('node_modules/')) continue
-    const body = extractBlock(read(root, rel) ?? '')
+    if (rel.startsWith('specs/') || rel.startsWith('node_modules/') || PRESERVED_RECORDS.includes(rel)) continue
+    const text = read(root, rel) ?? ''
+    const body = extractBlock(text)
     if (body !== null && body !== canonical) errors.push(`${rel}: support-scope 블록이 원문(src/config/supportScope.ts)과 다릅니다`)
+    const bodyEn = extractBlock(text, START_EN, END_EN)
+    if (bodyEn !== null && bodyEn !== canonicalEn) {
+      errors.push(`${rel}: support-scope-en 블록이 영문 원문(src/config/supportScope.ts)과 다릅니다`)
+    }
   }
   return errors
 }
@@ -115,16 +132,35 @@ export function checkForbiddenWording(root, exceptions) {
   return errors
 }
 
+function platformOptions(text) {
+  const m = /id:\s*platform[\s\S]*?options:\s*\n((?:\s*-\s*.+\n?)+)/.exec(text)
+  return m ? [...m[1].matchAll(/-\s*(.+)/g)].map((x) => x[1].trim()) : []
+}
+
 export function checkIssueTemplates(root) {
   const errors = []
-  const bug = read(root, '.github/ISSUE_TEMPLATE/bug_report.yml')
-  if (bug === null) errors.push('.github/ISSUE_TEMPLATE/bug_report.yml: 파일이 없습니다')
-  else {
-    const m = /id:\s*platform[\s\S]*?options:\s*\n((?:\s*-\s*.+\n?)+)/.exec(bug)
-    const options = m ? [...m[1].matchAll(/-\s*(.+)/g)].map((x) => x[1].trim()) : []
-    if (options.join(',') !== SUPPORTED_ISSUE_PLATFORMS.join(',')) {
-      errors.push(`bug_report.yml: 플랫폼 선택지가 ${SUPPORTED_ISSUE_PLATFORMS.join('·')}와 다릅니다(${options.join('·') || '없음'})`)
+  const forms = [
+    ['.github/ISSUE_TEMPLATE/bug_report.yml', CORE_ISSUE_PLATFORMS],
+    [TEST_BUILD_FORM, TEST_BUILD_ISSUE_PLATFORMS]
+  ]
+  for (const [f, expected] of forms) {
+    const name = f.split('/').pop()
+    const text = read(root, f)
+    if (text === null || text.trim() === '') {
+      errors.push(`${f}: 파일이 없습니다`)
+      continue
     }
+    const options = platformOptions(text)
+    if (options.join(',') !== expected.join(',')) {
+      errors.push(`${name}: 플랫폼 선택지가 ${expected.join('·')}와 다릅니다(${options.join('·') || '없음'})`)
+    }
+    if (f === TEST_BUILD_FORM) {
+      if (!/labels:[^\n]*["']?test-build["']?/.test(text)) errors.push(`${name}: labels에 test-build가 필요합니다`)
+      if (!TEST_BUILD_NOTICE.test(text)) errors.push(`${name}: 테스트용 빌드라 대응 일정을 보장하지 않는다는 안내가 없습니다`)
+    }
+  }
+  for (const f of walk(root, '.github/ISSUE_TEMPLATE', (rel) => /\.ya?ml$/.test(rel))) {
+    if (platformOptions(read(root, f) ?? '').includes('Windows')) errors.push(`${f.split('/').pop()}: Windows 선택지가 있습니다`)
   }
   const config = read(root, '.github/ISSUE_TEMPLATE/config.yml')
   if (config === null || !config.includes('https://github.com/edith2580/EasyViewer')) {

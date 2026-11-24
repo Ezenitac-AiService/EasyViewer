@@ -2,10 +2,11 @@
 
 <!-- support-scope:start -->
 이 포크는 **macOS**를 중점 지원합니다.
-iOS·Linux·Android는 우선순위를 낮춘 유지 플랫폼입니다. iOS는 공개 배포 채널 없이 소스 빌드로만 제공합니다.
-**Windows는 이 포크의 지원·배포 대상이 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
+iOS는 우선순위를 낮춘 유지 플랫폼이며, 공개 배포 채널 없이 소스 빌드로만 제공합니다.
+Linux·Android는 **테스트용 빌드**로만 배포합니다. 품질·기능 동등성·실기기 검증·대응 일정을 보장하지 않습니다.
+**Windows는 이 포크의 범위가 아닙니다. Windows에서는 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer)를 사용하세요.**
 웹 브라우저 실행은 개발 보조용입니다.
-Linux는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 검증합니다. 그 밖의 배포판은 동작할 수 있으나 검증하지 않습니다.
+Linux 테스트용 빌드는 Ubuntu 22.04 이상 또는 동급 배포판(deb·AppImage, WebKitGTK 4.1, X11·Wayland)에서 빌드합니다. Android 테스트용 빌드는 Android 7.0(API 24) 이상이 대상입니다.
 <!-- support-scope:end -->
 
 Pagelight의 Android APK(`com.ezenitac.easyviewer`)는 이 포크가 소유한 **release 키 하나**로만 서명합니다. 키를 아직 만들지 않았으면 릴리스 워크플로가 Android를 빼고 게시합니다(헌법 v4.3.0). 첫 APK를 서명한 키가 이후 모든 업데이트의 키가 되므로, debug 키나 임시 키로 서명한 APK는 게시하지 않습니다. Android는 같은 패키지 이름이라도 서명 인증서가 바뀌면 업데이트 설치를 거부합니다. 그래서 이 키를 잃으면 기존 사용자는 앱을 지우고 다시 설치해야 하고, 그 과정에서 앱 데이터가 사라집니다. 아래 절차는 키를 잃거나 유출하지 않기 위한 것입니다.

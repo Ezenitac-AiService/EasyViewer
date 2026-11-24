@@ -50,7 +50,7 @@ describe('release.yml (contracts §2)', () => {
   it('runs the gate before every build and again on the artifacts before publishing', () => {
     expect(jobBlock(text, 'gate')).toContain('node scripts/check-release-gate.mjs --release')
     expect(jobBlock(text, 'gate')).toContain('--phase prebuild')
-    for (const job of ['build-desktop', 'build-android']) {
+    for (const job of ['build-macos', 'build-linux', 'build-android']) {
       expect(jobBlock(text, job)).toMatch(/needs:\s*(\[[^\]]*gate[^\]]*\]|gate)/)
     }
     const publish = jobBlock(text, 'publish')
@@ -101,14 +101,70 @@ describe('release.yml (contracts §2)', () => {
     const android = jobBlock(text, 'build-android')
     expect(android).toMatch(/if:\s*needs\.gate\.outputs\.android\s*==\s*'true'/)
     const publish = jobBlock(text, 'publish')
-    expect(publish).toMatch(/needs\.build-android\.result\s*==\s*'skipped'/)
     expect(publish).toContain('--without-android')
-    expect(publish).toMatch(/Android APK/)
+    expect(publish).toContain('--android-reason')
+    expect(publish).toContain('no-signing-key')
   })
 
   it('grants contents: write only to publish', () => {
     expect(text).toMatch(/^permissions:\s*\n\s+contents:\s*read\s*$/m)
     expect(jobBlock(text, 'publish')).toMatch(/contents:\s*write/)
+  })
+})
+
+describe('release.yml test builds (spec 004 contracts/release-test-builds.md §1)', () => {
+  const text = read('.github/workflows/release.yml')
+
+  it('splits the builds into macOS, Linux and Android jobs', () => {
+    for (const job of ['build-macos', 'build-linux', 'build-android']) expect(jobBlock(text, job), job).not.toBe('')
+    expect(jobBlock(text, 'build-desktop')).toBe('')
+    expect(jobBlock(text, 'build-macos')).toContain('macos-universal')
+    expect(jobBlock(text, 'build-linux')).toContain('linux-x64')
+  })
+
+  it('runs Linux and Android only when the gate says so', () => {
+    expect(jobBlock(text, 'build-linux')).toMatch(/if:\s*needs\.gate\.outputs\.linux\s*==\s*'true'/)
+    expect(jobBlock(text, 'build-android')).toMatch(/if:\s*needs\.gate\.outputs\.android\s*==\s*'true'/)
+    expect(jobBlock(text, 'gate')).toMatch(/linux:\s*\$\{\{\s*steps\.\w+\.outputs\.linux\s*\}\}/)
+  })
+
+  it('publishes when macOS succeeded even if a test build failed, without continue-on-error', () => {
+    const publish = jobBlock(text, 'publish')
+    expect(publish).toMatch(/needs:\s*\[gate, build-macos, build-linux, build-android\]/)
+    const cond = /if:\s*>-?\s*\n([\s\S]*?)\n\s{4}runs-on/.exec(publish)?.[1] ?? /if:\s*(.+)/.exec(publish)?.[1] ?? ''
+    expect(cond).toContain('!cancelled()')
+    expect(cond).toContain("needs.gate.result == 'success'")
+    expect(cond).toContain("needs.build-macos.result == 'success'")
+    expect(cond).not.toMatch(/build-linux|build-android/)
+    expect(text).not.toContain('continue-on-error')
+  })
+
+  it('adds -test to Linux and Android file names, renders the notes and gates them before publishing', () => {
+    const publish = jobBlock(text, 'publish')
+    expect(publish).toMatch(/-test/)
+    expect(publish).toContain('-test-rehearsal')
+    expect(publish).toContain('node scripts/release-notes.mjs')
+    for (const flag of ['--linux-result', '--android-result', '--notes']) expect(publish).toContain(flag)
+    const order = ['-test', 'node scripts/release-notes.mjs', 'SHA256SUMS.txt', '--phase publish', 'gh release create'].map((k) =>
+      publish.indexOf(k)
+    )
+    expect(order).toEqual([...order].sort((a, b) => a - b))
+  })
+
+  it('offers fail_linux and fail_android only as workflow_dispatch inputs', () => {
+    const dispatch = /workflow_dispatch:\s*\n([\s\S]*?)\n(permissions|concurrency):/.exec(text)?.[1] ?? ''
+    expect(dispatch).toContain('fail_linux:')
+    expect(dispatch).toContain('fail_android:')
+    const push = /push:\s*\n([\s\S]*?)workflow_dispatch:/.exec(text)?.[1] ?? ''
+    expect(push).not.toMatch(/fail_(linux|android)/)
+    expect(jobBlock(text, 'build-linux')).toContain('inputs.fail_linux')
+    expect(jobBlock(text, 'build-android')).toContain('inputs.fail_android')
+  })
+
+  it('keeps write access only on publish', () => {
+    for (const job of ['gate', 'build-macos', 'build-linux', 'build-android']) {
+      expect(jobBlock(text, job), job).not.toMatch(/contents:\s*write/)
+    }
   })
 })
 

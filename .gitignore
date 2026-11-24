@@ -45,3 +45,7 @@ build/*
 *.keystore
 *.p12
 keystore.properties
+
+# Local environment files
+.env
+.env.*

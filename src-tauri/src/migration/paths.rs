@@ -34,14 +34,20 @@ impl MigrationPaths {
     /// `data_base` is the parent of the app data folder (Tauri `app_data_dir().parent()`), so the
     /// XDG data home on Linux is respected. Returns `None` where no migration runs.
     pub fn for_platform(data_base: &Path, home: &Path) -> Option<Self> {
+        Self::for_os(std::env::consts::OS, data_base, home)
+    }
+
+    /// The rules for one OS name (`std::env::consts::OS`: `macos`, `linux`, anything else has no
+    /// migration). Split out so the Linux rules can be tested on a macOS host (spec 004 T029).
+    pub fn for_os(os: &str, data_base: &Path, home: &Path) -> Option<Self> {
         let new_data = data_base.join(TARGET_IDENTIFIER);
         let data_pair = CopyPair {
             kind: TargetKind::DataDir,
             source: data_base.join(SOURCE_IDENTIFIER),
             target: new_data.clone(),
-            excludes: data_dir_excludes(),
+            excludes: data_dir_excludes(os),
         };
-        if cfg!(target_os = "macos") {
+        if os == "macos" {
             let webkit = home.join("Library/WebKit");
             Some(MigrationPaths {
                 pairs: vec![
@@ -56,7 +62,7 @@ impl MigrationPaths {
                 record_dir: new_data.clone(),
                 discard_dirs: vec![new_data, webkit.join(TARGET_IDENTIFIER)],
             })
-        } else if cfg!(target_os = "linux") {
+        } else if os == "linux" {
             Some(MigrationPaths {
                 pairs: vec![data_pair],
                 record_dir: new_data.clone(),
@@ -69,9 +75,9 @@ impl MigrationPaths {
 }
 
 /// WebKitGTK puts its disk cache next to the data (wry `web_context.rs`). Caches are not migrated.
-/// The exact folder list on Linux is re-checked by spike S1 (T005/T076).
-fn data_dir_excludes() -> Vec<String> {
-    if cfg!(target_os = "linux") {
+/// Linux is a test build, so the folder list is covered by automated tests (spec 004 FR-015).
+fn data_dir_excludes(os: &str) -> Vec<String> {
+    if os == "linux" {
         vec!["WebKitCache".to_string()]
     } else {
         Vec::new()

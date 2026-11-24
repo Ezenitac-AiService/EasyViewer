@@ -3,6 +3,7 @@
 
 mod copy;
 mod flow;
+mod linux;
 
 use crate::migration::decide::{decide, Decision, DecisionInput, RecordView, UserChoice};
 use crate::migration::detect::{is_legacy_exe, parse_lsappinfo_running, OldAppStatus};

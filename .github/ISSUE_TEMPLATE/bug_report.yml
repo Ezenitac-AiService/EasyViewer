@@ -1,5 +1,5 @@
 name: 버그 신고 / Bug report
-description: Pagelight(macOS·iOS·Linux·Android)에서 발견한 문제를 알려 주세요. / Report a problem found in Pagelight (macOS, iOS, Linux, Android).
+description: Pagelight(macOS·iOS)에서 발견한 문제를 알려 주세요. Linux·Android는 테스트 빌드 버그 양식을 써 주세요. / Report a problem found in Pagelight on macOS or iOS. For Linux and Android, use the test build bug form.
 labels: ["bug"]
 body:
   - type: markdown
@@ -25,8 +25,6 @@ body:
       options:
         - macOS
         - iOS
-        - Linux
-        - Android
     validations:
       required: true
   - type: input

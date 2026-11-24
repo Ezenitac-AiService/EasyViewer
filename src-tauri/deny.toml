@@ -1,6 +1,6 @@
 # cargo-deny policy (spec 003 FR-005, research R5).
-# Only shipped targets are evaluated. The Windows target stays in the audit until the remaining
-# Windows code paths are removed (constitution v5.0.0: Windows is not considered, no CI build).
+# Only shipped targets are evaluated. Windows is outside this fork's scope (constitution v6.1.0),
+# so no Windows target is audited.
 
 [graph]
 targets = [
@@ -9,7 +9,6 @@ targets = [
   "x86_64-unknown-linux-gnu",
   "aarch64-linux-android",
   "aarch64-apple-ios",
-  "x86_64-pc-windows-msvc",
 ]
 all-features = false
 

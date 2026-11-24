@@ -6,19 +6,21 @@ This repository is an **independent fork** of the original [EasyViewer](https://
 
 ## Support scope
 
-- **Focus**: macOS — the only core build.
-- **Maintained, lower priority**: iOS (source build only, no public distribution channel), Linux and Android. They are still built and distributed, but their CI results only report and do not block merges or releases.
-- **Not supported**: Windows is not considered. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).
-- Running in a web browser is a development aid only.
-- Linux is verified on Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland).
+<!-- support-scope-en:start -->
+This fork focuses on **macOS**.
+iOS is maintained with lower priority and is provided as a source build only, without a public distribution channel.
+Linux and Android are distributed as **test builds** only, with no guarantee of quality, feature parity, real-device verification or response time.
+**Windows is outside the scope of this fork. On Windows, use the original [EasyViewer](https://github.com/edith2580/EasyViewer).**
+Running in a web browser is a development aid only.
+Linux test builds are built for Ubuntu 22.04 or later and equivalent distributions (deb, AppImage, WebKitGTK 4.1, X11 and Wayland). Android test builds target Android 7.0 (API 24) or later.
+<!-- support-scope-en:end -->
 
-The source of the support-scope wording is `src/config/supportScope.ts`. To change it, edit the source, update every document that contains the support-scope block, and run `node scripts/check-support-scope.mjs`.
+The source of the support-scope wording is `src/config/supportScope.ts`. To change it, edit the source, update every document that contains the support-scope block (Korean) or the support-scope-en block (English), and run `node scripts/check-support-scope.mjs`.
 
 ## Windows issues
 
-- Issues about the Windows pre-releases this fork published (`v0.1.6-alpha`, `v0.1.6-beta`) are handled **in this repository**. Support has ended, so we point to the [Windows migration guide](docs/windows-migration.md) (Korean) and close the issue.
-- Do not file this fork's Windows build problems in the original author's repository. It is a separate build with a different data format.
-- Windows is not considered. CI does not compile or test Windows code, and changes that add Windows-only code are not accepted.
+- Windows is outside the scope of this fork, so changes that add Windows-only code, settings or files are not accepted (`node scripts/check-windows-exclusion.mjs` checks this).
+- Questions about the Windows pre-releases this fork published (`v0.1.6-alpha`, `v0.1.6-beta`) are pointed to the preserved [Windows migration guide](docs/windows-migration.md) (Korean) and closed. Do not file them in the original author's repository.
 
 ## Relationship with the upstream
 
@@ -60,8 +62,9 @@ This fork follows the [project constitution](.specify/memory/constitution.md) (v
 | Tier | Platforms | Expectation |
 |---|---|---|
 | Focus | macOS | The only core build. Check macOS behavior for every change; the core CI including `macos-build` must pass |
-| Maintained (lower priority) | iOS, Linux, Android | Try not to break the build or existing behavior. CI results only report and do not block merges, but failures are looked into and fixed |
-| Not supported | Windows | Not considered. Windows-only features or code are not accepted |
+| Maintained (lower priority) | iOS | Source build only. Try not to break the build or existing behavior. CI results only report and do not block merges, but failures are looked into and fixed |
+| Test build | Linux, Android | Distributed as test builds only, with no guarantee of quality, feature parity, real-device verification or response time. Keep the build working; CI results only report. Bug reports go to the test build bug form |
+| Excluded | Windows | Outside the scope of this fork. Windows-only code, settings and features are not accepted |
 | Development aid | Web | Kept only as a fallback for development and testing |
 
 ## Spec process
