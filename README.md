@@ -11,7 +11,7 @@
 
 > This is an independent fork. It focuses on macOS; iOS is a source build only, and Linux and Android are test builds. For Windows, please use the original EasyViewer by edith2580.
 
-Pagelight는 텍스트(TXT)와 EPUB 문서를 읽는 간단한 뷰어입니다(`v1.0.0-alpha.1`). 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크이며, 실행 파일과 체크섬은 [Releases](https://github.com/Ezenitac-AiService/EasyViewer/releases)에서 받을 수 있습니다.
+Pagelight는 텍스트(TXT)와 EPUB 문서를 읽는 간단한 뷰어입니다(`v1.0.0-alpha.2`). 원저작자의 [EasyViewer](https://github.com/edith2580/EasyViewer) `v0.1.6`에서 갈라진 독립 포크이며, 실행 파일과 체크섬은 [Releases](https://github.com/Ezenitac-AiService/EasyViewer/releases)에서 받을 수 있습니다.
 
 > [!IMPORTANT]
 > **처음 실행 안내**: 아직 Apple 공증을 받지 않아 macOS에서 처음 실행할 때 "손상되었기 때문에 열 수 없습니다"가 나올 수 있습니다. 체크섬을 확인한 뒤 [설치와 처음 실행](#설치와-처음-실행)의 macOS 절차를 따르세요.
@@ -28,13 +28,13 @@ Pagelight는 텍스트(TXT)와 EPUB 문서를 읽는 간단한 뷰어입니다(`
 ## 원저작자 앱과의 차이
 
 <!-- upstream-diff:start -->
-이 포크(Pagelight)와 원저작자 앱([EasyViewer](https://github.com/edith2580/EasyViewer))의 차이 중 확인할 수 있는 사실만 적습니다. 원저작자 쪽 값은 이 포크가 갈라진 `v0.1.6`과 2026-11-19에 확인한 최신 릴리스 `v0.2.2` 기준입니다.
+이 포크(Pagelight)와 원저작자 앱([EasyViewer](https://github.com/edith2580/EasyViewer))의 차이 중 확인할 수 있는 사실만 적습니다. 원저작자 쪽 값은 이 포크가 갈라진 `v0.1.6`과 2026-11-24에 확인한 최신 릴리스 `v0.2.4` 기준입니다.
 
 | 항목 | Pagelight (이 포크) | EasyViewer (원저작자) |
 |---|---|---|
 | 표시 이름 | Pagelight | EasyViewer |
 | 앱 식별자 | `com.ezenitac.easyviewer` | `com.edith.easyviewer` |
-| 배포 플랫폼 | macOS, Linux·Android(테스트용 빌드), iOS는 소스 빌드만 | `v0.2.2` 기준 Windows, macOS, Linux, Android |
+| 배포 플랫폼 | macOS, Linux·Android(테스트용 빌드), iOS는 소스 빌드만 | `v0.2.4` 기준 Windows, macOS, Linux, Android |
 | Windows | 배포·지원하지 않음 | 원저작자가 배포 |
 | 앱 내부 데이터 형식 버전 | 2 | 1 |
 
@@ -175,6 +175,6 @@ Linux·iOS·Android 빌드 명령과 버전 동기화는 기여 가이드의 [�
 ## 라이선스와 저작권 고지
 
 - **원저작물**: 이 저장소는 [edith2580의 EasyViewer](https://github.com/edith2580/EasyViewer)를 바탕으로 한 파생 저작물입니다. Copyright (C) 2026 edith2580.
-- **이 포크의 변경분**: Copyright (C) 2026 M5. 이 포크는 원저작자 앱 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었고, GitHub 포크 네트워크 분리는 2026-11-23에 끝났습니다. 원저작자 앱의 이후 릴리스(`v0.2.0`·`v0.2.1`·`v0.2.2`)는 병합하지 않았습니다. 주요 변경 요약은 [NOTICE](./NOTICE) 3절과 [CHANGELOG](./CHANGELOG.md)에 있습니다.
+- **이 포크의 변경분**: Copyright (C) 2026 M5. 이 포크는 원저작자 앱 `v0.1.6`(커밋 `44c4d37`, 태그 `upstream-base-v0.1.6`)에서 갈라져 2026-11-17에 독립 분리되었고, GitHub 포크 네트워크 분리는 2026-11-23에 끝났습니다. 원저작자 앱의 이후 릴리스(`v0.2.0`–`v0.2.4`)는 병합하지 않았습니다. 주요 변경 요약은 [NOTICE](./NOTICE) 3절과 [CHANGELOG](./CHANGELOG.md)에 있습니다.
 - **라이선스**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE). 라이선스 전문은 바꾸지 않았습니다. "only"는 이 포크의 선택이며, 그 근거와 재검토 조건은 [NOTICE](./NOTICE) 5절에 있습니다.
 - **서드파티 구성요소**: 직접 의존성 요약은 [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md), 전이 의존성을 포함한 전체 고지와 라이선스 전문은 [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt)(앱 정보 화면에서도 열람 가능)에 있습니다.

@@ -18,7 +18,7 @@
 - [ ] 8. Android 서명 키 백업 확인 — 서로 다른 보관 장소 2곳 이상, 그중 하나는 오프라인(`docs/android-signing.md`)
 
 서명 인증서 SHA-256:
-직전 포크 릴리스 versionCode: 1006
+직전 포크 릴리스 versionCode: 1000001
 
 ## 업스트림 원격 제거 기록 (T094)
 

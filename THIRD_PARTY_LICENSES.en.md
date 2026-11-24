@@ -6,9 +6,9 @@ This document summarizes the licenses of the third-party components Pagelight us
 
 > This is a reference translation of [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). The Korean table is the one checked by `scripts/check-licenses.mjs`; if the two differ, the Korean document prevails.
 
-**Project**: Pagelight (independent fork of EasyViewer, `1.0.0-alpha.1`)  
+**Project**: Pagelight (independent fork of EasyViewer, `1.0.0-alpha.2`)  
 **Project License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE) — the reason for the version choice is in section 5 of [NOTICE.en.md](./NOTICE.en.md)  
-**Updated**: `2026-11-23`
+**Updated**: `2026-11-24`
 
 > **Full notices**: this document summarizes direct dependencies. The copyright notices and full license texts of every third-party component in the distributed files, including transitive dependencies, are in [`src/generated/third-party-notices.txt`](./src/generated/third-party-notices.txt) (viewable from the app's About screen) and are generated with `node scripts/check-licenses.mjs --write`.
 

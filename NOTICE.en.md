@@ -30,7 +30,7 @@ The changes in this fork are the work of an individual contributor (commit autho
 
 - Base: original v0.1.6 (commit 44c4d37, tag upstream-base-v0.1.6)
 - Independence date: 2026-11-17 (GitHub fork network separation completed: 2026-11-23)
-- Later original releases (v0.2.0, v0.2.1, v0.2.2) were not merged into this fork.
+- Later original releases (v0.2.0 to v0.2.4, checked on 2026-11-24) were not merged into this fork.
 - Main changes:
   - 001 refactoring: security boundaries (path validation, SSRF protection, CSP, separate credential storage). These changes were contributed to the original project (PR #2) and merged there.
   - 002 refactoring: deep restructuring of the document engines, storage and sync layers, and convergence of the quality gates. The internal data format was raised to version 2 (the original uses version 1).

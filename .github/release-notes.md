@@ -34,9 +34,9 @@ Linux에서는 `sha256sum -c SHA256SUMS.txt --ignore-missing`을 써도 됩니�
 
 iOS는 공개 배포 채널 없이 **소스 빌드로만 제공**합니다. 직접 빌드해 설치하는 방법은 [iOS 소스 빌드 안내](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/docs/ios-build.md)를 따르세요.
 
-## 첫 독립 릴리스: 이름·식별자 변경과 데이터 이전
+## 이전 버전에서 옮겨 올 때
 
-이 릴리스부터 앱 이름이 **Pagelight**로, 앱 식별자가 `com.ezenitac.easyviewer`로 바뀌었습니다.
+첫 독립 릴리스 `v1.0.0-alpha.1`부터 앱 이름이 **Pagelight**로, 앱 식별자가 `com.ezenitac.easyviewer`로 바뀌었습니다. 이번 릴리스의 변경 사항은 [CHANGELOG](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/CHANGELOG.md)의 해당 버전 항목을 보세요.
 
 - **macOS·Linux(테스트용 빌드)**: Pagelight를 처음 실행하면 이전 버전의 서재와 설정을 한 번 복사합니다. 원본은 그대로 남습니다. 결과는 앱 안 안내로 알려 드립니다.
 - **Android·iOS**: 새 앱으로 따로 설치되며 데이터를 자동으로 옮기지 않습니다. [모바일 이전 안내](https://github.com/Ezenitac-AiService/EasyViewer/blob/main/docs/mobile-migration.md)를 참고하세요.
