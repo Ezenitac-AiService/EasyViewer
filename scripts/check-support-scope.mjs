@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { renderSupportScopeEn, renderSupportScopeKo, supportScopeBannerEn } from '../src/config/supportScope.ts'
+import { headerArea } from './docs/markdown.mjs'
 
 /**
  * Support-scope and public-wording gate (spec 003 FR-006, FR-007, FR-009, FR-010,
@@ -100,10 +101,13 @@ export function checkBlocks(root, canonical, canonicalEn = renderSupportScopeEn(
   return errors
 }
 
+/** First screen = the first 15 lines before the first `##` heading (spec 005 research R1). */
+const FIRST_SCREEN_LINES = 15
+
 export function checkBanner(root, banner) {
   const readme = read(root, 'README.md') ?? ''
-  const head = readme.split('\n').slice(0, 12).join('\n')
-  return head.includes(banner) ? [] : ['README.md: 맨 위 포크 안내 배너(영문 한 줄)가 없습니다']
+  const header = headerArea(readme).slice(0, FIRST_SCREEN_LINES).join('\n')
+  return header.includes(banner) ? [] : ['README.md: 첫 화면(처음 15줄, 첫 ## 절 앞)에 포크 안내 배너(영문 한 줄)가 없습니다']
 }
 
 function securityNotified(root) {

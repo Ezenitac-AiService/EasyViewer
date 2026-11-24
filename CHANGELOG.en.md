@@ -4,6 +4,17 @@
 
 This is the changelog of the independent fork of the original [EasyViewer](https://github.com/edith2580/EasyViewer) by edith2580. It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The Korean [CHANGELOG.md](CHANGELOG.md) is the authoritative version.
 
+## [Unreleased] — Korean and English public document cleanup (2026-11-24)
+
+Reorganized the structure, flow and terms of the six public document pairs (README, CONTRIBUTING, SECURITY, CHANGELOG, NOTICE, THIRD_PARTY_LICENSES).
+
+### Changed
+
+- The README header now runs title → language switch → six badges → English banner → introduction → first-launch notice → fork and issue notice. The platform badge shows the support tiers, and the support-scope text moved to the "Supported platforms and releases" section.
+- The README body puts the user sections first (differences from the original app, supported platforms and releases, features, controls, installation and first launch, building from source); developer details (tech stack, directory layout, verification commands, versions and builds, CI and releases) moved to the contributing guide.
+- Public document titles and their top format (title → language switch → purpose sentence) are unified, and the original author's side is consistently called the original author, original repository and original app.
+- The public document check (`scripts/check-doc-pairs.mjs`) now also checks the top format, titles, Korean/English section structure, links and anchors, terms and the README header.
+
 ## [Unreleased] — Support scope realignment and fork separation wrap-up (2026-11-24)
 
 Applies the platform tiers of constitution v6.1.0 (focus macOS, maintained iOS, test builds Linux and Android, excluded Windows).

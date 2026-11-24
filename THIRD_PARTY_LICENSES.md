@@ -1,6 +1,8 @@
-# 서드파티 오픈소스 라이선스 고지 (Third-Party Licenses)
+# 서드파티 라이선스 고지
 
 **언어 / Language**: **[한국어](THIRD_PARTY_LICENSES.md)** | [English](THIRD_PARTY_LICENSES.en.md)
+
+이 문서는 Pagelight가 쓰는 서드파티 구성요소의 라이선스를 요약한다.
 
 **Project**: Pagelight (EasyViewer 독립 포크, `1.0.0-alpha.1`)  
 **Project License**: [GNU General Public License v3.0 only (`GPL-3.0-only`)](./LICENSE) — 버전 선택의 근거는 [NOTICE](./NOTICE) 5절  

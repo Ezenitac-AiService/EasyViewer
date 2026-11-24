@@ -1,6 +1,8 @@
-# Pagelight (independent fork of EasyViewer) — Copyright and modification notice
+# Pagelight copyright and modification notice
 
 **언어 / Language**: [한국어](NOTICE) | **[English](NOTICE.en.md)**
+
+This document is the copyright attribution and GPLv3 §5(a) modification notice of Pagelight, an independent fork of EasyViewer.
 
 > This is a reference translation of [NOTICE](NOTICE). If the two differ, the Korean `NOTICE` prevails.
 

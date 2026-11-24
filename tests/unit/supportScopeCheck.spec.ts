@@ -174,3 +174,22 @@ describe('split bug templates (spec 004 contracts §5)', () => {
     expect(checkIssueTemplates(root).some((e) => e.includes('feature_request.yml') && e.includes('Windows'))).toBe(true)
   })
 })
+
+describe('README banner position (spec 005 research R1)', () => {
+  const head = (n: number) => ['# EasyViewer', ...Array.from({ length: n - 2 }, (_, i) => `[![b${i}](x)](y)`)].join('\n')
+  it('accepts the banner up to line 15 when it comes before the first ## heading', () => {
+    const root = goodRepo({ 'README.md': `${head(14)}\n> ${BANNER}\n\n## 지원 플랫폼과 릴리스\n\n${block(CANON)}\n` })
+    expect(checkSupportScope(root)).toEqual([])
+  })
+
+  it('rejects the banner after line 15', () => {
+    const root = goodRepo({ 'README.md': `${head(16)}\n> ${BANNER}\n\n## 지원 플랫폼과 릴리스\n\n${block(CANON)}\n` })
+    expect(checkSupportScope(root).join('\n')).toMatch(/배너/)
+  })
+
+  it('rejects the banner after the first ## heading even within 15 lines', () => {
+    const root = goodRepo({ 'README.md': `# EasyViewer\n\n## 지원 플랫폼과 릴리스\n\n> ${BANNER}\n\n${block(CANON)}\n` })
+    expect(checkSupportScope(root).join('\n')).toMatch(/배너/)
+  })
+})
+
