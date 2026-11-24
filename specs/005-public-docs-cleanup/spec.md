@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-24
 
-**Status**: Draft
+**Status**: Implemented (2026-11-24): 36개 작업 완료. 공개 문서 여섯 쌍 정리, 검사 D1–D7 추가, verify·GitHub 렌더링 확인
 
 **Input**: User description: "한글·영문 공개 마크다운 문서 정리. EasyViewer(Pagelight) 저장소의 README.md·README.en.md 헤더(제목, 배지, 언어 전환, 포크 안내, 라이선스 안내의 순서와 흐름)를 형제 프로젝트 Ezenitac-AiService/ImageViewer의 README 헤더 구성을 참고해 정리하고, 두 저장소 README를 비교해 서로 빠진 내용(절 구성)을 점검해 EasyViewer 쪽 공개 문서(README, CONTRIBUTING, SECURITY, CHANGELOG, NOTICE, THIRD_PARTY_LICENSES의 국문·영문 쌍)의 구조·흐름·용어를 일관되게 정리한다. 헌법 v6.1.0(제1원칙 국문·영문 병행, 지원 범위 단일 원문, 제8원칙 표현 원칙)을 준수한다."
 

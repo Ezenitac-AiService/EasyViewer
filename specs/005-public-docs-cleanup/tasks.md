@@ -121,8 +121,8 @@ description: "국문·영문 공개 문서 정리 — 작업 목록"
 - [X] T032 저장소의 다른 위치(`docs/`, `.github/`, `src/`, 릴리스 노트 템플릿)에서 README·CONTRIBUTING의 옛 앵커(예: `#지원-기능`, `#supported-platforms`)를 가리키는 링크를 찾아 고친다. `docs/windows-*.md` 보존 기록은 고치지 않는다
 - [X] T033 `CHANGELOG.md`·`CHANGELOG.en.md` 맨 위 미출시 절에 005 변경(README 헤더·절 구성, 기여 가이드 이동, 공개 문서 형식·용어, 검사 D2–D7)을 적는다
 - [X] T034 quickstart §1·§3·§4·§5를 실행해 결과를 `specs/005-public-docs-cleanup/verification/quickstart-run.md`에 적는다. §5는 ImageViewer README(국문·영문)와 같은 문장이 공개 문서에 없는지 대조한다(FR-012)
-- [ ] T035 브랜치를 푸시한 뒤 GitHub에서 `README.md`·`README.en.md` 렌더링을 열어 경고 문법(`[!IMPORTANT]`·`[!NOTE]`) 표시, 배지 6개 연결 대상, 앵커 이동을 확인하고 `verification/first-screen.md`를 갱신한다(quickstart §2, SC-002). 실행하지 못하면 `BLOCKED`로 적는다
-- [ ] T036 005 `spec.md` Status를 실제 결과로 갱신한다
+- [X] T035 브랜치를 푸시한 뒤 GitHub에서 `README.md`·`README.en.md` 렌더링을 열어 경고 문법(`[!IMPORTANT]`·`[!NOTE]`) 표시, 배지 6개 연결 대상, 앵커 이동을 확인하고 `verification/first-screen.md`를 갱신한다(quickstart §2, SC-002). 실행하지 못하면 `BLOCKED`로 적는다
+- [X] T036 005 `spec.md` Status를 실제 결과로 갱신한다
 
 ---
 
