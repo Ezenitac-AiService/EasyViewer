@@ -38,12 +38,11 @@
 Rust 백엔드 테스트는 **`cargo test`**를 표준으로 사용하며, `jsdom`으로 재현할 수 없는 실제 레이아웃·CSP
 동작은 실제 브라우저 렌더링 테스트로 보완해야 한다(MUST). 모든 구현 계획(`plan.md`, `tasks.md`)은
 **테스트 주도 개발(TDD: Red → Green → Refactor)** 주기에 따라 실패하는 테스트 작성(Red) → 구현
-(Green) → 리팩터링(Refactor) 순서로 구성해야 한다(MUST). 단, 저장소에 테스트 러너가 아직 구축되지
-않은 초기 상태에서는 최초 기능 구현 또는 테스트 도입 작업의 최우선 선행 태스크로 `npm test` 스크립트와
-표준 테스트 하네스를 먼저 구축해야 한다(MUST).
+(Green) → 리팩터링(Refactor) 순서로 구성해야 한다(MUST). 새 실행 환경(예: 새 플랫폼·새 언어 계층)에
+테스트 러너가 없으면 그 환경의 첫 기능 구현보다 먼저 표준 테스트 하네스를 구축해야 한다(MUST).
 
 근거(Rationale): 구현 전에 요구사항과 엣지 케이스를 실행 가능한 명세로 고정해 회귀 결함을 방지하며,
-테스트 도구가 부재한 저장소에서도 실행 가능한 부트스트랩 경로를 보장한다.
+테스트 도구가 없는 새 환경에서도 실행 가능한 부트스트랩 경로를 보장한다.
 
 ### III. 구현 무결성 및 우회 로직 금지 (Implementation Integrity & Anti-Bypass)
 **하드코딩(Hardcoding), 실제 비즈니스/엔진 로직을 대체하는 목업(Mockup/Stub 방치), 또는 오직 테스트
@@ -151,7 +150,9 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   원저작자 앱과 같은 기기에 함께 설치되어도 서로 덮어쓰거나 데이터·자격증명을 공유해서는 안
   된다(MUST NOT). 버전 번호만으로 포크를 구분해서는 안 되며, 릴리스 제목과 산출물 이름에 포크 정체성이
   드러나야 한다(MUST). 저장소 이름(`EasyViewer`)은 URL·이력 보존을 위해 유지하지만, 앱 안과 공개
-  문서에서 원저작자 앱 이름은 출처 표기와 Windows 사용자 안내 목적으로만 써야 한다(MUST).
+  문서에서 원저작자 앱 이름은 기술 스택 및 플랫폼 제약사항의 앱 식별자 항목이 허용하는 용도(출처 고지,
+  지원 범위 원문과 Windows 안내, 기존 사용자 데이터 마이그레이션, 구 구조 재발 차단 검증, 과거 명세
+  이력)로만 써야 한다(MUST).
 - **이력 보존**: 공유 브랜치의 이력 재작성(강제 푸시 등)과 저작권·출처 고지 삭제는 금지한다(MUST NOT).
   원저작자 유래 코드의 일반적인 수정·삭제는 허용한다.
 
@@ -166,9 +167,10 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
 - **문서 렌더링 엔진**: `epubjs` (`^0.3.93`) 및 `jszip` (`^3.10`) 기반 EPUB 엔진(`DocumentReaderPort`
   추상화 포트 뒤로 격리, `css-tree` `^3.2.1` AST 기반 정화 및 비차단 CFI 위치 색인·캐시), 자동
   인코딩 감지(`TextDecoder`)·청크 분할·실측 기반 페이지네이션을 수행하는 커스텀 TXT 엔진.
-- **크로스 플랫폼 런타임 및 Rust 백엔드**: Tauri 2 (`@tauri-apps/api`, `@tauri-apps/cli` `^2.12.x`, 공식
-  플러그인 `plugin-fs`, `plugin-store`, `plugin-dialog`, `plugin-opener` 최신 `2.x` 및 OS 키체인/키스토어
-  자격증명 분리 `tauri-plugin-keyring-store` — WebView 직접 `plugin-http` 비허용), Rust
+- **크로스 플랫폼 런타임 및 Rust 백엔드**: Tauri 2 (`@tauri-apps/api`, `@tauri-apps/cli` `^2.12`, 공식
+  플러그인 `plugin-fs`, `plugin-store`, `plugin-dialog`, `plugin-opener` 최신 `2.x`, 데스크톱 단일 실행
+  보장 `tauri-plugin-single-instance` 및 OS 키체인/키스토어 자격증명 분리 `tauri-plugin-keyring-store`
+  — WebView 직접 `plugin-http` 비허용), Rust
   (`src-tauri/Cargo.toml`, edition `2021`, `rustc >= 1.90.0` 권장, `tauri` v2, `reqwest` `0.13`
   `rustls` + `stream`, `tokio`, `futures-util`, `dunce`, `sha2`, `hex`, `zip` `9.x`, `serde`,
   `serde_json`), 웹 브라우저 `IndexedDB v2`(`book_files`, `book_covers`, `location_indexes`,
@@ -188,15 +190,22 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   - **테스트 빌드(최하위)**: Linux, Android — 릴리스에 **테스트용 빌드**로 첨부해 배포만 한다.
     - 설계·품질 투자, 기능 동등성, 실기기 검증, 버그 대응 일정을 보장하지 않는다. 공유 코드 변경이
       이 빌드를 깨뜨리지 않도록만 하며, CI 결과는 보고만 한다.
+    - **보안 하한**: 위 미보장에도 불구하고, 공통 코드의 보안 수정은 같은 릴리스의 테스트용 빌드에도
+      반영되어야 한다(MUST). 테스트용 빌드에만 있는 알려진 미수정 취약점이 있으면 고칠 때까지 해당
+      플랫폼을 릴리스에서 빼야 하며(MUST), 알려진 취약점이 있는 산출물을 새로 게시해서는 안 된다(MUST NOT).
     - 릴리스 노트와 공개 문서는 이 산출물이 테스트용 빌드임을 분명히 밝혀야 한다(MUST).
-    - Linux 빌드 환경 기준은 Ubuntu 22.04 이상(WebKitGTK 4.1)이다.
+    - Linux 빌드 환경 기준은 Ubuntu 22.04 이상(WebKitGTK 4.1), Android 최소 버전은 7.0(API 24)이다.
     - Android(`scripts/android.mjs`)는 테스트용이라도 포크 소유 고정 서명 키로 서명할 수 있는
       릴리스에서만 게시해야 하며(MUST), 키가 없으면 그 릴리스에서 빼고 게시한다. debug 서명이나 임시
       키로 서명한 APK를 대신 게시해서는 안 된다(MUST NOT). 첫 APK의 서명 키가 이후 모든 업데이트의
       서명 키가 되기 때문이다.
   - **제외**: Windows — 이 포크의 범위 밖이다. 배포·지원·CI·신규 코드·사용 안내 문서의 대상이 아니다.
-    남아 있는 Windows 전용 코드·설정·빌드 스크립트는 별도 명세로 제거해야 한다(MUST). 공개 문서는
-    Windows 사용자에게 원저작자(`edith2580/EasyViewer`) 애플리케이션을 안내하는 문장만 둘 수 있다.
+    남아 있는 Windows 전용 코드·설정·빌드 스크립트는 별도 명세로 제거해야 한다(MUST). "Windows 전용"은
+    Windows용으로 빌드하거나 실행할 때만 효과가 있는지로 판단하며, 다른 플랫폼에도 효과가 있는 입력
+    검증·경로 처리는 해당하지 않는다. 공개 문서는 Windows 사용자에게 원저작자(`edith2580/EasyViewer`)
+    애플리케이션을 안내하는 문장만 둘 수 있다. 단, 제8원칙의 이력 보존에 따라 이미 게시된 Windows
+    프리릴리스·지원 종료 고지와 그 고지가 링크한 안내 문서는 갱신하지 않는 보존 기록으로 남겨야
+    한다(MUST).
   - **개발 보조**: 웹 브라우저 폴백.
 - **표준 테스트 스택**: 프론트엔드 단위·통합 테스트는 Vitest(`vite ^6.0` 호환 버전) +
   `@vue/test-utils` + `jsdom` + `@tauri-apps/api/mocks`(`mockIPC`, `clearMocks`), 실제 브라우저
@@ -247,9 +256,10 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
   한다(MUST). 감사 도구가 갖춰지기 전에는 이 게이트를 `BLOCKED`로 보고하고 릴리스를 게시하지
   않는다(MUST NOT 게시).
 - **지원 범위·릴리스 게이트**: 릴리스는 중점 플랫폼 산출물, 테스트용 빌드임을 표시한 테스트 빌드
-  플랫폼 산출물, 체크섬 목록만 게시해야 하며(MUST), Windows 산출물을 게시해서는 안 된다(MUST NOT). 워크플로는 저장소에 실제로 있는
-  스크립트만 호출해야 하고(MUST), 비밀값이 없는 외부 PR 빌드에서도 서명을 제외한 검증은 수행해야
-  한다(MUST).
+  플랫폼 산출물, 체크섬 목록만 게시해야 하며(MUST), Windows 산출물을 게시해서는 안 된다(MUST NOT).
+  워크플로는 저장소에 실제로 있는 스크립트만 호출해야 하고(MUST), 비밀값이 없는 외부 PR 빌드에서도
+  서명을 제외한 검증은 수행해야 한다(MUST). 새 보안 권고는 코드 변경 없이도 필수 검사를 실패시킬 수
+  있으므로, 의존성 보안 권고를 정기적으로 점검해 릴리스 전에 드러내야 한다(MUST).
 - **공개 문서 병행 게이트**: 제1원칙의 국문·영문 공개 문서 쌍이 모두 존재하고 양방향 언어 전환 링크가
   있는지 자동 검사로 확인해야 하며(MUST), 한쪽만 바뀐 변경은 리뷰에서 반려한다(MUST).
 - **커밋 메시지 게이트**: 모든 Git 커밋 메시지는 Conventional Commits 타입 접두사와 한국어 요약 제목을
@@ -265,16 +275,18 @@ EasyViewer 저장소(`Ezenitac-AiService/EasyViewer`)는 `edith2580/EasyViewer`�
 - **개정 절차 (Amendment Procedure)**: 핵심 원칙, 언어·커밋 정책, 테스트 정책 또는 플랫폼 제약사항을
   수정할 때에는 반드시 `.specify/memory/constitution.md`를 업데이트하고 상단에 변경 영향 보고서
   (Sync Impact Report)를 작성해 검토한 뒤(MUST), 실제 커밋 시에는 해당 임시 HTML 주석을 제거해야
-  한다(SHOULD).
+  한다(SHOULD). 개정은 메인테이너의 명시적 승인을 받아 PR로 `main`에 반영해야 하며(MUST), 에이전트가
+  스스로 개정을 시작하거나 승인 없이 반영해서는 안 된다(MUST NOT). 개정으로 기존 산출물(지원 범위 원문,
+  공개 문서, 게이트)이 헌법과 어긋나게 되면 그 차이를 후속 작업으로 기록해야 한다(MUST).
 - **버전 관리 정책 (Versioning Policy)**: 헌법 버전은 시맨틱 버저닝(`MAJOR.MINOR.PATCH`)을 따른다:
   - `MAJOR`: 기존 원칙의 삭제, 기존 `MUST` 규범 경계의 재정의, 필수 거버넌스 게이트 변경 등 하위
     호환되지 않는 규범 변경.
   - `MINOR`: 새로운 핵심 원칙 또는 섹션의 추가, 개발 가이드라인의 실질적 확장.
   - `PATCH`: 의미 변경 없는 문구 다듬기, 오타 수정, 명확화.
 - **규정 준수 검토 (Compliance Review)**: 모든 명세(`spec.md`), 구현 계획(`plan.md`), 태스크(`tasks.md`),
-  커밋 이력 및 코드 리뷰는 본 헌법의 8대 핵심 원칙(한국어 문서·커밋, 공개 문서 국문·영문 병행 및 영어 코드, TDD 및 테스트
-  부트스트랩, 무결성 및 정당한 경계 격리, 외부 리서치·내부 실측 근거 확보, 플랫폼 추상화·엔진 분리,
-  지속적 의심·다층 검증, Zero Trust 보안, 독립 포크 운영)과 문서 분리 게이트 준수 여부를 반드시 검증해야
-  한다(MUST).
+  커밋 이력 및 코드 리뷰는 본 헌법의 8대 핵심 원칙(한국어 문서·커밋, 공개 문서 국문·영문 병행 및
+  영어 코드, TDD 및 테스트 부트스트랩, 무결성 및 정당한 경계 격리, 외부 리서치·내부 실측 근거 확보,
+  플랫폼 추상화·엔진 분리, 지속적 의심·다층 검증, Zero Trust 보안, 독립 포크 운영)과 문서 분리 게이트
+  준수 여부를 반드시 검증해야 한다(MUST).
 
-**Version**: 6.0.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-24
+**Version**: 6.1.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-24
