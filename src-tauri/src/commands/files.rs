@@ -71,7 +71,7 @@ pub fn resolve_scope_and_whitelist(
             .lock()
             .map_err(|_| "STATE_LOCK_ERROR: 드롭 경로 잠금 실패".to_string())?
             .clone();
-        return Ok((dirs, drops, fs_scope_allowed));
+        Ok((dirs, drops, fs_scope_allowed))
     }
     #[cfg(mobile)]
     {

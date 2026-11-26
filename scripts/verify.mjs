@@ -60,6 +60,12 @@ if (cargoCheckCode !== 0) {
   process.exit(cargoCheckCode)
 }
 
+// Lint warnings fail the gate so they cannot pile up again (all targets, tests included).
+const clippyCode = runStep('Rust cargo clippy (warnings denied)', 'cargo', ['clippy', '--all-targets', '--', '-D', 'warnings'], tauriDir)
+if (clippyCode !== 0) {
+  process.exit(clippyCode)
+}
+
 const cargoTestCode = runStep('Rust cargo test', 'cargo', ['test'], tauriDir)
 if (cargoTestCode !== 0) {
   process.exit(cargoTestCode)

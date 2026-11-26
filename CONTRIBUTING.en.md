@@ -125,7 +125,7 @@ npm run verify
 cd src-tauri && cargo deny check
 ```
 
-`npm run verify` runs the build, unit tests, layer and size boundaries (450 lines or fewer per file), version and identifier sync, the license policy audit, the support-scope wording check, the Korean/English document pair check, `cargo check` and `cargo test`. Code without tests is not accepted (constitution principle II, TDD).
+`npm run verify` runs the build, unit tests, layer and size boundaries (450 lines or fewer per file), version and identifier sync, the license policy audit, the support-scope wording check, the Korean/English document pair check, `cargo check`, `cargo clippy` (any warning fails) and `cargo test`. Code without tests is not accepted (constitution principle II, TDD).
 
 Individual checks and tests can also be run on their own.
 

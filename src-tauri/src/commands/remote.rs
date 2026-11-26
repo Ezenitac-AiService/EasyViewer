@@ -116,7 +116,7 @@ fn resolve_download_dir(app: &tauri::AppHandle, requested: Option<&str>) -> Resu
         if let Ok(mut dirs) = state.approved_storage_dirs.lock() {
             dirs.insert(canonical.clone());
         }
-        return Ok(canonical);
+        Ok(canonical)
     }
     #[cfg(mobile)]
     {
@@ -359,7 +359,7 @@ pub async fn safe_download_to_storage(
                 let _ = tokio::fs::remove_file(&part_path).await;
                 return Err(format!("STORAGE_DIR_WRITE_FAILED: {e}"));
             }
-            let percent = total_bytes.map(|t| if t > 0 { ((received * 100) / t).min(99) as u8 } else { 50 }).unwrap_or(50);
+            let percent = total_bytes.and_then(|t| (received * 100).checked_div(t)).map_or(50, |p| p.min(99) as u8);
             let _ = on_progress.send(DownloadProgressEvent { received_bytes: received, total_bytes, percent });
         }
 
